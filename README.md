@@ -36,19 +36,21 @@ Note that only `To` is required, the rest of the options are optional (`subject`
 yag.send(To = to, Subject = subject, Body = body)
 yag.send(To = to, Subject = subject, Body = body, Html = html)
 yag.send(To = to, Html = html)
+```
 
 Furthermore, if you want do not want to be explicit, you can do the following:
 
 ```python
 yag.send(to, subject, body)
 yag.send(to, subject, body, html)
+```
 
 And lastly, it is also possible to send to a group of people by providing a list of email strings rather than a single string:
 
 ```python
 yag.send([to, to2], subject, body)
 yag.send([to, to2], subject, body)
-
+```
 
 ### Errors
 
