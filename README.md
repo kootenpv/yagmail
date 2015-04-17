@@ -1,6 +1,6 @@
 # yagmail -- Yet Another GMAIL client
 
-The simple goal here is to make it as simple and painless as possible to send an email.
+The goal here is to make it as simple and painless as possible to send an email.
 
 In the end, your code will look something like this:
 
