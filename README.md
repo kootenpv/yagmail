@@ -10,6 +10,14 @@ yag = yagmail.Mail('mygmailusername')
 yag.send('to@someone.com', 'subject', 'body')
 ```
 
+Note that it will read the password securely from your keyring (read below). If you don't want this, even though you know you want it, you can also initialize with:
+
+```python
+yag = yagmail.Mail('mygmailusername', 'mygmailpassword')
+```
+
+but honestly, do you want to have your password written in your script?
+
 ### Install
 
 For Python 2.x and Python 3.x respectively:
@@ -30,14 +38,6 @@ yagmail.register('mygmailusername', 'mygmailpassword')
 ```
 
 In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusername', 'mygmailpassword')`.
-
-If you don't want this, even though you know you want it, you can also initialize with:
-
-```python
-yag = yagmail.Mail('mygmailusername', 'mygmailpassword')
-```
-
-but honestly, do you want to have your password written in your script?
 
 ### Start a connection
 
