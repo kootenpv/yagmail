@@ -89,12 +89,9 @@ yag.send([to, to2, to3], subject, body)
 
 ### Errors
 
-- Make sure you have a keyring entry. This is how you can do it for example (only required once):
+- Make sure you have a keyring entry (see section [Add yagmail to your keyring](add-yagmail-to-your-keyring))
 
-```python
-import keyring
-keyring.set_password('yagmail', 'mygmailusername', 'mypassword')
-```
+- [`smtplib.SMTPException: SMTP AUTH extension not supported by server`](http://stackoverflow.com/questions/10147455/trying-to-send-email-gmail-as-mail-provider-using-python)
 
 - Make sure you have a connection
 
