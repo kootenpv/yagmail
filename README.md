@@ -23,29 +23,31 @@ Note that this connection is reusable.
 Defining some variables:
 
 ```python
+to = 'to@someone.com'
+to2 = 'another@someone.com
 subject = 'This is obviously the subject'
 body = 'This is obviously the body'
-html = '<a href="http://nieuwsdumper.nl/nieuws">Click me!</a>'
+html = '<a href="https://pypi.python.org/pypi/yagmail/">Click me!</a>'
 ```
 
-Note that only "To" is required, the rest of the options are optional (subject, body, html)
+Note that only `To` is required, the rest of the options are optional (`subject`, `body`, `html`)
 
 ```python
-yag.send(To = 'example@example.com', Subject = subject, Body = body)
-yag.send(To = 'example@example.com', Subject = subject, Body = body, Html = html)
-yag.send(To = 'example@example.com', Html = html)
+yag.send(To = to, Subject = subject, Body = body)
+yag.send(To = to, Subject = subject, Body = body, Html = html)
+yag.send(To = to, Html = html)
 
 Furthermore, if you want do not want to be explicit, you can do the following:
 
 ```python
-yag.send('example@example.com', subject, body)
-yag.send('example@example.com', subject, body, html)
+yag.send(to, subject, body)
+yag.send(to, subject, body, html)
 
 And lastly, it is also possible to send to a group of people by providing a list of email strings rather than a single string:
 
 ```python
-yag.send(['example@example.com', 'example2@example.com'], subject, body)
-yag.send(['example@example.com', 'example2@example.com'], subject, body)
+yag.send([to, to2], subject, body)
+yag.send([to, to2], subject, body)
 
 
 ### Errors
@@ -57,3 +59,6 @@ import keyring
 keyring.set_password('yagmail', 'mygmailusername', 'mypassword')
 ```
 
+- Make sure you have a connection
+
+- I only suppose it will work for gmail

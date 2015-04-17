@@ -29,5 +29,4 @@ class Mail():
             msg.attach(MIMEText(Html, 'html'))            
         if isinstance(To, str):
             To = [To]
-        self.server.sendmail(self.From, To, msg.as_string()) 
-        
+        self.server.sendmail(self.From, To, msg.as_string())        
