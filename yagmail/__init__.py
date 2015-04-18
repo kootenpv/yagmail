@@ -29,6 +29,7 @@ class Connect():
         self.From = From 
         self.isClosed = None
         self.login(password)
+        self.attachmentCount = 0
 
     def _findUserFromHome(self):
         home = os.path.expanduser("~")
@@ -37,6 +38,7 @@ class Connect():
         
     def send(self, To = None, Subject = None, Body = None, Html = None, Image = None): 
         """ Use this to send an email with gmail"""
+        self.attachmentCount = 0
         if self.isClosed:
             raise YagConnectionClosed('Login required again') 
         if To is None:
@@ -124,6 +126,7 @@ class Connect():
                 content = urlopen(inp).read()
             except:
                 content = inp
+        self.attachmentCount += 1        
         return content            
         
     def __del__(self):

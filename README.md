@@ -1,6 +1,6 @@
 # yagmail -- Yet Another GMAIL client
 
-The goal here is to make it as simple and painless as possible to send an email.
+The goal here is to make it as simple and painless as possible to send emails.
 
 In the end, your code will look something like this:
 
@@ -10,7 +10,7 @@ yag = yagmail.Connect('mygmailusername')
 yag.send('to@someone.com', 'subject', 'body')
 ```
 
-Or one time use:
+Or a one-liner (connection will automatically close):
 ```python
 yagmail.Connect('mygmailusername').send('to@someone.com', 'subject', 'body')
 ```
