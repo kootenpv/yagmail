@@ -15,7 +15,7 @@ Or a one-liner (connection will automatically close):
 yagmail.Connect('mygmailusername').send('to@someone.com', 'subject', 'body')
 ```
 
-Note that it will read the password securely from your keyring (read below). If you don't want this, even though you know you want it, you can also initialize with:
+Note that it will read the password securely from your keyring (read below). If you don't want this, you can also initialize with:
 
 ```python
 yag = yagmail.Connect('mygmailusername', 'mygmailpassword')
@@ -37,7 +37,7 @@ pip3 install yagmail
 [keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
 > The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage. 
 
-Great. Set it up by running once:
+You know you want it. Set it up by running once:
 
 ```python
 yagmail.register('mygmailusername', 'mygmailpassword')
@@ -51,7 +51,7 @@ In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusern
 yag = yagmail.Connect('mygmailusername')
 ```
 
-Note that this connection is reusable.
+Note that this connection is reusable, closable and when it leaves scope will auto-destroy.
 
 ### Usability 
 
@@ -67,7 +67,7 @@ html = '<a href="https://pypi.python.org/pypi/sky/">Click me!</a>'
 img = '/local/file/bunny.png'
 ```
 
-All variables are optional, and note that not even `To` is required (you'll send an email to yourself):
+All variables are optional, and know that not even `To` is required (you'll send an email to yourself):
 
 ```python
 yag.send(To = to, Subject = subject, Body = body)
@@ -88,7 +88,7 @@ And lastly, it is also possible to send to a group of people by providing a list
 yag.send([to, to2, to3], subject, body)
 ```
 
-Pretty much the table summarizes:
+Actually, all arguments can be missing or lists. Pretty much the table summarizes:
 
 Type/Amount   |None|String|Flat iterable (set/list/etc)
 ---|---|---|---
@@ -106,13 +106,13 @@ Image|Yes|Yes|No
 
 ### Roadmap (and priorities)
 
-- Optional SMTP arguments should go with magic to my Connect
+- ~~Optional SMTP arguments should go with magic to my Connect~~
 - CC/BCC (high)
 - Custom names (high)
 - Just attachments, being smart guessed (high)
 - Extra other types (low)
-- Logging capability (low)
 - Mail counter (low)
+- Logging capability (very low)
 
 ### Errors
 
