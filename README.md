@@ -93,6 +93,8 @@ yag.send([to, to2, to3], subject, body)
 
 - [`smtplib.SMTPException: SMTP AUTH extension not supported by server`](http://stackoverflow.com/questions/10147455/trying-to-send-email-gmail-as-mail-provider-using-python)
 
+- [`SMTPAuthenticationError: Application-specific password required`](http://support.google.com/accounts/bin/answer.py?answer=185833 bi3sm4651945wib.5)
+
 - Make sure you have a connection
 
 - I only suppose it will work for gmail
