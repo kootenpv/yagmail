@@ -106,7 +106,6 @@ Image|Yes|Yes|No
 ### Roadmap (and priorities)
 
 - Just attachments, being smart guessed (high)
-- SSL option (high)
 - CC/BCC (medium)
 - More other types (low)
 - Logging capability (low)

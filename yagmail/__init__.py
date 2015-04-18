@@ -22,14 +22,17 @@ class YagConnectionClosed(Exception):
     pass
 
 class Connect():
-    """ Connection is the class that contains the server"""
-    def __init__(self, From, password = None): 
+    """ Connection is the class that contains the smtp"""
+    def __init__(self, From, password = None, host = 'smtp.gmail.com', port = '587', startTls = True): 
         if not From: 
             From = self._findUserFromHome()
         self.From = From 
         self.isClosed = None
         self.login(password)
+        self.host = host
+        self.port = port
         self.attachmentCount = 0
+        self.startTls = startTls
 
     def _findUserFromHome(self):
         home = os.path.expanduser("~")
@@ -52,15 +55,18 @@ class Connect():
         self._addImage(msg, Image)
         if isinstance(To, str):
             To = [To] 
-        return self.server.sendmail(self.From, To, msg.as_string())
+        return self.smtp.sendmail(self.From, To, msg.as_string())
 
     def close(self):
         self.isClosed = True
-        self.server.quit()
+        self.smtp.quit()
 
     def login(self, password):
-        self.server = smtplib.SMTP('smtp.gmail.com:587')
-        self.server.starttls() 
+        self.smtp = smtplib.SMTP(self.host, self.port) 
+        if self.startTls:
+            self.smtp.ehlo()
+            self.smtp.starttls() 
+            self.smtp.ehlo()
         if password is None:
             password = keyring.get_password('yagmail', self.From)
             if '@' not in self.From:
@@ -70,7 +76,7 @@ class Connect():
             if password is None: 
                 exceptionMsg = 'Either yagmail is not listed in keyring, or the user + password is not defined.'
                 raise UserNotFoundInKeyring(exceptionMsg)
-        self.server.login(self.From, password)
+        self.smtp.login(self.From, password)
         self.isClosed = False
         
     def _addSubject(self, msg, Subject):
@@ -130,6 +136,7 @@ class Connect():
         return content            
         
     def __del__(self):
+        print('shutting...')
         self.close()
 
     def test(self):
