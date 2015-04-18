@@ -90,7 +90,10 @@ yag.send([to, to2, to3], subject, body)
 
 ### Roadmap (and priorities)
 
-- Add images/video/other types (medium)
+- Just attachments, being smart guessed (high)
+- SSL option (high)
+- CC/BCC (medium)
+- More other types (low)
 - Logging capability (low)
 
 ### Errors
