@@ -87,6 +87,22 @@ And lastly, it is also possible to send to a group of people by providing a list
 yag.send([to, to2, to3], subject, body)
 ```
 
+Pretty much the table summarizes:
+
+Type/Amount   |None|String|Flat iterable (set/list/etc)
+---|---|---|---
+To|To = Self|Value|join (";")
+Subject|Nothing|Value|join (" ")
+Body|Nothing|Value|join (" ")
+Attach|Nothing|Value|Separated
+
+Furthermore, attachments will be smartly guessed. (To be continued)
+
+Attachment By|Filename|URL|String
+---|---|---|---
+Html|Yes|Yes|Yes
+Image|Yes|Yes|No
+
 ### Roadmap (and priorities)
 
 - Just attachments, being smart guessed (high)
@@ -106,16 +122,3 @@ yag.send([to, to2, to3], subject, body)
 - Make sure you have a connection
 
 - I only suppose it will work for gmail
-
-   |Amount|   |   
----|---|---|---        
-   |None|String|zzz
----|---|---|---
-To|To = Self|Value|Concat (";")
-Subject|Nothing|Value|Concat (" ")
-Body|Nothing|Value|Concat (" ")
-Attach|Nothing|Value|Separated
-			
-Attachments			
-Html	FileName	URL	String (Html)
-Image	FileName	URL	
