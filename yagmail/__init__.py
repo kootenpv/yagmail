@@ -23,7 +23,8 @@ class YagConnectionClosed(Exception):
 
 class Connect():
     """ Connection is the class that contains the smtp"""
-    def __init__(self, From, password = None, host = 'smtp.gmail.com', port = '587', startTls = True): 
+    def __init__(self, From, password = None, host = 'smtp.gmail.com', port = '587', 
+                 starttls = True, set_debuglevel = 0, **kwargs): 
         if not From: 
             From = self._findUserFromHome()
         self.From = From 
@@ -32,7 +33,9 @@ class Connect():
         self.host = host
         self.port = port
         self.attachmentCount = 0
-        self.startTls = startTls
+        self.starttls = starttls
+        self.debuglevel = set_debuglevel
+        self.kwargs = kwargs
 
     def _findUserFromHome(self):
         home = os.path.expanduser("~")
@@ -62,10 +65,14 @@ class Connect():
         self.smtp.quit()
 
     def login(self, password):
-        self.smtp = smtplib.SMTP(self.host, self.port) 
-        if self.startTls:
+        self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs) 
+        self.smtp.set_debuglevel(self.debuglevel)
+        if self.starttls is not None:
             self.smtp.ehlo()
-            self.smtp.starttls() 
+            if self.starttls == True:
+                self.smtp.starttls() 
+            else:
+                self.smtp.starttls(**self.starttls)     
             self.smtp.ehlo()
         if password is None:
             password = keyring.get_password('yagmail', self.From)

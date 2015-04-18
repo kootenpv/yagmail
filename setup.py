@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='yagmail',
-      version='0.0.9',
+      version='0.1b1',
       description='Yet Another GMAIL client',
       url='https://github.com/kootenpv/yagmail',
       author='Pascal van Kooten',

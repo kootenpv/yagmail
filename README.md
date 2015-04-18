@@ -64,21 +64,22 @@ to3 = 'sky@pip-package.com'
 subject = 'This is obviously the subject'
 body = 'This is obviously the body'
 html = '<a href="https://pypi.python.org/pypi/sky/">Click me!</a>'
+img = '/local/file/bunny.png'
 ```
 
 All options are optional, and note that not even `To` is required (you'll send an email to yourself):
 
 ```python
 yag.send(To = to, Subject = subject, Body = body)
-yag.send(To = to, Subject = subject, Body = body, Html = html)
-yag.send(To = to, Html = html)
+yag.send(To = to, Subject = subject, Body = body, Html = html, Image = img)
+yag.send(To = to, Image = img)
 ```
 
 Furthermore, if you do not want to be explicit, you can do the following:
 
 ```python
 yag.send(to, subject, body)
-yag.send(to, subject, body, html)
+yag.send(to, subject, body, img)
 ```
 
 And lastly, it is also possible to send to a group of people by providing a list of email strings rather than a single string:
@@ -96,7 +97,7 @@ Subject|Nothing|Value|join (" ")
 Body|Nothing|Value|join (" ")
 Attach|Nothing|Value|Separated
 
-Furthermore, attachments will be smartly guessed. (To be continued)
+Furthermore, attachments will be smartly guessed. (Soon, To be continued)
 
 Attachment By|Filename|URL|String
 ---|---|---|---
@@ -105,6 +106,7 @@ Image|Yes|Yes|No
 
 ### Roadmap (and priorities)
 
+- Optional SMTP arguments should go with magic to my Connect
 - Just attachments, being smart guessed (high)
 - CC/BCC (medium)
 - More other types (low)
