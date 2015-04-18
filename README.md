@@ -107,9 +107,9 @@ yag.send([to, to2, to3], subject, body)
 
 - I only suppose it will work for gmail
 
-   |Amount|   |
+   |Amount|   |   
 ---|---|---|---        
-   |None|String|Flat iterable (set/list/etc)
+   |None|String|zzz
 ---|---|---|---
 To|To = Self|Value|Concat (";")
 Subject|Nothing|Value|Concat (" ")
