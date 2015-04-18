@@ -6,14 +6,19 @@ In the end, your code will look something like this:
 
 ```python
 import yagmail
-yag = yagmail.Mail('mygmailusername')
+yag = yagmail.Connect('mygmailusername')
 yag.send('to@someone.com', 'subject', 'body')
+```
+
+Or one time use:
+```python
+yagmail.Connect('mygmailusername').send('to@someone.com', 'subject', 'body')
 ```
 
 Note that it will read the password securely from your keyring (read below). If you don't want this, even though you know you want it, you can also initialize with:
 
 ```python
-yag = yagmail.Mail('mygmailusername', 'mygmailpassword')
+yag = yagmail.Connect('mygmailusername', 'mygmailpassword')
 ```
 
 but honestly, do you want to have your password written in your script?
@@ -43,7 +48,7 @@ In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusern
 ### Start a connection
 
 ```python
-yag = yagmail.Mail('mygmailusername')
+yag = yagmail.Connect('mygmailusername')
 ```
 
 Note that this connection is reusable.
