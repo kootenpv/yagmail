@@ -37,7 +37,7 @@ pip3 install yagmail
 [keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
 > The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage. 
 
-You know you want it. Set it up by running once:
+Great. Set it up by running once:
 
 ```python
 yagmail.register('mygmailusername', 'mygmailpassword')
@@ -66,7 +66,7 @@ body = 'This is obviously the body'
 html = '<a href="https://pypi.python.org/pypi/sky/">Click me!</a>'
 ```
 
-Note that only `To` is required, the rest of the options are optional (`subject`, `body`, `html`)
+All options are optional, and note that not even `To` is required (you'll send an email to yourself):
 
 ```python
 yag.send(To = to, Subject = subject, Body = body)
@@ -84,7 +84,6 @@ yag.send(to, subject, body, html)
 And lastly, it is also possible to send to a group of people by providing a list of email strings rather than a single string:
 
 ```python
-yag.send([to, to2, to3], subject, body)
 yag.send([to, to2, to3], subject, body)
 ```
 
@@ -107,3 +106,16 @@ yag.send([to, to2, to3], subject, body)
 - Make sure you have a connection
 
 - I only suppose it will work for gmail
+
+   |Amount|   |
+---|---|---|---        
+   |None|String|Flat iterable (set/list/etc)
+---|---|---|---
+To|To = Self|Value|Concat (";")
+Subject|Nothing|Value|Concat (" ")
+Body|Nothing|Value|Concat (" ")
+Attach|Nothing|Value|Separated
+			
+Attachments			
+Html	FileName	URL	String (Html)
+Image	FileName	URL	

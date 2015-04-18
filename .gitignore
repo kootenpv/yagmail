@@ -4,5 +4,6 @@
 *.log
 *Data.fs*
 *flymake*
-dist/
+dist/*
 *egg*
+build*

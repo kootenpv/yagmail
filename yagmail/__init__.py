@@ -27,6 +27,7 @@ class Connect():
         if not From: 
             From = self._findUserFromHome()
         self.From = From 
+        self.isClosed = None
         self.login(password)
 
     def _findUserFromHome(self):
@@ -34,10 +35,12 @@ class Connect():
         with open(home + '/.yagmail') as f:
             return f.read().strip()
         
-    def send(self, To, Subject = None, Body = None, Html = None, Image = None): 
+    def send(self, To = None, Subject = None, Body = None, Html = None, Image = None): 
         """ Use this to send an email with gmail"""
         if self.isClosed:
-            raise YagConnectionClosed('Login required again')
+            raise YagConnectionClosed('Login required again') 
+        if To is None:
+            To = self.From
         msg = MIMEMultipart() 
         self._addSubject(msg, Subject)
         msg['From'] = self.From
