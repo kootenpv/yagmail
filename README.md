@@ -29,7 +29,8 @@ pip3 install yagmail
 
 ### Add yagmail to your keyring
 
-[keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib): The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage. 
+[keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
+> The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage. 
 
 You know you want it. Set it up by running once:
 
@@ -93,7 +94,7 @@ yag.send([to, to2, to3], subject, body)
 
 - [`smtplib.SMTPException: SMTP AUTH extension not supported by server`](http://stackoverflow.com/questions/10147455/trying-to-send-email-gmail-as-mail-provider-using-python)
 
-- [`SMTPAuthenticationError: Application-specific password required`](http://support.google.com/accounts/bin/answer.py?answer=185833 bi3sm4651945wib.5)
+- [`SMTPAuthenticationError: Application-specific password required`](https://support.google.com/accounts/answer/185833)
 
 - Make sure you have a connection
 
