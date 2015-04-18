@@ -13,13 +13,13 @@ class Mail():
         self.server = smtplib.SMTP('smtp.gmail.com:587')
         self.server.starttls() 
         if password is None:
-            pw = keyring.get_password('yagmail', From)
-            if pw is None:
-                pw = keyring.get_password('yagmail', From + '@gmail.com') 
-            if pw is None: 
-                exceptionMsg = 'Either yagmail is not listed in keyring, or the user + pw is not defined.'
+            password = keyring.get_password('yagmail', From)
+            if password is None:
+                password = keyring.get_password('yagmail', From + '@gmail.com') 
+            if password is None: 
+                exceptionMsg = 'Either yagmail is not listed in keyring, or the user + password is not defined.'
                 raise UserNotFoundInKeyring(exceptionMsg)
-        self.server.login(From, pw)
+        self.server.login(From, password)
 
     def send(self, To, Subject = '', Body = None, Html = None): 
         """ Use this to send an email with gmail"""
