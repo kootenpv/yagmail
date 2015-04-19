@@ -110,8 +110,13 @@ Image|Yes|Yes|No
 - ~~Attachment counter~~
 - ~~Optional SMTP arguments should go with magic to my Connect~~
 - ~~CC/BCC (high)~~
+- Perhaps change the casing of the arguments... (needs thought)
+- Choose inline or not somehow (needs thought)
+- See if I can pass the "send"/"preview" arguments directly to "prepare" (needs thought)
 - Custom names (high)
-- Just attachments, being smart guessed (high)
+- Just attachments, being smart guessed (high, complex)
+- Attachments in a list so they actually define the order (medium)
+- Provide automatic fallback for html etc (low)
 - Extra other types (low)
 - Mail counter (low)
 - Logging capability (very low)
