@@ -107,8 +107,9 @@ Image|Yes|Yes|No
 ### Roadmap (and priorities)
 
 - ~~Added possibility of Image~~
+- ~~Attachment counter~~
 - ~~Optional SMTP arguments should go with magic to my Connect~~
-- CC/BCC (high)
+- ~~CC/BCC (high)~~
 - Custom names (high)
 - Just attachments, being smart guessed (high)
 - Extra other types (low)

@@ -28,22 +28,21 @@ class Connect():
         if not From: 
             From = self._findUserFromHome()
         self.From = From 
-        self.isClosed = None
-        self.login(password)
+        self.isClosed = None 
         self.host = host
         self.port = port
         self.attachmentCount = 0
         self.starttls = starttls
         self.debuglevel = set_debuglevel
         self.kwargs = kwargs
+        self.login(password)
 
     def _findUserFromHome(self):
         home = os.path.expanduser("~")
         with open(home + '/.yagmail') as f:
             return f.read().strip()
-        
-    def send(self, To = None, Subject = None, Body = None, Html = None, Image = None): 
-        """ Use this to send an email with gmail"""
+
+    def prepare(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None):
         self.attachmentCount = 0
         if self.isClosed:
             raise YagConnectionClosed('Login required again') 
@@ -53,12 +52,24 @@ class Connect():
         self._addSubject(msg, Subject)
         msg['From'] = self.From
         msg['To'] = ";".join(To) if isinstance(To, list) else To
+        if Cc is not None:
+            msg['Cc'] = ";".join(Cc) if isinstance(Cc, list) else Cc 
+        if Bcc is not None:
+            msg['Bcc'] = ";".join(Bcc) if isinstance(Bcc, list) else Bcc 
         self._addBody(msg, Body)
         self._addHtml(msg, Html)
-        self._addImage(msg, Image)
-        if isinstance(To, str):
-            To = [To] 
+        self._addImage(msg, Image) 
+        return msg        
+        
+    def send(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None): 
+        """ Use this to send an email with gmail"""
+        msg = self.prepare(To, Subject, Body, Html, Image, Cc, Bcc)
         return self.smtp.sendmail(self.From, To, msg.as_string())
+
+    def preview(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None): 
+        """ Use this to send an email with gmail"""
+        msg = self.prepare(To, Subject, Body, Html, Image, Cc, Bcc)
+        return msg.as_string() 
 
     def close(self):
         self.isClosed = True
