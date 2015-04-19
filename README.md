@@ -106,6 +106,7 @@ Image|Yes|Yes|No
 
 ### Roadmap (and priorities)
 
+- ~~Added possibility of Image~~
 - ~~Optional SMTP arguments should go with magic to my Connect~~
 - CC/BCC (high)
 - Custom names (high)
