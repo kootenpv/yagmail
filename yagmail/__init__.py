@@ -64,11 +64,15 @@ class Connect():
     def send(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None): 
         """ Use this to send an email with gmail"""
         msg = self.prepare(To, Subject, Body, Html, Image, Cc, Bcc)
+        if To is None:
+            To = self.From
         return self.smtp.sendmail(self.From, To, msg.as_string())
 
     def preview(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None): 
         """ Use this to send an email with gmail"""
         msg = self.prepare(To, Subject, Body, Html, Image, Cc, Bcc)
+        if To is None:
+            To = self.From
         return msg.as_string() 
 
     def close(self):
@@ -169,3 +173,4 @@ class Connect():
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""
     keyring.set_password('yagmail', username, password)
+
