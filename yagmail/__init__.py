@@ -35,13 +35,8 @@ class Connect():
         self.starttls = starttls
         self.debuglevel = set_debuglevel
         self.kwargs = kwargs
-        self.login(password)
-
-    def _findUserFromHome(self):
-        home = os.path.expanduser("~")
-        with open(home + '/.yagmail') as f:
-            return f.read().strip()
-
+        self._login(password)
+        
     def prepare(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None):
         self.attachmentCount = 0
         if self.isClosed:
@@ -79,7 +74,7 @@ class Connect():
         self.isClosed = True
         self.smtp.quit()
 
-    def login(self, password):
+    def _login(self, password):
         self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs) 
         self.smtp.set_debuglevel(self.debuglevel)
         if self.starttls is not None:
@@ -100,6 +95,11 @@ class Connect():
                 raise UserNotFoundInKeyring(exceptionMsg)
         self.smtp.login(self.From, password)
         self.isClosed = False
+
+    def _findUserFromHome(self):
+        home = os.path.expanduser("~")
+        with open(home + '/.yagmail') as f:
+            return f.read().strip()        
         
     def _addSubject(self, msg, Subject):
         if not Subject:
@@ -158,7 +158,6 @@ class Connect():
         return content            
         
     def __del__(self):
-        print('shutting...')
         self.close()
 
     def test(self):
