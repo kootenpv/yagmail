@@ -107,7 +107,7 @@ Local files require to have an extension for their content type to be inferred. 
 
 - ~~Added possibility of Image~~
 - ~~Attachment counter~~
-- ~~Optional SMTP arguments should go with magic to my Connect~~
+- ~~Optional SMTP arguments should go with \**kwargs to my Connect~~
 - ~~CC/BCC (high)~~
 - ~~Custom names (high)~~
 - ~~Allow send to return a preview rather than to actually send~~
@@ -115,6 +115,7 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Attachments (contents) in a list so they actually define the order (medium)~~
 - ~~Use lxml to see if it can parse the html (low)~~
 - Choose inline or not somehow (high)
+- Make `lxml` optional magic (high)
 - Provide automatic fallback for complex content(medium)
 - Allow caching of content (low)
 - Extra other types (low)
