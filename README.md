@@ -112,14 +112,14 @@ Image|Yes|Yes|No
 - ~~CC/BCC (high)~~
 - Perhaps change the casing of the arguments... (needs thought)
 - Choose inline or not somehow (needs thought)
-- See if I can pass the "send"/"preview" arguments directly to "prepare" (needs thought)
-- Custom names (high)
+- ~~See if I can pass the "send"/"preview" arguments directly to "prepare"~~
+- ~~Custom names (high)~~
 - Just attachments, being smart guessed (high, complex)
 - Attachments in a list so they actually define the order (medium)
 - Provide automatic fallback for html etc (low)
 - Extra other types (low)
 - Mail counter (low)
-- Logging capability (very low)
+- Logging count & mail capability (very low)
 
 ### Errors
 
