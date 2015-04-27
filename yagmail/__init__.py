@@ -21,13 +21,16 @@ class UserNotFoundInKeyring(Exception):
 class YagConnectionClosed(Exception):
     pass
 
+class YagAddressError(Exception):
+    pass
+
 class Connect():
     """ Connection is the class that contains the smtp"""
     def __init__(self, From, password = None, host = 'smtp.gmail.com', port = '587', 
                  starttls = True, set_debuglevel = 0, **kwargs): 
         if not From: 
             From = self._findUserFromHome()
-        self.From = From 
+        self.From, self.FromName = self._makeAddrAliasFrom(From)
         self.isClosed = None 
         self.host = host
         self.port = port
@@ -35,46 +38,55 @@ class Connect():
         self.starttls = starttls
         self.debuglevel = set_debuglevel
         self.kwargs = kwargs
-        self._login(password)
-        
-    def prepare(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None):
+        self.login(password)
+                
+    def send(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None,
+             previewOnly = False): 
+        """ Use this to send an email with gmail"""
+        # This is where I should handle "To"
+        # I will send the ToAlias to prepare msg, and keep the To for sending addr.
+        addresses = self._resolveAddresses(To, Cc, Bcc)
+        msg = self._prepareMsg(addresses, Subject, Body, Html, Image)
+        if previewOnly: 
+            return addresses, msg.as_string() 
+        else: 
+            return self.smtp.sendmail(self.From, addresses['recipients'], msg.as_string())
+
+    def _resolveAddresses(self, To = None, Cc = None, Bcc = None): 
+        addresses = {'recipients' : []} 
+        if To is not None: 
+            self._makeAddrAliasTarget(To, addresses, 'To')
+        elif Cc is not None and Bcc is not None: 
+            self._makeAddrAliasTarget([self.From, self.FromName], addresses, 'To')
+        if Cc is not None:
+            self._makeAddrAliasTarget(Cc, addresses, 'Cc')                
+        if Bcc is not None:
+            self._makeAddrAliasTarget(Bcc, addresses, 'Bcc')    
+        return addresses        
+                            
+    def close(self):
+        self.isClosed = True
+        self.smtp.quit()
+
+    def _prepareMsg(self, addresses, Subject = None, Body = None, Html = None, Image = None):
         self.attachmentCount = 0
         if self.isClosed:
             raise YagConnectionClosed('Login required again') 
-        if To is None:
-            To = self.From
         msg = MIMEMultipart() 
         self._addSubject(msg, Subject)
-        msg['From'] = self.From
-        msg['To'] = ";".join(To) if isinstance(To, list) else To
-        if Cc is not None:
-            msg['Cc'] = ";".join(Cc) if isinstance(Cc, list) else Cc 
-        if Bcc is not None:
-            msg['Bcc'] = ";".join(Bcc) if isinstance(Bcc, list) else Bcc 
+        msg['From'] = self.FromName
+        if 'To' in addresses: 
+            msg['To'] = addresses['To']
+        if 'Cc' in addresses:
+            msg['Cc'] = addresses['Cc']
+        if 'Bcc' in addresses:
+            msg['Bcc'] = addresses['Bcc']
         self._addBody(msg, Body)
         self._addHtml(msg, Html)
         self._addImage(msg, Image) 
         return msg        
         
-    def send(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None): 
-        """ Use this to send an email with gmail"""
-        msg = self.prepare(To, Subject, Body, Html, Image, Cc, Bcc)
-        if To is None:
-            To = self.From
-        return self.smtp.sendmail(self.From, To, msg.as_string())
-
-    def preview(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None): 
-        """ Use this to send an email with gmail"""
-        msg = self.prepare(To, Subject, Body, Html, Image, Cc, Bcc)
-        if To is None:
-            To = self.From
-        return msg.as_string() 
-
-    def close(self):
-        self.isClosed = True
-        self.smtp.quit()
-
-    def _login(self, password):
+    def login(self, password):
         self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs) 
         self.smtp.set_debuglevel(self.debuglevel)
         if self.starttls is not None:
@@ -100,6 +112,31 @@ class Connect():
         home = os.path.expanduser("~")
         with open(home + '/.yagmail') as f:
             return f.read().strip()        
+
+    def _makeAddrAliasFrom(self, x):
+        if isinstance(x, str):
+            return (x, x)
+        if isinstance(x, dict): 
+            if len(x) == 1:
+                return (list(x.keys())[0], list(x.values())[0])
+        raise YagAddressError
+
+    def _makeAddrAliasTarget(self, x, addresses, which): 
+        if isinstance(x, str):
+            addresses['recipients'].append(x) 
+            addresses['To'] = x
+            return addresses
+        if isinstance(x, list) or isinstance(x, tuple): 
+            if not all([isinstance(k, str) for k in x]): 
+                raise YagAddressError
+            addresses['recipients'].extend(x) 
+            addresses[which] = '; '.join(x)
+            return addresses
+        if isinstance(x, dict):
+            addresses['recipients'].extend(x.keys()) 
+            addresses[which] = '; '.join(x.values())
+            return addresses
+        raise YagAddressError 
         
     def _addSubject(self, msg, Subject):
         if not Subject:
@@ -172,4 +209,3 @@ class Connect():
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""
     keyring.set_password('yagmail', username, password)
-
