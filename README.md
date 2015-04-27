@@ -70,39 +70,38 @@ img = '/local/file/bunny.png'
 All variables are optional, and know that not even `To` is required (you'll send an email to yourself):
 
 ```python
-yag.send(To = to, Subject = subject, Body = body)
-yag.send(To = to, Subject = subject, Body = body, Html = html, Image = img)
-yag.send(To = to, Image = img)
+yag.send(To = to, Subject = subject, Contents = body)
+yag.send(To = to, Subject = subject, Contents = [body, html, img])
+yag.send(Contents = [body, img])
 ```
 
 Furthermore, if you do not want to be explicit, you can do the following:
 
 ```python
-yag.send(to, subject, body)
-yag.send(to, subject, body, img)
+yag.send(to, subject, [body, img])
 ```
+
+## Recipients
 
 And lastly, it is also possible to send to a group of people by providing a list of email strings rather than a single string:
 
 ```python
-yag.send([to, to2, to3], subject, body)
+yag.send(To = to) 
+yag.send(To = [to, to2]) # List or tuples for emailadresses *without* aliases
+yag.send(To = {to : 'Alias1'}) # Dictionary for emailaddress *with* aliases
+yag.send(To = {to : 'Alias1', to2 : 'Alias2'}
 ```
 
-Actually, all arguments can be missing or lists. Pretty much the table summarizes:
+**All arguments are optional when sending.**
 
-Type/Amount   |None|String|Flat iterable (set/list/etc)
----|---|---|---
-To|To = Self|Value|join (";")
-Subject|Nothing|Value|join (" ")
-Body|Nothing|Value|join (" ")
-Attach|Nothing|Value|Separated
+Furthermore, the `Contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
 
-Furthermore, attachments will be smartly guessed. (Soon, To be continued)
+- It will try to see if the string can be read as a file locally,
+- if impossible, it will try to visit the string as a URL,
+- if impossible, it will check if the string is valid html
+- if not, it must be text.
 
-Attachment By|Filename|URL|String
----|---|---|---
-Html|Yes|Yes|Yes
-Image|Yes|Yes|No
+Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension.
 
 ### Roadmap (and priorities)
 
@@ -112,14 +111,16 @@ Image|Yes|Yes|No
 - ~~CC/BCC (high)~~
 - ~~Custom names (high)~~
 - ~~Allow send to return a preview rather than to actually send~~
-- Perhaps change the casing of the arguments... (needs thought)
-- Choose inline or not somehow (needs thought)
-- Just attachments, being smart guessed (high, complex)
-- Attachments in a list so they actually define the order (medium)
-- Provide automatic fallback for html etc (low)
+- ~~Just use attachments in "contents", being smart guessed (high, complex)~~
+- ~~Attachments (contents) in a list so they actually define the order (medium)~~
+- ~~Use lxml to see if it can parse the html (low)~~
+- Choose inline or not somehow (high)
+- Provide automatic fallback for complex content(medium)
+- Allow caching of content (low)
 - Extra other types (low)
 - Mail counter (low)
 - Logging count & mail capability (very low)
+- Add the local images to the package (lowest)
 
 ### Errors
 
@@ -130,6 +131,8 @@ Image|Yes|Yes|No
 - [`SMTPAuthenticationError: Application-specific password required`](https://support.google.com/accounts/answer/185833)
 
 - **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'To', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
+
+- **YagContentError**: It means that from the filename/url it is not possible to infer the type. I plan to allow the use of python-magic which can infer many more types, not just based on the filename/url.   
 
 - Make sure you have a connection
 

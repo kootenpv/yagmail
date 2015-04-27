@@ -1,20 +1,14 @@
+import os
 import keyring
 import smtplib
+from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.image import MIMEImage
-import os
+import email.encoders
+import mimetypes
+import lxml.html
+import requests
 
-try:
-    from urllib import urlopen
-except ImportError:
-    from urllib.request import urlopen        
-
-try:
-    FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError
-    
 class UserNotFoundInKeyring(Exception):
     pass
 
@@ -24,75 +18,46 @@ class YagConnectionClosed(Exception):
 class YagAddressError(Exception):
     pass
 
+class YagContentError(Exception):
+    pass
+
+
 class Connect():
     """ Connection is the class that contains the smtp"""
-    def __init__(self, From, password = None, host = 'smtp.gmail.com', port = '587', 
+    def __init__(self, From = None, password = None, host = 'smtp.gmail.com', port = '587', 
                  starttls = True, set_debuglevel = 0, **kwargs): 
-        if not From: 
+        if From is None: 
             From = self._findUserFromHome()
         self.From, self.FromName = self._makeAddrAliasFrom(From)
         self.isClosed = None 
         self.host = host
         self.port = port
-        self.attachmentCount = 0
         self.starttls = starttls
         self.debuglevel = set_debuglevel
         self.kwargs = kwargs
         self.login(password)
                 
-    def send(self, To = None, Subject = None, Body = None, Html = None, Image = None, Cc = None, Bcc = None,
+    def send(self, To = None, Subject = None, Contents = None, Cc = None, Bcc = None,
              previewOnly = False): 
-        """ Use this to send an email with gmail"""
-        # This is where I should handle "To"
-        # I will send the ToAlias to prepare msg, and keep the To for sending addr.
+        """ Use this to send an email with gmail""" 
         addresses = self._resolveAddresses(To, Cc, Bcc)
-        msg = self._prepareMsg(addresses, Subject, Body, Html, Image)
+        msg = self._prepareMsg(addresses, Subject, Contents)
         if previewOnly: 
             return addresses, msg.as_string() 
         else: 
             return self.smtp.sendmail(self.From, addresses['recipients'], msg.as_string())
 
-    def _resolveAddresses(self, To = None, Cc = None, Bcc = None): 
-        addresses = {'recipients' : []} 
-        if To is not None: 
-            self._makeAddrAliasTarget(To, addresses, 'To')
-        elif Cc is not None and Bcc is not None: 
-            self._makeAddrAliasTarget([self.From, self.FromName], addresses, 'To')
-        if Cc is not None:
-            self._makeAddrAliasTarget(Cc, addresses, 'Cc')                
-        if Bcc is not None:
-            self._makeAddrAliasTarget(Bcc, addresses, 'Bcc')    
-        return addresses        
-                            
     def close(self):
         self.isClosed = True
         self.smtp.quit()
 
-    def _prepareMsg(self, addresses, Subject = None, Body = None, Html = None, Image = None):
-        self.attachmentCount = 0
-        if self.isClosed:
-            raise YagConnectionClosed('Login required again') 
-        msg = MIMEMultipart() 
-        self._addSubject(msg, Subject)
-        msg['From'] = self.FromName
-        if 'To' in addresses: 
-            msg['To'] = addresses['To']
-        if 'Cc' in addresses:
-            msg['Cc'] = addresses['Cc']
-        if 'Bcc' in addresses:
-            msg['Bcc'] = addresses['Bcc']
-        self._addBody(msg, Body)
-        self._addHtml(msg, Html)
-        self._addImage(msg, Image) 
-        return msg        
-        
     def login(self, password):
         self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs) 
         self.smtp.set_debuglevel(self.debuglevel)
         if self.starttls is not None:
             self.smtp.ehlo()
             if self.starttls == True:
-                self.smtp.starttls() 
+                self.smtp.starttls()
             else:
                 self.smtp.starttls(**self.starttls)     
             self.smtp.ehlo()
@@ -106,8 +71,39 @@ class Connect():
                 exceptionMsg = 'Either yagmail is not listed in keyring, or the user + password is not defined.'
                 raise UserNotFoundInKeyring(exceptionMsg)
         self.smtp.login(self.From, password)
-        self.isClosed = False
-
+        self.isClosed = False        
+        
+    def _resolveAddresses(self, To = None, Cc = None, Bcc = None): 
+        addresses = {'recipients' : []} 
+        if To is not None: 
+            self._makeAddrAliasTarget(To, addresses, 'To')
+        elif Cc is not None and Bcc is not None: 
+            self._makeAddrAliasTarget([self.From, self.FromName], addresses, 'To')
+        if Cc is not None:
+            self._makeAddrAliasTarget(Cc, addresses, 'Cc')                
+        if Bcc is not None:
+            self._makeAddrAliasTarget(Bcc, addresses, 'Bcc')    
+        return addresses        
+        
+    def _prepareMsg(self, addresses, Subject = None, Contents = None):
+        if self.isClosed:
+            raise YagConnectionClosed('Login required again') 
+        msg = MIMEMultipart() 
+        self._addSubject(msg, Subject)
+        msg['From'] = self.FromName
+        if 'To' in addresses: 
+            msg['To'] = addresses['To']
+        if 'Cc' in addresses:
+            msg['Cc'] = addresses['Cc']
+        if 'Bcc' in addresses:
+            msg['Bcc'] = addresses['Bcc']
+        if Contents is not None:    
+            if isinstance(Contents, str):
+                Contents = [Contents]
+            for content in Contents:
+                self._addContents(msg, content) 
+        return msg        
+        
     def _findUserFromHome(self):
         home = os.path.expanduser("~")
         with open(home + '/.yagmail') as f:
@@ -145,71 +141,56 @@ class Connect():
             Subject = ' '.join(Subject)
         msg['Subject'] = Subject
         
-    def _addBody(self, msg, Body):
-        if not Body:
-            return
-        if isinstance(Body, list):
-            Body = " ".join(Body)
-        msg.attach(MIMEText(Body)) 
-
-    def _addHtml(self, msg, Html):
-        if not Html:
-            return
-        if isinstance(Html, str):
-            Html = [Html]
-        for html in Html:    
-            msg.attach(self._readHtml(html)) 
-            
-    def _addImage(self, msg, Image):
-        if not Image:
-            return
-        if isinstance(Image, str):
-            Image = [Image]
-        for img in Image:
-            msg.attach(self._readImage(img))
-
-    def _readHtml(self, html):
-        content = self._loadContent(html)
-        return MIMEText(content, 'html')
-        
-    def _readImage(self, img):
-        content = self._loadContent(img)
-        imgName = os.path.basename(img)
-        if len(imgName) > 50:
-            imgName = 'long_img_name_{}'.format(hash(img))
-        return MIMEImage(content, name = imgName)
-
-    def _loadContent(self, inp):
-        try:
-            with open(inp) as f:
-                content = f.read()
-        except UnicodeDecodeError:
-            with open(inp, 'rb') as f:
-                content = f.read()            
-        except FileNotFoundError: 
+    def _addContents(self, msg, attachString):
+        guessed_type = (None, None)
+        if os.path.isfile(attachString):
             try:
-                content = urlopen(inp).read()
-            except:
-                content = inp
-        self.attachmentCount += 1        
-        return content            
-        
+                with open(attachString) as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                with open(attachString, 'rb') as f:
+                    content = f.read()                 
+        else:
+            try:
+                r = requests.get(attachString)
+                content = r._content 
+                if 'content-type' in r.headers:
+                    guessed_type = r.headers['content-type'].split('/')
+            except (IOError, ValueError): 
+                html_tree = lxml.html.fromstring(attachString)                
+                if html_tree.find('.//*') is not None or html_tree.tag != 'p':
+                    msg.attach(MIMEText(attachString, 'html'))
+                else:
+                    msg.attach(MIMEText(attachString)) 
+                return 
+                
+        if guessed_type[0] is None:
+            guessed_type = mimetypes.guess_type(attachString)
+            if guessed_type[0] is not None: 
+                guessed_type = guessed_type[0].split('/')
+                
+        if guessed_type is None:    
+            raise YagContentError('Content-type cannot be inferred')    
+        else:
+            default_type, content_type = guessed_type
+            contentName = os.path.basename(attachString)
+            mimeObject = MIMEBase(default_type, content_type, name = contentName)
+            mimeObject.set_payload(content)
+            email.encoders.encode_base64(mimeObject)                
+            msg.attach(mimeObject)
+                    
     def __del__(self):
         self.close()
 
-    def test(self):
-        tos = [self.From, self.From]    
-        subjects = ['subj', 'subj1']
-        bodys = ['body', 'body1']
-        htmls = ['/Users/pascal/GDrive/yagmail/yagmail/example.html', '<h2>Text</h2>']
-        imgs = ['/Users/pascal/Documents/Capture.PNG', 'http://tinyurl.com/lpphnuy']
-        self.send(tos, subjects, bodys, htmls, imgs)
+    def _test(self): 
+        tos = [self.From, self.From] 
+        subjects = ['subj', 'subj1'] 
+        bodys = ['body', 'body1'] 
+        htmls = ['/Users/pascal/GDrive/yagmail/yagmail/example.html', '<h2>Text</h2>', 
+                 'http://github.com/kootenpv/yagmail'] 
+        imgs = ['/Users/pascal/GDrive/yagmail/yagmail/sky.jpg', 'http://tinyurl.com/nwe5hxj'] 
+        return self.send(tos, subjects, bodys + htmls + imgs)
         
-
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""
     keyring.set_password('yagmail', username, password)
-
-
-
-    
