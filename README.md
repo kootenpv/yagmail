@@ -110,10 +110,10 @@ Image|Yes|Yes|No
 - ~~Attachment counter~~
 - ~~Optional SMTP arguments should go with magic to my Connect~~
 - ~~CC/BCC (high)~~
+- ~~Custom names (high)~~
+- ~~Allow send to return a preview rather than to actually send~~
 - Perhaps change the casing of the arguments... (needs thought)
 - Choose inline or not somehow (needs thought)
-- ~~See if I can pass the "send"/"preview" arguments directly to "prepare"~~
-- ~~Custom names (high)~~
 - Just attachments, being smart guessed (high, complex)
 - Attachments in a list so they actually define the order (medium)
 - Provide automatic fallback for html etc (low)
@@ -128,6 +128,8 @@ Image|Yes|Yes|No
 - [`smtplib.SMTPException: SMTP AUTH extension not supported by server`](http://stackoverflow.com/questions/10147455/trying-to-send-email-gmail-as-mail-provider-using-python)
 
 - [`SMTPAuthenticationError: Application-specific password required`](https://support.google.com/accounts/answer/185833)
+
+- **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'To', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
 
 - Make sure you have a connection
 
