@@ -76,9 +76,11 @@ class Connect():
     def _resolveAddresses(self, To = None, Cc = None, Bcc = None): 
         addresses = {'recipients' : []} 
         if To is not None: 
-            self._makeAddrAliasTarget(To, addresses, 'To')
+            self._makeAddrAliasTarget(To, addresses, 'To') 
         elif Cc is not None and Bcc is not None: 
             self._makeAddrAliasTarget([self.From, self.FromName], addresses, 'To')
+        else:
+            addresses['recipients'].append(self.From)     
         if Cc is not None:
             self._makeAddrAliasTarget(Cc, addresses, 'Cc')                
         if Bcc is not None:
@@ -93,6 +95,8 @@ class Connect():
         msg['From'] = self.FromName
         if 'To' in addresses: 
             msg['To'] = addresses['To']
+        else:
+            msg['To'] = self.FromName    
         if 'Cc' in addresses:
             msg['Cc'] = addresses['Cc']
         if 'Bcc' in addresses:
