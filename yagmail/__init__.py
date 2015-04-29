@@ -36,12 +36,13 @@ class Connect():
         self.debuglevel = set_debuglevel
         self.kwargs = kwargs
         self.login(password)
+        self.cache = {} 
                 
     def send(self, To = None, Subject = None, Contents = None, Cc = None, Bcc = None,
-             previewOnly = False): 
+             previewOnly = False, useCache = False): 
         """ Use this to send an email with gmail""" 
-        addresses = self._resolveAddresses(To, Cc, Bcc)
-        msg = self._prepareMsg(addresses, Subject, Contents)
+        addresses = self._resolveAddresses(To, Cc, Bcc)        
+        msg = self._prepareMsg(addresses, Subject, Contents, useCache)
         if previewOnly: 
             return addresses, msg.as_string() 
         else: 
@@ -87,7 +88,7 @@ class Connect():
             self._makeAddrAliasTarget(Bcc, addresses, 'Bcc')    
         return addresses        
         
-    def _prepareMsg(self, addresses, Subject = None, Contents = None):
+    def _prepareMsg(self, addresses, Subject = None, Contents = None, useCache = False):
         if self.isClosed:
             raise YagConnectionClosed('Login required again') 
         msg = MIMEMultipart() 
@@ -105,7 +106,13 @@ class Connect():
             if isinstance(Contents, str):
                 Contents = [Contents]
             for content in Contents:
-                self._addContents(msg, content) 
+                if useCache:
+                    if content not in self.cache:
+                        mimeObject = self._getMIMEObject(content)
+                        self.cache[content] = mimeObject
+                    msg.attach(self.cache[content])
+                else:
+                    msg.attach(self._getMIMEObject(content))
         return msg        
         
     def _findUserFromHome(self):
@@ -145,7 +152,7 @@ class Connect():
             Subject = ' '.join(Subject)
         msg['Subject'] = Subject
         
-    def _addContents(self, msg, attachString):
+    def _getMIMEObject(self, attachString):
         guessed_type = (None, None)
         if os.path.isfile(attachString):
             try:
@@ -157,16 +164,17 @@ class Connect():
         else:
             try:
                 r = requests.get(attachString)
+                # pylint: disable=protected-access
+                # Used to obtain the raw content of requests object
                 content = r._content 
                 if 'content-type' in r.headers:
                     guessed_type = r.headers['content-type'].split('/')
             except (IOError, ValueError): 
                 html_tree = lxml.html.fromstring(attachString)                
                 if html_tree.find('.//*') is not None or html_tree.tag != 'p':
-                    msg.attach(MIMEText(attachString, 'html'))
+                    return MIMEText(attachString, 'html')
                 else:
-                    msg.attach(MIMEText(attachString)) 
-                return 
+                    return MIMEText(attachString) 
                 
         if guessed_type[0] is None:
             guessed_type = mimetypes.guess_type(attachString)
@@ -181,19 +189,10 @@ class Connect():
             mimeObject = MIMEBase(default_type, content_type, name = contentName)
             mimeObject.set_payload(content)
             email.encoders.encode_base64(mimeObject)                
-            msg.attach(mimeObject)
+            return mimeObject
                     
     def __del__(self):
         self.close()
-
-    def _test(self): 
-        tos = [self.From, self.From] 
-        subjects = ['subj', 'subj1'] 
-        bodys = ['body', 'body1'] 
-        htmls = ['/Users/pascal/GDrive/yagmail/yagmail/example.html', '<h2>Text</h2>', 
-                 'http://github.com/kootenpv/yagmail'] 
-        imgs = ['/Users/pascal/GDrive/yagmail/yagmail/sky.jpg', 'http://tinyurl.com/nwe5hxj'] 
-        return self.send(tos, subjects, bodys + htmls + imgs)
         
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""

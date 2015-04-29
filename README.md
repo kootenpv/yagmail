@@ -114,13 +114,17 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Just use attachments in "contents", being smart guessed (high, complex)~~
 - ~~Attachments (contents) in a list so they actually define the order (medium)~~
 - ~~Use lxml to see if it can parse the html (low)~~
+- ~~Added tests (high)~~
+- ~~Allow caching of content (low)~~
 - Choose inline or not somehow (high)
 - Make `lxml` optional magic (high)
 - Provide automatic fallback for complex content(medium)
-- Allow caching of content (low)
 - Extra other types (low)
 - Mail counter (low)
+- Go over documentation again (low)
+- Add documentation to exception classes (low)
 - Logging count & mail capability (very low)
+- Exception classes to their own file (very low)
 - Add the local images to the package (lowest)
 
 ### Errors
