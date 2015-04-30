@@ -8,19 +8,10 @@ import email.encoders
 import mimetypes
 import lxml.html
 import requests
-
-class UserNotFoundInKeyring(Exception):
-    pass
-
-class YagConnectionClosed(Exception):
-    pass
-
-class YagAddressError(Exception):
-    pass
-
-class YagContentError(Exception):
-    pass
-
+from yagmail.exceptions import UserNotFoundInKeyring
+from yagmail.exceptions import YagConnectionClosed
+from yagmail.exceptions import YagAddressError
+from yagmail.exceptions import YagContentError
 
 class Connect():
     """ Connection is the class that contains the smtp"""

@@ -116,10 +116,11 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Use lxml to see if it can parse the html (low)~~
 - ~~Added tests (high)~~
 - ~~Allow caching of content (low)~~
+- ~~Extra other types (low)~~ (for example, mp3 also works, let me know if something does not work)
+- Allow `.yagmail` file to contain more parameters
 - Choose inline or not somehow (high)
 - Make `lxml` optional magic (high)
 - Provide automatic fallback for complex content(medium)
-- Extra other types (low)
 - Mail counter (low)
 - Go over documentation again (low)
 - Add documentation to exception classes (low)

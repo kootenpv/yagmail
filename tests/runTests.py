@@ -16,6 +16,10 @@ def getCombinations(yag):
     return results        
 
 def previewAll():
+    """ 
+    Tests are only going to pass for "me" <kootenpv@gmail> at this point. 
+    I very much will change that in the future
+    """
     yag = yagmail.Connect() 
     z = getCombinations(yag)
     passed = 0
