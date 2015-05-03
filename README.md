@@ -117,6 +117,7 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Added tests (high)~~
 - ~~Allow caching of content (low)~~
 - ~~Extra other types (low)~~ (for example, mp3 also works, let me know if something does not work)
+- Probaly a naming issue with content type/default type
 - Allow `.yagmail` file to contain more parameters
 - Choose inline or not somehow (high)
 - Make `lxml` optional magic (high)
@@ -137,8 +138,6 @@ Local files require to have an extension for their content type to be inferred. 
 - [`SMTPAuthenticationError: Application-specific password required`](https://support.google.com/accounts/answer/185833)
 
 - **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'To', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
-
-- **YagContentError**: It means that from the filename/url it is not possible to infer the type. I plan to allow the use of python-magic which can infer many more types, not just based on the filename/url.   
 
 - Make sure you have a connection
 
