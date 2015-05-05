@@ -6,7 +6,12 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import email.encoders
 import mimetypes
-import lxml.html
+
+try:
+    import lxml.html
+except ImportError:
+    pass
+    
 import requests
 
 
@@ -204,11 +209,14 @@ class Connect():
                     contentObject['main_type'] = main_type
                     contentObject['sub_type'] = sub_type
             except (IOError, ValueError):
-                html_tree = lxml.html.fromstring(contentString)
-                if html_tree.find('.//*') is not None or html_tree.tag != 'p':
-                    contentObject['mimeObject'] = MIMEText(contentString, 'html')
-                else:
-                    contentObject['mimeObject'] = MIMEText(contentString)
+                try:
+                    html_tree = lxml.html.fromstring(contentString)
+                    if html_tree.find('.//*') is not None or html_tree.tag != 'p':
+                        contentObject['mimeObject'] = MIMEText(contentString, 'html')
+                    else:
+                        contentObject['mimeObject'] = MIMEText(contentString)
+                except NameError: 
+                    contentObject['mimeObject'] = MIMEText(contentString) 
                 return contentObject
 
         if contentObject['main_type'] is None:
