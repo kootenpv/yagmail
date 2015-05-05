@@ -47,7 +47,7 @@ class Connect():
     def send(self, to = None, subject = None, contents = None, attachments = None, cc = None, bcc = None,
              previewOnly=False, useCache=False):
         """ Use this to send an email with gmail"""
-        addresses = self._resolveAddresses(to, cc, bcc)
+        addresses = self._resolveAddresses(to, cc, bcc) 
         msg = self._prepareMsg(addresses, subject, contents, attachments, useCache)
         if previewOnly:
             return addresses, msg.as_string()
@@ -94,10 +94,10 @@ class Connect():
             self._makeAddrAliasTarget(bcc, addresses, 'bcc')
         return addresses
 
-    def _prepareMsg(self, addresses, subject, Contents, attachments, useCache):
+    def _prepareMsg(self, addresses, subject, contents, attachments, useCache):
         if self.isClosed:
             raise YagConnectionClosed('Login required again')
-        hasEmbeddedImage, contentObjects = self._prepareContents(Contents, useCache)
+        hasEmbeddedImage, contentObjects = self._prepareContents(contents, useCache)
         msg = MIMEMultipart()
         msgAlternative = MIMEMultipart('alternative')
         msg.attach(msgAlternative)
@@ -105,29 +105,30 @@ class Connect():
         self._addRecipients(msg, addresses)
         if hasEmbeddedImage:
             msg.preamble = "You need a MIME enabled mail reader to see this message."
-        for contentObject, contentString in zip(contentObjects, Contents):
-            if contentObject['main_type'] == 'image':
-                hashed_ref = str(hash(os.path.basename(contentString)))
-                msgImgText = MIMEText('<img src="cid:{}" />'.format(hashed_ref), 'html')
-                contentObject['mimeObject'].add_header('Content-ID', '<{}>'.format(hashed_ref))
-                msg.attach(msgImgText)
-                msgAlternative.attach(MIMEText('<imag {} here>'.format(hashed_ref)))
-            msg.attach(contentObject['mimeObject'])
-        if attachments:
+        if contents is not None:    
+            for contentObject, contentString in zip(contentObjects, contents):
+                if contentObject['main_type'] == 'image':
+                    hashed_ref = str(hash(os.path.basename(contentString)))
+                    msgImgText = MIMEText('<img src="cid:{}" />'.format(hashed_ref), 'html')
+                    contentObject['mimeObject'].add_header('Content-ID', '<{}>'.format(hashed_ref))
+                    msg.attach(msgImgText)
+                    msgAlternative.attach(MIMEText('<imag {} here>'.format(hashed_ref)))
+                msg.attach(contentObject['mimeObject'])
+        if attachments or attachments is None:
             pass
         # attachments = self._prepareattachments(msg, attachments, useCache)
         return msg
 
-    def _prepareattachments(self, msg, Contents, useCache=False):
+    def _prepareattachments(self, msg, attachments, useCache=False):
         pass
 
-    def _prepareContents(self, Contents, useCache=False):
+    def _prepareContents(self, contents, useCache=False):
         mimeObjects = []
         hasEmbeddedImage = False
-        if Contents is not None:
-            if isinstance(Contents, str):
-                Contents = [Contents]
-            for content in Contents:
+        if contents is not None:
+            if isinstance(contents, str):
+                contents = [contents]
+            for content in contents:
                 if useCache:
                     if content not in self.cache:
                         contentObject = self._getMIMEObject(content)
@@ -137,7 +138,6 @@ class Connect():
                     contentObject = self._getMIMEObject(content)
                 if contentObject['main_type'] == 'image':
                     hasEmbeddedImage = True
-                    fn = os.path.basename(content)
                 mimeObjects.append(contentObject)
         return hasEmbeddedImage, mimeObjects
 
