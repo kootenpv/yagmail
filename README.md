@@ -67,12 +67,12 @@ html = '<a href="https://pypi.python.org/pypi/sky/">Click me!</a>'
 img = '/local/file/bunny.png'
 ```
 
-All variables are optional, and know that not even `To` is required (you'll send an email to yourself):
+All variables are optional, and know that not even `to` is required (you'll send an email to yourself):
 
 ```python
-yag.send(To = to, Subject = subject, Contents = body)
-yag.send(To = to, Subject = subject, Contents = [body, html, img])
-yag.send(Contents = [body, img])
+yag.send(to = to, subject = subject, contents = body)
+yag.send(to = to, subject = subject, contents = [body, html, img])
+yag.send(contents = [body, img])
 ```
 
 Furthermore, if you do not want to be explicit, you can do the following:
@@ -86,15 +86,15 @@ yag.send(to, subject, [body, img])
 And lastly, it is also possible to send to a group of people by providing a list of email strings rather than a single string:
 
 ```python
-yag.send(To = to) 
-yag.send(To = [to, to2]) # List or tuples for emailadresses *without* aliases
-yag.send(To = {to : 'Alias1'}) # Dictionary for emailaddress *with* aliases
-yag.send(To = {to : 'Alias1', to2 : 'Alias2'}
+yag.send(to = to) 
+yag.send(to = [to, to2]) # List or tuples for emailadresses *without* aliases
+yag.send(to = {to : 'Alias1'}) # Dictionary for emailaddress *with* aliases
+yag.send(to = {to : 'Alias1', to2 : 'Alias2'}
 ```
 
 **All arguments are optional when sending.**
 
-Furthermore, the `Contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
+Furthermore, the `contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
 
 - It will try to see if the string can be read as a file locally,
 - if impossible, it will try to visit the string as a URL,
@@ -117,16 +117,15 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Added tests (high)~~
 - ~~Allow caching of content (low)~~
 - ~~Extra other types (low)~~ (for example, mp3 also works, let me know if something does not work)
-- Probaly a naming issue with content type/default type
+- ~~ Probably a naming issue with content type/default type ~~
+- ~~Choose inline or not somehow (high)~~
 - Allow `.yagmail` file to contain more parameters
-- Choose inline or not somehow (high)
-- Make `lxml` optional magic (high)
+- ~~ Make `lxml` optional magic (high) ~~
 - Provide automatic fallback for complex content(medium)
 - Mail counter (low)
 - Go over documentation again (low)
 - Add documentation to exception classes (low)
 - Logging count & mail capability (very low)
-- Exception classes to their own file (very low)
 - Add the local images to the package (lowest)
 
 ### Errors
@@ -137,7 +136,7 @@ Local files require to have an extension for their content type to be inferred. 
 
 - [`SMTPAuthenticationError: Application-specific password required`](https://support.google.com/accounts/answer/185833)
 
-- **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'To', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
+- **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'to', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
 
 - Make sure you have a connection
 
