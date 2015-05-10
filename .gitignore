@@ -6,5 +6,6 @@
 *flymake*
 dist/*
 *egg*
+urllist*
 build/
 __pycache__/

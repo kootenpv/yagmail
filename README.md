@@ -113,7 +113,7 @@ Local files require to have an extension for their content type to be inferred. 
 
 ### Roadmap (and priorities)
 
-- ~~Added possibility of Image~~
+- ~~Added possibility of Image~~ 
 - ~~Attachment counter~~
 - ~~Optional SMTP arguments should go with \**kwargs to my Connect~~
 - ~~CC/BCC (high)~~
