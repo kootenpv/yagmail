@@ -108,11 +108,15 @@ class Connect():
         if contents is not None:    
             for contentObject, contentString in zip(contentObjects, contents):
                 if contentObject['main_type'] == 'image':
-                    hashed_ref = str(hash(os.path.basename(contentString)))
-                    msgImgText = MIMEText('<img src="cid:{}" />'.format(hashed_ref), 'html')
-                    contentObject['mimeObject'].add_header('Content-ID', '<{}>'.format(hashed_ref))
-                    msg.attach(msgImgText)
-                    msgAlternative.attach(MIMEText('<imag {} here>'.format(hashed_ref)))
+                    if isinstance(contentString, dict):
+                        for x in contentString:
+                            hashed_ref = contentString[x]
+                    else:
+                        hashed_ref = str(abs(hash(os.path.basename(contentString))))
+                    msgImgText = MIMEText('<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref), 'html')
+                    contentObject['mimeObject'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
+                    msgAlternative.attach(msgImgText) 
+                email.encoders.encode_base64(contentObject['mimeObject'])    
                 msg.attach(contentObject['mimeObject'])
         if attachments or attachments is None:
             pass
@@ -129,14 +133,14 @@ class Connect():
             if isinstance(contents, str):
                 contents = [contents]
             for content in contents:
-                if useCache:
+                if useCache: 
                     if content not in self.cache:
                         contentObject = self._getMIMEObject(content)
                         self.cache[content] = contentObject
                     contentObject = self.cache[content]
                 else:
                     contentObject = self._getMIMEObject(content)
-                if contentObject['main_type'] == 'image':
+                if contentObject['main_type'] == 'image': 
                     hasEmbeddedImage = True
                 mimeObjects.append(contentObject)
         return hasEmbeddedImage, mimeObjects
@@ -190,7 +194,12 @@ class Connect():
         msg['Subject'] = Subject
 
     def _getMIMEObject(self, contentString):
-        contentObject = {'mimeObject': None, 'encoding': None, 'main_type': None, 'sub_type': None}
+        contentObject = {'mimeObject': None, 'encoding': None, 'main_type': None, 'sub_type': None} 
+        if isinstance(contentString, dict):
+            for x in contentString:
+                contentString, contentName = x, contentString[x]
+        else:
+            contentName = os.path.basename(contentString)        
         if os.path.isfile(contentString):
             try:
                 with open(contentString) as f:
@@ -230,10 +239,8 @@ class Connect():
             contentObject['main_type'] = 'application'
             contentObject['sub_type'] = 'octet-stream'
 
-        contentName = os.path.basename(contentString)
-        mimeObject = MIMEBase(contentObject['main_type'], contentObject['sub_type'], name=contentName)
-        mimeObject.set_payload(content)
-        email.encoders.encode_base64(mimeObject)
+        mimeObject = MIMEBase(contentObject['main_type'], contentObject['sub_type'], name = contentName)
+        mimeObject.set_payload(content) 
         contentObject['mimeObject'] = mimeObject
         return contentObject
 
@@ -244,5 +251,7 @@ class Connect():
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""
     keyring.set_password('yagmail', username, password)
+
+
 
 
