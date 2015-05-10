@@ -103,9 +103,11 @@ Furthermore, the `contents` argument will be smartly guessed. It can be passed a
 - if impossible, it will try to visit the string as a URL,
   e.g. 'http://domain.com/image.png' or 'http://domain.com/html_template.html'
 - if impossible, it will check if the string is valid html
-  e.g. '<h1>This is a big title</h1>'
+  e.g. '\<h1>This is a big title</h1>'
 - if not, it must be text.
   e.g. 'Hi John!'
+
+Note that local/external files can be html (inline), image (inline), everything else will be attached (if required, I can update to make it decidable by the user).  
 
 Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension, but for now it will work whenever an extension is present.
 
