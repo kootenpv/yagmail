@@ -51,7 +51,7 @@ In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusern
 yag = yagmail.Connect('mygmailusername')
 ```
 
-Note that this connection is reusable, closable and when it leaves scope will auto-destroy.
+Note that this connection is reusable, closable and when it leaves scope it will auto-destroy.
 
 ### Usability 
 
@@ -83,7 +83,7 @@ yag.send(to, subject, [body, img])
 
 ### Recipients
 
-And lastly, it is also possible to send to a group of people by providing a list of email strings rather than a single string:
+It is also possible to send to a group of people by providing a list of email strings rather than a single string:
 
 ```python
 yag.send(to = to) 
@@ -96,12 +96,18 @@ yag.send(to = {to : 'Alias1', to2 : 'Alias2'}
 
 Furthermore, the `contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
 
-- It will try to see if the string can be read as a file locally,
+- If it is a dictionary it will assume the key is the content and the value is an alias (only for images currently!)
+  e.g. {'/path/to/image.png' : 'MyPicture'}
+- It will try to see if the content (string) can be read as a file locally,
+  e.g. '/path/to/image.png'
 - if impossible, it will try to visit the string as a URL,
+  e.g. 'http://domain.com/image.png' or 'http://domain.com/html_template.html'
 - if impossible, it will check if the string is valid html
+  e.g. '<h1>This is a big title</h1>'
 - if not, it must be text.
+  e.g. 'Hi John!'
 
-Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension.
+Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension, but for now it will work whenever an extension is present.
 
 ### Roadmap (and priorities)
 
@@ -119,8 +125,8 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Extra other types (low)~~ (for example, mp3 also works, let me know if something does not work)
 - ~~ Probably a naming issue with content type/default type ~~
 - ~~Choose inline or not somehow (high)~~
-- Allow `.yagmail` file to contain more parameters
 - ~~ Make `lxml` optional magic (high) ~~
+- Allow `.yagmail` file to contain more parameters
 - Provide automatic fallback for complex content(medium)
 - Mail counter (low)
 - Go over documentation again (low)
@@ -138,6 +144,4 @@ Local files require to have an extension for their content type to be inferred. 
 
 - **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'to', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
 
-- Make sure you have a connection
-
-- I only suppose it will work for gmail
+- Make sure you have a working internet connection
