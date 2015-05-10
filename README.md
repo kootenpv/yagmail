@@ -103,7 +103,7 @@ Furthermore, the `contents` argument will be smartly guessed. It can be passed a
 - if impossible, it will try to visit the string as a URL,
   e.g. 'http://domain.com/image.png' or 'http://domain.com/html_template.html'
 - if impossible, it will check if the string is valid html
-  e.g. '\<h1>This is a big title</h1>'
+  e.g. `<h1>This is a big title</h1>`
 - if not, it must be text.
   e.g. 'Hi John!'
 
