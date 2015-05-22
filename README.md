@@ -1,3 +1,5 @@
+<img src="icon.sg" />
+
 # yagmail -- Yet Another GMAIL client
 
 The goal here is to make it as simple and painless as possible to send emails.
