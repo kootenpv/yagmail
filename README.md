@@ -1,4 +1,4 @@
-<img src="https://cdn.rawgit.com/kootenpv/yagmail/master/icon.svg" style="height: 50px"/>
+<img src="https://cdn.rawgit.com/kootenpv/yagmail/master/resources/icon.svg"/>
 
 # yagmail -- Yet Another GMAIL client
 
