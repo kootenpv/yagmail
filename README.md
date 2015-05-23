@@ -131,7 +131,7 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Extra other types (low)~~ (for example, mp3 also works, let me know if something does not work)
 - ~~ Probably a naming issue with content type/default type ~~
 - ~~Choose inline or not somehow (high)~~
-- ~~ Make `lxml` optional magic (high) ~~
+- ~~Make lxml module optional magic (high) ~~
 - Allow `.yagmail` file to contain more parameters
 - Provide automatic fallback for complex content(medium)
 - Mail counter (low)
