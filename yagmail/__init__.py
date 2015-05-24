@@ -6,18 +6,12 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import email.encoders
 import mimetypes
+import requests
 
 try:
     import lxml.html
 except ImportError:
-    pass
-    
-import requests
-
-
-class UserNotFoundInKeyring(Exception):
-    pass
-
+    pass 
 
 class YagConnectionClosed(Exception):
     pass
@@ -75,8 +69,17 @@ class Connect():
             if password is None:
                 password = keyring.get_password('yagmail', self.user)
             if password is None:
-                exceptionMsg = 'Either yagmail is not listed in keyring, or the user + password is not defined.'
-                raise UserNotFoundInKeyring(exceptionMsg)
+                import getpass
+                password = getpass.getpass('Password for <{}>: '.format(self.user))
+                answer = ''
+                try: 
+                    input = raw_input 
+                except NameError: 
+                    pass
+                while answer != 'y' and answer != 'n':
+                    answer = input('Save username and password in keyring? [y/n]: ').strip()
+                if answer == 'y':    
+                    register(self.user, password)    
         self.smtp.login(self.user, password)
         self.isClosed = False
 
@@ -116,7 +119,7 @@ class Connect():
                     msgImgText = MIMEText('<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref), 'html')
                     contentObject['mimeObject'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
                     msgAlternative.attach(msgImgText) 
-                email.encoders.encode_base64(contentObject['mimeObject'])    
+                    email.encoders.encode_base64(contentObject['mimeObject']) 
                 msg.attach(contentObject['mimeObject'])
         if attachments or attachments is None:
             pass
@@ -217,15 +220,19 @@ class Connect():
                     main_type, sub_type = r.headers['content-type'].split('/')
                     contentObject['main_type'] = main_type
                     contentObject['sub_type'] = sub_type
-            except (IOError, ValueError):
+            except (IOError, ValueError, requests.exceptions.MissingSchema):
+                contentObject['main_type'] = 'text'
                 try:
                     html_tree = lxml.html.fromstring(contentString)
                     if html_tree.find('.//*') is not None or html_tree.tag != 'p':
                         contentObject['mimeObject'] = MIMEText(contentString, 'html')
+                        contentObject['sub_type'] = 'html'
                     else:
                         contentObject['mimeObject'] = MIMEText(contentString)
                 except NameError: 
                     contentObject['mimeObject'] = MIMEText(contentString) 
+                if contentObject['sub_type'] is None:
+                    contentObject['sub_type'] = 'plain'
                 return contentObject
 
         if contentObject['main_type'] is None:
@@ -251,3 +258,18 @@ class Connect():
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""
     keyring.set_password('yagmail', username, password)
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description='Send a (g)mail with yagmail.') 
+    parser.add_argument('-to', '-t', help='Send an email to address "TO"', nargs='+') 
+    parser.add_argument('-subject', '-s', help='Subject of email', nargs='+') 
+    parser.add_argument('-contents', '-c', help='Contents to send', nargs='+') 
+    parser.add_argument('-user', '-u', help='Username') 
+    parser.add_argument('-password', '-p', help='Preferable to use keyring rather than password here') 
+    args = parser.parse_args() 
+    Connect(args.user, args.password).send(to = args.to, subject = args.subject, contents = args.contents)
+    
+if __name__ == 'main':
+    main()

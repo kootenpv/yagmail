@@ -2,14 +2,14 @@ import yagmail
 import itertools
 
 def getCombinations(yag):
-    tos = (None, (yag.From), [yag.From, yag.From], {yag.From : 'me', yag.From + '1' : 'me'}) 
+    tos = (None, (yag.user), [yag.user, yag.user], {yag.user : 'me', yag.user + '1' : 'me'}) 
     subjects = ('subj', ['subj'], ['subj', 'subj1']) 
     contents = (None, ['body'], ['body', 'body1', '/Users/pascal/GDrive/yagmail/yagmail/example.html', '<h2>Text</h2>',
              'http://github.com/kootenpv/yagmail', 'body', '/Users/pascal/GDrive/yagmail/yagmail/sky.jpg', 
              'http://tinyurl.com/nwe5hxj']) 
     results = []
     for x in itertools.product(tos, subjects, contents):
-        options = {y : z for y,z in zip(['To', 'Subject', 'Contents'], x)}
+        options = {y : z for y,z in zip(['to', 'subject', 'contents'], x)}
         options['previewOnly'] = True
         options['useCache'] = True
         results.append(options)
