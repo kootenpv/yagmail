@@ -11,12 +11,12 @@ In the end, your code will look something like this:
 ```python
 import yagmail
 yag = yagmail.Connect('mygmailusername')
-yag.send('to@someone.com', 'subject', 'body')
+yag.send('to@someone.com', 'subject', ['This is the body, and look, here is an embedded image:', 'http://somedomain/image.png', 'You can also find an audio file attached', '/local/path/song.mp3'])
 ```
 
-Or a one-liner (connection will automatically close):
+Or a simple one-liner (connection will automatically close):
 ```python
-yagmail.Connect('mygmailusername').send('to@someone.com', 'subject', 'body')
+yagmail.Connect('mygmailusername').send('to@someone.com', 'subject', 'This is the body')
 ```
 
 Note that it will read the password securely from your keyring (read below). If you don't want this, you can also initialize with:
@@ -36,6 +36,8 @@ pip install yagmail
 pip3 install yagmail
 ```
 
+As a side note, `yagmail` can now also be used to send emails from the command line.
+
 ### Add yagmail to your keyring
 
 [keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
@@ -48,6 +50,8 @@ yagmail.register('mygmailusername', 'mygmailpassword')
 ```
 
 In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusername', 'mygmailpassword')`.
+
+When no password is given and the user is not found in the keyring, `getpass.getpass()` is used to prompt the user for a password. Upon entering this once, it will be stored in the keyring and never asked again.
 
 ### Start a connection
 
@@ -115,6 +119,8 @@ Note that local/external files can be html (inline), image (inline), everything 
 
 Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension, but for now it will work whenever an extension is present.
 
+
+
 ### Roadmap (and priorities)
 
 - ~~Added possibility of Image~~ 
@@ -129,12 +135,15 @@ Local files require to have an extension for their content type to be inferred. 
 - ~~Added tests (high)~~
 - ~~Allow caching of content (low)~~
 - ~~Extra other types (low)~~ (for example, mp3 also works, let me know if something does not work)
-- ~~ Probably a naming issue with content type/default type ~~
+- ~~Probably a naming issue with content type/default type~~
 - ~~Choose inline or not somehow (high)~~
-- ~~Make lxml module optional magic (high) ~~
+- ~~Make lxml module optional magic (high)~~
+- ~~Provide automatic fallback for complex content(medium)~~ (should work)
+- ~~`yagmail` as a command on CLI upon install~~
+- ~~Added `feedback` function on Connect to be able to send me feedback directly :-)~~
+- ~~Added the option to validate emailaddresses...~~
+- however, I'm unhappy with the error handling/loggin of wrong emails
 - Allow `.yagmail` file to contain more parameters
-- Provide automatic fallback for complex content(medium)
-- Mail counter (low)
 - Go over documentation again (low)
 - Add documentation to exception classes (low)
 - Logging count & mail capability (very low)
@@ -142,12 +151,14 @@ Local files require to have an extension for their content type to be inferred. 
 
 ### Errors
 
-- Make sure you have a keyring entry (see section "Add yagmail to your keyring")
+- Make sure you have a keyring entry (see section "Add yagmail to your keyring"), or use getpass to register. I discourage to use username / password in scripts.
 
 - [`smtplib.SMTPException: SMTP AUTH extension not supported by server`](http://stackoverflow.com/questions/10147455/trying-to-send-email-gmail-as-mail-provider-using-python)
 
 - [`SMTPAuthenticationError: Application-specific password required`](https://support.google.com/accounts/answer/185833)
 
 - **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'to', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
+
+- **YagInvalidEmailAddress**: Note that this will only filter out syntax mistakes in emailaddresses. If a human would think it is probably a valid email, it will most likely pass. However, it could still very well be that the actual emailaddress has simply not be claimed by anyone (so then this function fails to devalidate).
 
 - Make sure you have a working internet connection

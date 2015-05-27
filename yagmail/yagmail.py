@@ -6,11 +6,13 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import email.encoders
 import mimetypes
-
 import requests
 
 from .error import YagConnectionClosed
 from .error import YagAddressError
+from .error import YagInvalidEmailAddress
+
+from .validate import validate_email_with_regex
 
 try:
     import lxml.html
@@ -20,8 +22,8 @@ except ImportError:
 class Connect():
     """ Connection is the class that contains the smtp"""
 
-    def __init__(self, user=None, password=None, host='smtp.gmail.com', port='587',
-                 starttls=True, set_debuglevel=0, **kwargs):
+    def __init__(self, user = None, password = None, host = 'smtp.gmail.com', port = '587',
+                 starttls = True, set_debuglevel = 0, **kwargs):
         if user is None:
             user = self._findUseruserHome()
         self.user, self.userName = self._makeAddrAliasuser(user)
@@ -35,9 +37,9 @@ class Connect():
         self.cache = {}
 
     def send(self, to = None, subject = None, contents = None, attachments = None, cc = None, bcc = None,
-             previewOnly=False, useCache=False):
+             previewOnly=False, useCache=False, validate_email = True, throw_invalid_exception = False):
         """ Use this to send an email with gmail"""
-        addresses = self._resolveAddresses(to, cc, bcc) 
+        addresses = self._resolveAddresses(to, cc, bcc, validate_email, throw_invalid_exception)
         msg = self._prepareMsg(addresses, subject, contents, attachments, useCache)
         if previewOnly:
             return addresses, msg.as_string()
@@ -68,6 +70,7 @@ class Connect():
                 import getpass
                 password = getpass.getpass('Password for <{}>: '.format(self.user))
                 answer = ''
+                # Python 2 fix
                 try: 
                     input = raw_input 
                 except NameError: 
@@ -79,7 +82,7 @@ class Connect():
         self.smtp.login(self.user, password)
         self.isClosed = False
 
-    def _resolveAddresses(self, to, cc, bcc):
+    def _resolveAddresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
         addresses = {'recipients': []}
         if to is not None:
             self._makeAddrAliasTarget(to, addresses, 'to')
@@ -91,6 +94,15 @@ class Connect():
             self._makeAddrAliasTarget(cc, addresses, 'cc')
         if bcc is not None:
             self._makeAddrAliasTarget(bcc, addresses, 'bcc')
+        if validate_email:
+            for email_addr in addresses['recipients']:
+                try:
+                    validate_email_with_regex(email_addr)
+                except YagInvalidEmailAddress as e:
+                    if throw_invalid_exception:
+                        raise e
+                    else:
+                        print('Warning: {}'.format(e))
         return addresses
 
     def _prepareMsg(self, addresses, subject, contents, attachments, useCache):
@@ -122,10 +134,10 @@ class Connect():
         # attachments = self._prepareattachments(msg, attachments, useCache)
         return msg
 
-    def _prepareattachments(self, msg, attachments, useCache=False):
+    def _prepareattachments(self, msg, attachments, useCache):
         pass
 
-    def _prepareContents(self, contents, useCache=False):
+    def _prepareContents(self, contents, useCache):
         mimeObjects = []
         hasEmbeddedImage = False
         if contents is not None:
@@ -155,12 +167,14 @@ class Connect():
         if 'bcc' in addresses:
             msg['Bcc'] = addresses['bcc']
 
-    def _findUseruserHome(self):
+    @staticmethod        
+    def _findUseruserHome():
         home = os.path.expanduser("~")
         with open(home + '/.yagmail') as f:
             return f.read().strip()
 
-    def _makeAddrAliasuser(self, x):
+    @staticmethod        
+    def _makeAddrAliasuser(x):
         if isinstance(x, str):
             return (x, x)
         if isinstance(x, dict):
@@ -168,7 +182,8 @@ class Connect():
                 return (list(x.keys())[0], list(x.values())[0])
         raise YagAddressError
 
-    def _makeAddrAliasTarget(self, x, addresses, which):
+    @staticmethod
+    def _makeAddrAliasTarget(x, addresses, which):
         if isinstance(x, str):
             addresses['recipients'].append(x)
             addresses['To'] = x
@@ -185,14 +200,16 @@ class Connect():
             return addresses
         raise YagAddressError
 
-    def _addSubject(self, msg, Subject):
+    @staticmethod        
+    def _addSubject(msg, Subject):
         if not Subject:
             return
         if isinstance(Subject, list):
             Subject = ' '.join(Subject)
         msg['Subject'] = Subject
 
-    def _getMIMEObject(self, contentString):
+    @staticmethod        
+    def _getMIMEObject(contentString):
         contentObject = {'mimeObject': None, 'encoding': None, 'main_type': None, 'sub_type': None} 
         if isinstance(contentString, dict):
             for x in contentString:
@@ -247,6 +264,9 @@ class Connect():
         contentObject['mimeObject'] = mimeObject
         return contentObject
 
+    def feedback(self, message = "Awesome features! You made my day! How can I contribute? Winter is coming."):
+        self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
+        
     def __del__(self):
         self.close()
 

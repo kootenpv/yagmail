@@ -11,7 +11,7 @@ setup(name = 'yagmail',
       license = 'GPL',
       packages = ['yagmail'],
       install_requires = [ 
-          'keyring'
+          'keyring',
       ],
       entry_points = { 
           'console_scripts': ['yagmail = yagmail.yagmail:main'] 
