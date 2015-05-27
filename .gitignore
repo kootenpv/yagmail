@@ -9,3 +9,8 @@ dist/*
 urllist*
 build/
 __pycache__/
+/.Python
+/bin/
+/include/
+/lib/
+/pip-selfcheck.json
