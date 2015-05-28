@@ -11,7 +11,9 @@ In the end, your code will look something like this:
 ```python
 import yagmail
 yag = yagmail.Connect('mygmailusername')
-yag.send('to@someone.com', 'subject', ['This is the body, and look, here is an embedded image:', 'http://somedomain/image.png', 'You can also find an audio file attached', '/local/path/song.mp3'])
+contents = ['This is the body, and here is an embedded image:', 'http://somedomain/image.png',
+            'You can also find an audio file attached.', '/local/path/song.mp3']
+yag.send('to@someone.com', 'subject', contents) 
 ```
 
 Or a simple one-liner (connection will automatically close):
@@ -119,7 +121,11 @@ Note that local/external files can be html (inline), image (inline), everything 
 
 Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension, but for now it will work whenever an extension is present.
 
+### Feedback
 
+I'll try to respond to issues within 24 hours at Github.....
+
+And please send me a line of feedback with `Connect().feedback('Great job!')` :-)
 
 ### Roadmap (and priorities)
 
