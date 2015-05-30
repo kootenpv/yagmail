@@ -154,6 +154,7 @@ And please send me a line of feedback with `Connect().feedback('Great job!')` :-
 - Add documentation to exception classes (low)
 - Logging count & mail capability (very low)
 - Add the local images to the package (lowest)
+- Add option to shrink images
 
 ### Errors
 

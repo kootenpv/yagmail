@@ -1,3 +1,5 @@
+import logging
+import time
 import os
 import keyring
 import smtplib
@@ -14,6 +16,8 @@ from .error import YagInvalidEmailAddress
 
 from .validate import validate_email_with_regex
 
+from .log import getLogger
+
 try:
     import lxml.html
 except ImportError:
@@ -23,19 +27,26 @@ class Connect():
     """ Connection is the class that contains the smtp"""
 
     def __init__(self, user = None, password = None, host = 'smtp.gmail.com', port = '587',
-                 starttls = True, set_debuglevel = 0, **kwargs):
+                 smtp_starttls = True, smtp_set_debuglevel = 0, **kwargs):
         if user is None:
             user = self._findUseruserHome()
         self.user, self.userName = self._makeAddrAliasuser(user)
         self.isClosed = None
         self.host = host
         self.port = port
-        self.starttls = starttls
-        self.debuglevel = set_debuglevel
+        self.starttls = smtp_starttls
+        self.debuglevel = smtp_set_debuglevel
         self.kwargs = kwargs
         self.login(password)
         self.cache = {}
+        self.unsent = [] 
+        self.log = logging.getLogger(__name__)
+        self.log.addHandler(logging.NullHandler())
+        self.log.info('Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
+    def setLogging(self, file_path_name = None, log_level = logging.DEBUG):
+        self.log = getLogger(file_path_name, log_level)
+        
     def send(self, to = None, subject = None, contents = None, attachments = None, cc = None, bcc = None,
              previewOnly=False, useCache=False, validate_email = True, throw_invalid_exception = False):
         """ Use this to send an email with gmail"""
@@ -43,12 +54,31 @@ class Connect():
         msg = self._prepareMsg(addresses, subject, contents, attachments, useCache)
         if previewOnly:
             return addresses, msg.as_string()
-        else:
-            return self.smtp.sendmail(self.user, addresses['recipients'], msg.as_string())
+        return self._attemptSend(addresses['recipients'], msg.as_string())
 
+    def _attemptSend(self, recipients, msgString):
+        attempts = 0
+        while attempts < 3:
+            try:
+                result = self.smtp.sendmail(self.user, recipients, msgString)
+                self.log.info('Message succesfully sent to %s', recipients)
+                return result
+            except smtplib.SMTPServerDisconnected as e:
+                self.log.error(e)
+                attempts += 1
+                time.sleep(attempts * 3)
+        self.unsent.append((recipients, msgString))
+        return False
+
+    def sendUnsent(self):
+        for i in range(len(self.unsent)):
+            recipients, msgString = self.unsent.pop(i)
+            self._attemptSend(recipients, msgString)
+        
     def close(self):
-        self.isClosed = True
+        self.isClosed = True 
         self.smtp.quit()
+        self.log.info('Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
     def login(self, password):
         self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
@@ -267,8 +297,9 @@ class Connect():
     def feedback(self, message = "Awesome features! You made my day! How can I contribute? Winter is coming."):
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
         
-    def __del__(self):
-        self.close()
+    def __del__(self): 
+        self.close() 
+        self.log.info('Deleted SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
 
 def register(username, password):
@@ -286,5 +317,3 @@ def main():
     parser.add_argument('-password', '-p', help='Preferable to use keyring rather than password here') 
     args = parser.parse_args() 
     Connect(args.user, args.password).send(to = args.to, subject = args.subject, contents = args.contents)
-    
-    

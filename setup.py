@@ -1,9 +1,14 @@
 from setuptools import setup
-
+import sh
 # run updater like: python setup.py sdist bdist_wininst upload
 
+MAJOR_VERSION = '0'
+MINOR_VERSION = '3'
+MICRO_VERSION = sh.git('rev-list', ['--all']).count('\n')
+VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
+
 setup(name = 'yagmail',
-      version = "0.3.6",
+      version = VERSION,
       description = 'Yet Another GMAIL client',
       url = 'https://github.com/kootenpv/yagmail',
       author = 'Pascal van Kooten',
