@@ -26,3 +26,4 @@ class YagInvalidEmailAddress(Exception):
     However, it could still very well be that the actual emailaddress has simply 
     not be claimed by anyone (so then this function fails to devalidate).
     """ 
+    pass

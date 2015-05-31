@@ -24,10 +24,12 @@ except ImportError:
     pass 
 
 class Connect():
-    """ Connection is the class that contains the smtp"""
+    """ Connection is the class that contains the SMTP connection and allows messages to be send """
 
     def __init__(self, user = None, password = None, host = 'smtp.gmail.com', port = '587',
                  smtp_starttls = True, smtp_set_debuglevel = 0, **kwargs):
+        self.log = getLogger()
+        self.setLogging()
         if user is None:
             user = self._findUseruserHome()
         self.user, self.userName = self._makeAddrAliasuser(user)
@@ -40,28 +42,43 @@ class Connect():
         self.login(password)
         self.cache = {}
         self.unsent = [] 
-        self.log = logging.getLogger(__name__)
-        self.log.addHandler(logging.NullHandler())
         self.log.info('Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
+        self.num_mail_sent = 0
 
-    def setLogging(self, file_path_name = None, log_level = logging.DEBUG):
-        self.log = getLogger(file_path_name, log_level)
+    def setLogging(self, log_level = logging.ERROR, file_path_name = None):
+        """ 
+        This function allows to change the logging backend, either output or file as backend 
+        It also allows to set the logging level (whether to display only critical, error, info or debug.
+        e.g.
+        yag = yagmail.Connect()
+        yag.setLogging(yagmail.logging.DEBUG)  # to see everything
+
+        and 
+
+        yagmail.setLogging(yagmail.logging.DEBUG, 'somelocalfile.log')
+
+        lastly, a log_level of None will make sure there is no I/O.
+        """
+        self.log = getLogger(log_level, file_path_name)
         
     def send(self, to = None, subject = None, contents = None, attachments = None, cc = None, bcc = None,
              previewOnly=False, useCache=False, validate_email = True, throw_invalid_exception = False):
         """ Use this to send an email with gmail"""
         addresses = self._resolveAddresses(to, cc, bcc, validate_email, throw_invalid_exception)
+        if not addresses['recipients']:
+            return {}
         msg = self._prepareMsg(addresses, subject, contents, attachments, useCache)
         if previewOnly:
             return addresses, msg.as_string()
         return self._attemptSend(addresses['recipients'], msg.as_string())
 
-    def _attemptSend(self, recipients, msgString):
+    def _attemptSend(self, recipients, msgString): 
         attempts = 0
         while attempts < 3:
             try:
                 result = self.smtp.sendmail(self.user, recipients, msgString)
-                self.log.info('Message succesfully sent to %s', recipients)
+                self.log.info('Message sent to %s', recipients)
+                self.num_mail_sent += 1
                 return result
             except smtplib.SMTPServerDisconnected as e:
                 self.log.error(e)
@@ -71,16 +88,25 @@ class Connect():
         return False
 
     def sendUnsent(self):
+        """ 
+        Emails that were not being able to send will be stored in self.unsent. 
+        Use this function to attempt to send these again
+        """
         for i in range(len(self.unsent)):
             recipients, msgString = self.unsent.pop(i)
             self._attemptSend(recipients, msgString)
         
     def close(self):
+        """ Close the connection to the SMTP server """
         self.isClosed = True 
         self.smtp.quit()
         self.log.info('Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
     def login(self, password):
+        """ 
+        Login to the SMTP server using password. 
+        This only needs to be manually run when the connection to the SMTP server was closed by the user.
+        """
         self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
         self.smtp.set_debuglevel(self.debuglevel)
         if self.starttls is not None:
@@ -113,6 +139,7 @@ class Connect():
         self.isClosed = False
 
     def _resolveAddresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
+        """ Handle the targets addresses, adding aliases when defined """
         addresses = {'recipients': []}
         if to is not None:
             self._makeAddrAliasTarget(to, addresses, 'to')
@@ -132,10 +159,12 @@ class Connect():
                     if throw_invalid_exception:
                         raise e
                     else:
-                        print('Warning: {}'.format(e))
+                        self.log.error(e)
+                        addresses['recipients'].remove(email_addr)
         return addresses
 
     def _prepareMsg(self, addresses, subject, contents, attachments, useCache):
+        """ Prepare a MIME message """
         if self.isClosed:
             raise YagConnectionClosed('Login required again')
         hasEmbeddedImage, contentObjects = self._prepareContents(contents, useCache)
@@ -295,9 +324,11 @@ class Connect():
         return contentObject
 
     def feedback(self, message = "Awesome features! You made my day! How can I contribute? Winter is coming."):
+        """ Most important function. Please send me feedback :-) """
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
         
     def __del__(self): 
+        """ When the object leaves scope / gets destroyed, it will neatly cleanup and log it"""
         self.close() 
         self.log.info('Deleted SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
@@ -308,6 +339,7 @@ def register(username, password):
 
 
 def main():
+    """ This is the function that is run from commandline with `yagmail` """ 
     import argparse
     parser = argparse.ArgumentParser(description='Send a (g)mail with yagmail.') 
     parser.add_argument('-to', '-t', help='Send an email to address "TO"', nargs='+') 

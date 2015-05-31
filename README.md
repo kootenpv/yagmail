@@ -130,7 +130,6 @@ And please send me a line of feedback with `Connect().feedback('Great job!')` :-
 ### Roadmap (and priorities)
 
 - ~~Added possibility of Image~~ 
-- ~~Attachment counter~~
 - ~~Optional SMTP arguments should go with \**kwargs to my Connect~~
 - ~~CC/BCC (high)~~
 - ~~Custom names (high)~~
@@ -148,13 +147,13 @@ And please send me a line of feedback with `Connect().feedback('Great job!')` :-
 - ~~`yagmail` as a command on CLI upon install~~
 - ~~Added `feedback` function on Connect to be able to send me feedback directly :-)~~
 - ~~Added the option to validate emailaddresses...~~
-- however, I'm unhappy with the error handling/loggin of wrong emails
-- Allow `.yagmail` file to contain more parameters
-- Go over documentation again (low)
-- Add documentation to exception classes (low)
-- Logging count & mail capability (very low)
-- Add the local images to the package (lowest)
-- Add option to shrink images
+- ~~however, I'm unhappy with the error handling/loggin of wrong emails~~
+- ~~Logging count & mail capability (very low)~~
+- ~~Add documentation to exception classes (low)~~
+- Add documentation to all functions (high, halfway)
+- Allow `.yagmail` file to contain more parameters (medium)
+- Go over documentation again (medium)
+- Add option to shrink images (low)
 
 ### Errors
 
