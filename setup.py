@@ -3,7 +3,7 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '3'
-MICRO_VERSION = '71'
+MICRO_VERSION = '72'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name = 'yagmail',

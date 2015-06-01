@@ -55,13 +55,15 @@ In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusern
 
 When no password is given and the user is not found in the keyring, `getpass.getpass()` is used to prompt the user for a password. Upon entering this once, it will be stored in the keyring and never asked again.
 
+Another convenience can be to save a .yagmail file in your home folder, containing just the email username. You can then omit everything, and simply use `yagmail.Connect()` to connect. Of course, this wouldn't work with more accounts, but it might be a nice default. Upon request I'll consider adding more details to this .yagmail file (host, port and other settings).
+
 ### Start a connection
 
 ```python
 yag = yagmail.Connect('mygmailusername')
 ```
 
-Note that this connection is reusable, closable and when it leaves scope it will auto-destroy.
+Note that this connection is reusable, closable and when it leaves scope it will clean it self up (close).
 
 ### Usability 
 
@@ -115,7 +117,7 @@ Furthermore, the `contents` argument will be smartly guessed. It can be passed a
 - if impossible, it will check if the string is valid html
   e.g. `<h1>This is a big title</h1>`
 - if not, it must be text.
-  e.g. 'Hi John!'
+  e.g. 'Hi Dorika!'
 
 Note that local/external files can be html (inline), image (inline), everything else will be attached (if required, I can update to make it decidable by the user).  
 
