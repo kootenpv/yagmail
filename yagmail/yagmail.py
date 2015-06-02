@@ -16,7 +16,7 @@ from .error import YagInvalidEmailAddress
 
 from .validate import validate_email_with_regex
 
-from .log import getLogger
+from .log import get_logger
 
 try:
     import lxml.html
@@ -28,12 +28,12 @@ class Connect():
 
     def __init__(self, user = None, password = None, host = 'smtp.gmail.com', port = '587',
                  smtp_starttls = True, smtp_set_debuglevel = 0, **kwargs):
-        self.log = getLogger()
+        self.log = get_logger()
         self.set_logging()
         if user is None:
             user = self._find_user_home_path()
-        self.user, self.userName = self._make_addr_alias_user(user)
-        self.isClosed = None
+        self.user, self.username = self._make_addr_alias_user(user)
+        self.is_closed = None
         self.host = host
         self.port = port
         self.starttls = smtp_starttls
@@ -59,24 +59,24 @@ class Connect():
 
         lastly, a log_level of None will make sure there is no I/O.
         """
-        self.log = getLogger(log_level, file_path_name)
+        self.log = get_logger(log_level, file_path_name)
         
     def send(self, to = None, subject = None, contents = None, attachments = None, cc = None, bcc = None,
-             previewOnly=False, useCache=False, validate_email = True, throw_invalid_exception = False):
+             preview_only=False, use_cache=False, validate_email = True, throw_invalid_exception = False):
         """ Use this to send an email with gmail"""
         addresses = self._resolveAddresses(to, cc, bcc, validate_email, throw_invalid_exception)
         if not addresses['recipients']:
             return {}
-        msg = self._prepare_message(addresses, subject, contents, attachments, useCache)
-        if previewOnly:
+        msg = self._prepare_message(addresses, subject, contents, attachments, use_cache)
+        if preview_only:
             return addresses, msg.as_string()
         return self._attempt_send(addresses['recipients'], msg.as_string())
 
-    def _attempt_send(self, recipients, msgString): 
+    def _attempt_send(self, recipients, msg_string): 
         attempts = 0
         while attempts < 3:
             try:
-                result = self.smtp.sendmail(self.user, recipients, msgString)
+                result = self.smtp.sendmail(self.user, recipients, msg_string)
                 self.log.info('Message sent to %s', recipients)
                 self.num_mail_sent += 1
                 return result
@@ -84,7 +84,7 @@ class Connect():
                 self.log.error(e)
                 attempts += 1
                 time.sleep(attempts * 3)
-        self.unsent.append((recipients, msgString))
+        self.unsent.append((recipients, msg_string))
         return False
 
     def send_unsent(self):
@@ -93,12 +93,12 @@ class Connect():
         Use this function to attempt to send these again
         """
         for i in range(len(self.unsent)):
-            recipients, msgString = self.unsent.pop(i)
-            self._attempt_send(recipients, msgString)
+            recipients, msg_string = self.unsent.pop(i)
+            self._attempt_send(recipients, msg_string)
         
     def close(self):
         """ Close the connection to the SMTP server """
-        self.isClosed = True 
+        self.is_closed = True 
         self.smtp.quit()
         self.log.info('Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
@@ -136,7 +136,7 @@ class Connect():
                 if answer == 'y':    
                     register(self.user, password)    
         self.smtp.login(self.user, password)
-        self.isClosed = False
+        self.is_closed = False
 
     def _resolveAddresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
         """ Handle the targets addresses, adding aliases when defined """
@@ -144,7 +144,7 @@ class Connect():
         if to is not None:
             self._make_addr_alias_target(to, addresses, 'to')
         elif cc is not None and bcc is not None:
-            self._make_addr_alias_target([self.user, self.userName], addresses, 'to')
+            self._make_addr_alias_target([self.user, self.username], addresses, 'to')
         else:
             addresses['recipients'].append(self.user)
         if cc is not None:
@@ -163,64 +163,64 @@ class Connect():
                         addresses['recipients'].remove(email_addr)
         return addresses
 
-    def _prepare_message(self, addresses, subject, contents, attachments, useCache):
+    def _prepare_message(self, addresses, subject, contents, attachments, use_cache):
         """ Prepare a MIME message """
-        if self.isClosed:
+        if self.is_closed:
             raise YagConnectionClosed('Login required again')
-        hasEmbeddedImage, contentObjects = self._prepare_contents(contents, useCache)
+        has_embedded_images, content_objects = self._prepare_contents(contents, use_cache)
         msg = MIMEMultipart()
-        msgAlternative = MIMEMultipart('alternative')
-        msg.attach(msgAlternative)
+        msg_alternative = MIMEMultipart('alternative')
+        msg.attach(msg_alternative)
         self._add_subject(msg, subject)
         self._add_recipients(msg, addresses)
-        if hasEmbeddedImage:
+        if has_embedded_images:
             msg.preamble = "You need a MIME enabled mail reader to see this message."
         if contents is not None:    
-            for contentObject, contentString in zip(contentObjects, contents):
-                if contentObject['main_type'] == 'image':
-                    if isinstance(contentString, dict):
-                        for x in contentString:
-                            hashed_ref = contentString[x]
+            for content_object, content_string in zip(content_objects, contents):
+                if content_object['main_type'] == 'image':
+                    if isinstance(content_string, dict):
+                        for x in content_string:
+                            hashed_ref = content_string[x]
                     else:
-                        hashed_ref = str(abs(hash(os.path.basename(contentString))))
-                    msgImgText = MIMEText('<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref), 'html')
-                    contentObject['mimeObject'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
-                    msgAlternative.attach(msgImgText) 
-                    email.encoders.encode_base64(contentObject['mimeObject']) 
-                msg.attach(contentObject['mimeObject'])
+                        hashed_ref = str(abs(hash(os.path.basename(content_string))))
+                    msg_img_text = MIMEText('<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref), 'html')
+                    content_object['mime_object'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
+                    msg_alternative.attach(msg_img_text) 
+                    email.encoders.encode_base64(content_object['mime_object']) 
+                msg.attach(content_object['mime_object'])
         if attachments or attachments is None:
             pass
-        # attachments = self._prepare_attachments(msg, attachments, useCache)
+        # attachments = self._prepare_attachments(msg, attachments, use_cache)
         return msg
 
-    def _prepare_attachments(self, msg, attachments, useCache):
+    def _prepare_attachments(self, msg, attachments, use_cache):
         pass
 
-    def _prepare_contents(self, contents, useCache):
-        mimeObjects = []
-        hasEmbeddedImage = False
+    def _prepare_contents(self, contents, use_cache):
+        mime_objects = []
+        has_embedded_images = False
         if contents is not None:
             if isinstance(contents, str):
                 contents = [contents]
             for content in contents:
-                if useCache: 
+                if use_cache: 
                     if content not in self.cache:
-                        contentObject = self._get_mime_object(content)
-                        self.cache[content] = contentObject
-                    contentObject = self.cache[content]
+                        content_object = self._get_mime_object(content)
+                        self.cache[content] = content_object
+                    content_object = self.cache[content]
                 else:
-                    contentObject = self._get_mime_object(content)
-                if contentObject['main_type'] == 'image': 
-                    hasEmbeddedImage = True
-                mimeObjects.append(contentObject)
-        return hasEmbeddedImage, mimeObjects
+                    content_object = self._get_mime_object(content)
+                if content_object['main_type'] == 'image': 
+                    has_embedded_images = True
+                mime_objects.append(content_object)
+        return has_embedded_images, mime_objects
 
     def _add_recipients(self, msg, addresses):
-        msg['user'] = self.userName
+        msg['user'] = self.username
         if 'To' in addresses:
             msg['To'] = addresses['To']
         else:
-            msg['To'] = self.userName
+            msg['To'] = self.username
         if 'cc' in addresses:
             msg['Cc'] = addresses['cc']
         if 'bcc' in addresses:
@@ -268,60 +268,60 @@ class Connect():
         msg['Subject'] = Subject
 
     @staticmethod        
-    def _get_mime_object(contentString):
-        contentObject = {'mimeObject': None, 'encoding': None, 'main_type': None, 'sub_type': None} 
-        if isinstance(contentString, dict):
-            for x in contentString:
-                contentString, contentName = x, contentString[x]
+    def _get_mime_object(content_string):
+        content_object = {'mime_object': None, 'encoding': None, 'main_type': None, 'sub_type': None} 
+        if isinstance(content_string, dict):
+            for x in content_string:
+                content_string, content_name = x, content_string[x]
         else:
-            contentName = os.path.basename(contentString)        
-        if os.path.isfile(contentString):
+            content_name = os.path.basename(content_string)        
+        if os.path.isfile(content_string):
             try:
-                with open(contentString) as f:
+                with open(content_string) as f:
                     content = f.read()
             except UnicodeDecodeError:
-                with open(contentString, 'rb') as f:
+                with open(content_string, 'rb') as f:
                     content = f.read()
         else:
             try:
-                r = requests.get(contentString)
+                r = requests.get(content_string)
                 # pylint: disable=protected-access
                 # Used to obtain the raw content of requests object
                 content = r._content
                 if 'content-type' in r.headers:
                     main_type, sub_type = r.headers['content-type'].split('/')
-                    contentObject['main_type'] = main_type
-                    contentObject['sub_type'] = sub_type
+                    content_object['main_type'] = main_type
+                    content_object['sub_type'] = sub_type
             except (IOError, ValueError, requests.exceptions.MissingSchema):
-                contentObject['main_type'] = 'text'
+                content_object['main_type'] = 'text'
                 try:
-                    html_tree = lxml.html.fromstring(contentString)
+                    html_tree = lxml.html.fromstring(content_string)
                     if html_tree.find('.//*') is not None or html_tree.tag != 'p':
-                        contentObject['mimeObject'] = MIMEText(contentString, 'html')
-                        contentObject['sub_type'] = 'html'
+                        content_object['mime_object'] = MIMEText(content_string, 'html')
+                        content_object['sub_type'] = 'html'
                     else:
-                        contentObject['mimeObject'] = MIMEText(contentString)
+                        content_object['mime_object'] = MIMEText(content_string)
                 except NameError: 
-                    contentObject['mimeObject'] = MIMEText(contentString) 
-                if contentObject['sub_type'] is None:
-                    contentObject['sub_type'] = 'plain'
-                return contentObject
+                    content_object['mime_object'] = MIMEText(content_string) 
+                if content_object['sub_type'] is None:
+                    content_object['sub_type'] = 'plain'
+                return content_object
 
-        if contentObject['main_type'] is None:
-            content_type, content_encoding = mimetypes.guess_type(contentString)
-            contentObject['encoding'] = content_encoding
+        if content_object['main_type'] is None:
+            content_type, content_encoding = mimetypes.guess_type(content_string)
+            content_object['encoding'] = content_encoding
 
             if content_type is not None:
-                contentObject['main_type'], contentObject['sub_type'] = content_type.split('/')
+                content_object['main_type'], content_object['sub_type'] = content_type.split('/')
 
-        if contentObject['main_type'] is None or contentObject['encoding'] is not None:
-            contentObject['main_type'] = 'application'
-            contentObject['sub_type'] = 'octet-stream'
+        if content_object['main_type'] is None or content_object['encoding'] is not None:
+            content_object['main_type'] = 'application'
+            content_object['sub_type'] = 'octet-stream'
 
-        mimeObject = MIMEBase(contentObject['main_type'], contentObject['sub_type'], name = contentName)
-        mimeObject.set_payload(content) 
-        contentObject['mimeObject'] = mimeObject
-        return contentObject
+        mime_object = MIMEBase(content_object['main_type'], content_object['sub_type'], name = content_name)
+        mime_object.set_payload(content) 
+        content_object['mime_object'] = mime_object
+        return content_object
 
     def feedback(self, message = "Awesome features! You made my day! How can I contribute? Winter is coming."):
         """ Most important function. Please send me feedback :-) """

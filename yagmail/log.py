@@ -14,7 +14,7 @@ yag.log = myOwnLogger
 
 import logging
 
-def getLogger(log_level = logging.DEBUG, file_path_name = None):
+def get_logger(log_level = logging.DEBUG, file_path_name = None):
 
     # create logger
     logger = logging.getLogger(__name__)
