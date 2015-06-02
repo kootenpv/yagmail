@@ -29,10 +29,10 @@ class Connect():
     def __init__(self, user = None, password = None, host = 'smtp.gmail.com', port = '587',
                  smtp_starttls = True, smtp_set_debuglevel = 0, **kwargs):
         self.log = getLogger()
-        self.setLogging()
+        self.set_logging()
         if user is None:
-            user = self._findUseruserHome()
-        self.user, self.userName = self._makeAddrAliasuser(user)
+            user = self._find_user_home_path()
+        self.user, self.userName = self._make_addr_alias_user(user)
         self.isClosed = None
         self.host = host
         self.port = port
@@ -45,7 +45,7 @@ class Connect():
         self.log.info('Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
         self.num_mail_sent = 0
 
-    def setLogging(self, log_level = logging.ERROR, file_path_name = None):
+    def set_logging(self, log_level = logging.ERROR, file_path_name = None):
         """ 
         This function allows to change the logging backend, either output or file as backend 
         It also allows to set the logging level (whether to display only critical, error, info or debug.
@@ -67,12 +67,12 @@ class Connect():
         addresses = self._resolveAddresses(to, cc, bcc, validate_email, throw_invalid_exception)
         if not addresses['recipients']:
             return {}
-        msg = self._prepareMsg(addresses, subject, contents, attachments, useCache)
+        msg = self._prepare_message(addresses, subject, contents, attachments, useCache)
         if previewOnly:
             return addresses, msg.as_string()
-        return self._attemptSend(addresses['recipients'], msg.as_string())
+        return self._attempt_send(addresses['recipients'], msg.as_string())
 
-    def _attemptSend(self, recipients, msgString): 
+    def _attempt_send(self, recipients, msgString): 
         attempts = 0
         while attempts < 3:
             try:
@@ -87,14 +87,14 @@ class Connect():
         self.unsent.append((recipients, msgString))
         return False
 
-    def sendUnsent(self):
+    def send_unsent(self):
         """ 
         Emails that were not being able to send will be stored in self.unsent. 
         Use this function to attempt to send these again
         """
         for i in range(len(self.unsent)):
             recipients, msgString = self.unsent.pop(i)
-            self._attemptSend(recipients, msgString)
+            self._attempt_send(recipients, msgString)
         
     def close(self):
         """ Close the connection to the SMTP server """
@@ -142,15 +142,15 @@ class Connect():
         """ Handle the targets addresses, adding aliases when defined """
         addresses = {'recipients': []}
         if to is not None:
-            self._makeAddrAliasTarget(to, addresses, 'to')
+            self._make_addr_alias_target(to, addresses, 'to')
         elif cc is not None and bcc is not None:
-            self._makeAddrAliasTarget([self.user, self.userName], addresses, 'to')
+            self._make_addr_alias_target([self.user, self.userName], addresses, 'to')
         else:
             addresses['recipients'].append(self.user)
         if cc is not None:
-            self._makeAddrAliasTarget(cc, addresses, 'cc')
+            self._make_addr_alias_target(cc, addresses, 'cc')
         if bcc is not None:
-            self._makeAddrAliasTarget(bcc, addresses, 'bcc')
+            self._make_addr_alias_target(bcc, addresses, 'bcc')
         if validate_email:
             for email_addr in addresses['recipients']:
                 try:
@@ -163,16 +163,16 @@ class Connect():
                         addresses['recipients'].remove(email_addr)
         return addresses
 
-    def _prepareMsg(self, addresses, subject, contents, attachments, useCache):
+    def _prepare_message(self, addresses, subject, contents, attachments, useCache):
         """ Prepare a MIME message """
         if self.isClosed:
             raise YagConnectionClosed('Login required again')
-        hasEmbeddedImage, contentObjects = self._prepareContents(contents, useCache)
+        hasEmbeddedImage, contentObjects = self._prepare_contents(contents, useCache)
         msg = MIMEMultipart()
         msgAlternative = MIMEMultipart('alternative')
         msg.attach(msgAlternative)
-        self._addSubject(msg, subject)
-        self._addRecipients(msg, addresses)
+        self._add_subject(msg, subject)
+        self._add_recipients(msg, addresses)
         if hasEmbeddedImage:
             msg.preamble = "You need a MIME enabled mail reader to see this message."
         if contents is not None:    
@@ -190,13 +190,13 @@ class Connect():
                 msg.attach(contentObject['mimeObject'])
         if attachments or attachments is None:
             pass
-        # attachments = self._prepareattachments(msg, attachments, useCache)
+        # attachments = self._prepare_attachments(msg, attachments, useCache)
         return msg
 
-    def _prepareattachments(self, msg, attachments, useCache):
+    def _prepare_attachments(self, msg, attachments, useCache):
         pass
 
-    def _prepareContents(self, contents, useCache):
+    def _prepare_contents(self, contents, useCache):
         mimeObjects = []
         hasEmbeddedImage = False
         if contents is not None:
@@ -205,17 +205,17 @@ class Connect():
             for content in contents:
                 if useCache: 
                     if content not in self.cache:
-                        contentObject = self._getMIMEObject(content)
+                        contentObject = self._get_mime_object(content)
                         self.cache[content] = contentObject
                     contentObject = self.cache[content]
                 else:
-                    contentObject = self._getMIMEObject(content)
+                    contentObject = self._get_mime_object(content)
                 if contentObject['main_type'] == 'image': 
                     hasEmbeddedImage = True
                 mimeObjects.append(contentObject)
         return hasEmbeddedImage, mimeObjects
 
-    def _addRecipients(self, msg, addresses):
+    def _add_recipients(self, msg, addresses):
         msg['user'] = self.userName
         if 'To' in addresses:
             msg['To'] = addresses['To']
@@ -227,13 +227,13 @@ class Connect():
             msg['Bcc'] = addresses['bcc']
 
     @staticmethod        
-    def _findUseruserHome():
+    def _find_user_home_path():
         home = os.path.expanduser("~")
         with open(home + '/.yagmail') as f:
             return f.read().strip()
 
     @staticmethod        
-    def _makeAddrAliasuser(x):
+    def _make_addr_alias_user(x):
         if isinstance(x, str):
             return (x, x)
         if isinstance(x, dict):
@@ -242,7 +242,7 @@ class Connect():
         raise YagAddressError
 
     @staticmethod
-    def _makeAddrAliasTarget(x, addresses, which):
+    def _make_addr_alias_target(x, addresses, which):
         if isinstance(x, str):
             addresses['recipients'].append(x)
             addresses['To'] = x
@@ -260,7 +260,7 @@ class Connect():
         raise YagAddressError
 
     @staticmethod        
-    def _addSubject(msg, Subject):
+    def _add_subject(msg, Subject):
         if not Subject:
             return
         if isinstance(Subject, list):
@@ -268,7 +268,7 @@ class Connect():
         msg['Subject'] = Subject
 
     @staticmethod        
-    def _getMIMEObject(contentString):
+    def _get_mime_object(contentString):
         contentObject = {'mimeObject': None, 'encoding': None, 'main_type': None, 'sub_type': None} 
         if isinstance(contentString, dict):
             for x in contentString:
