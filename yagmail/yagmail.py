@@ -142,15 +142,15 @@ class Connect():
         """ Handle the targets addresses, adding aliases when defined """
         addresses = {'recipients': []}
         if to is not None:
-            self._make_addr_alias_target(to, addresses, 'to')
+            self._make_addr_alias_target(to, addresses, 'To')
         elif cc is not None and bcc is not None:
-            self._make_addr_alias_target([self.user, self.username], addresses, 'to')
+            self._make_addr_alias_target([self.user, self.username], addresses, 'To')
         else:
             addresses['recipients'].append(self.user)
         if cc is not None:
-            self._make_addr_alias_target(cc, addresses, 'cc')
+            self._make_addr_alias_target(cc, addresses, 'Cc')
         if bcc is not None:
-            self._make_addr_alias_target(bcc, addresses, 'bcc')
+            self._make_addr_alias_target(bcc, addresses, 'Bcc')
         if validate_email:
             for email_addr in addresses['recipients']:
                 try:
@@ -221,10 +221,10 @@ class Connect():
             msg['To'] = addresses['To']
         else:
             msg['To'] = self.username
-        if 'cc' in addresses:
-            msg['Cc'] = addresses['cc']
-        if 'bcc' in addresses:
-            msg['Bcc'] = addresses['bcc']
+        if 'Cc' in addresses:
+            msg['Cc'] = addresses['Cc']
+        if 'Bcc' in addresses:
+            msg['Bcc'] = addresses['Bcc']
 
     @staticmethod        
     def _find_user_home_path():
