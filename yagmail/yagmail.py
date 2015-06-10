@@ -32,7 +32,7 @@ class Connect():
         self.set_logging()
         if user is None:
             user = self._find_user_home_path()
-        self.user, self.username = self._make_addr_alias_user(user)
+        self.user, self.useralias = self._make_addr_alias_user(user)
         self.is_closed = None
         self.host = host
         self.port = port
@@ -144,7 +144,7 @@ class Connect():
         if to is not None:
             self._make_addr_alias_target(to, addresses, 'To')
         elif cc is not None and bcc is not None:
-            self._make_addr_alias_target([self.user, self.username], addresses, 'To')
+            self._make_addr_alias_target([self.user, self.useralias], addresses, 'To')
         else:
             addresses['recipients'].append(self.user)
         if cc is not None:
@@ -216,11 +216,11 @@ class Connect():
         return has_embedded_images, mime_objects
 
     def _add_recipients(self, msg, addresses):
-        msg['user'] = self.username
+        msg['From'] = '{} <{}>'.format(self.useralias, self.user)
         if 'To' in addresses:
             msg['To'] = addresses['To']
         else:
-            msg['To'] = self.username
+            msg['To'] = self.useralias
         if 'Cc' in addresses:
             msg['Cc'] = addresses['Cc']
         if 'Bcc' in addresses:
