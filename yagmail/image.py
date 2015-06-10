@@ -1,3 +1,5 @@
+""" Unused so far"""
+
 class InlineIMG():
     def __init__(self, path):
         self.path = path
@@ -30,6 +32,5 @@ class InlineIMG():
         return '<img src="cid:{}" title="{}"/>'.format(self.id, self.name) 
 
     def makeMIME(self): 
-        mime_object = ....
         mime_object.add_header('Content-ID', '<{}>'.format(self.id)) 
         email.encoders.encode_base64(content_object['mime_object'])
