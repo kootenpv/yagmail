@@ -27,8 +27,12 @@
 
 import re
 
-from .error import YagInvalidEmailAddress
-
+try:
+    from .error import YagInvalidEmailAddress
+except (ValueError, SystemError):
+    # stupid fix to make it easy to load interactively
+    from error import YagInvalidEmailAddress
+    
 # All we are really doing is comparing the input string to one
 # gigantic regular expression.  But building that regexp, and
 # ensuring its correctness, is made much easier by assembling it

@@ -10,13 +10,20 @@ import email.encoders
 import mimetypes
 import requests
 
-from .error import YagConnectionClosed
-from .error import YagAddressError
-from .error import YagInvalidEmailAddress
-
-from .validate import validate_email_with_regex
-
-from .log import get_logger
+try:
+    from .error import YagConnectionClosed
+    from .error import YagAddressError
+    from .error import YagInvalidEmailAddress
+    from .validate import validate_email_with_regex
+    from .log import get_logger
+except (ValueError, SystemError):
+    # stupid fix to make it easy to load interactively
+    from error import YagConnectionClosed
+    from error import YagAddressError
+    from error import YagInvalidEmailAddress
+    from validate import validate_email_with_regex
+    from log import get_logger
+    
 
 try:
     import lxml.html
@@ -186,7 +193,10 @@ class Connect():
                     msg_img_text = MIMEText('<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref), 'html')
                     content_object['mime_object'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
                     msg_alternative.attach(msg_img_text) 
-                    email.encoders.encode_base64(content_object['mime_object']) 
+
+                if content_object['encoding'] == 'base64': 
+                    email.encoders.encode_base64(content_object['mime_object'])    
+                    
                 msg.attach(content_object['mime_object'])
         if attachments or attachments is None:
             pass
@@ -280,7 +290,9 @@ class Connect():
                 with open(content_string) as f:
                     content = f.read()
             except UnicodeDecodeError:
-                with open(content_string, 'rb') as f:
+                with open(content_string, 'rb') as f: 
+                    content_object['encoding'] = 'base64'
+                    print('b64')
                     content = f.read()
         else:
             try:
@@ -308,8 +320,7 @@ class Connect():
                 return content_object
 
         if content_object['main_type'] is None:
-            content_type, content_encoding = mimetypes.guess_type(content_string)
-            content_object['encoding'] = content_encoding
+            content_type, content_encoding = mimetypes.guess_type(content_string) 
 
             if content_type is not None:
                 content_object['main_type'], content_object['sub_type'] = content_type.split('/')
