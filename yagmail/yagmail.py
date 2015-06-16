@@ -8,7 +8,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import email.encoders
 import mimetypes
-import requests
 
 try:
     from .error import YagConnectionClosed
@@ -124,22 +123,19 @@ class Connect():
                 self.smtp.starttls(**self.starttls)
             self.smtp.ehlo()
         if password is None:
-            password = keyring.get_password('yagmail', self.user)
-            if '@' not in self.user:
-                self.user += '@gmail.com'
+            password = keyring.get_password('yagmail', self.user) 
             if password is None:
                 password = keyring.get_password('yagmail', self.user)
             if password is None:
                 import getpass
                 password = getpass.getpass('Password for <{}>: '.format(self.user))
                 answer = ''
-                # Python 2 fix
-                try: 
-                    input = raw_input 
-                except NameError: 
-                    pass
+                # Python 2 fix 
                 while answer != 'y' and answer != 'n':
-                    answer = input('Save username and password in keyring? [y/n]: ').strip()
+                    try: 
+                        answer = raw_input('Save username and password in keyring? [y/n]: ').strip()
+                    except NameError: 
+                        answer = input('Save username and password in keyring? [y/n]: ').strip()
                 if answer == 'y':    
                     register(self.user, password)    
         self.smtp.login(self.user, password)
@@ -177,9 +173,11 @@ class Connect():
         has_embedded_images, content_objects = self._prepare_contents(contents, use_cache)
         msg = MIMEMultipart()
         msg_alternative = MIMEMultipart('alternative')
+        msg_relative = MIMEMultipart('related')
         msg.attach(msg_alternative)
         self._add_subject(msg, subject)
         self._add_recipients(msg, addresses)
+        htmlstr = ''
         if has_embedded_images:
             msg.preamble = "You need a MIME enabled mail reader to see this message."
         if contents is not None:    
@@ -190,14 +188,19 @@ class Connect():
                             hashed_ref = content_string[x]
                     else:
                         hashed_ref = str(abs(hash(os.path.basename(content_string))))
-                    msg_img_text = MIMEText('<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref), 'html')
+                    htmlstr+='<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref)
                     content_object['mime_object'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
+                    msg_img_text = MIMEText('<div style="display:none"> img {} should be here </div>'.format(hashed_ref), 'html')
                     msg_alternative.attach(msg_img_text) 
 
                 if content_object['encoding'] == 'base64': 
                     email.encoders.encode_base64(content_object['mime_object'])    
-                    
-                msg.attach(content_object['mime_object'])
+                    msg.attach(content_object['mime_object'])
+                else: 
+                    htmlstr += '<div>{}</div>'.format(content_string)
+                
+        msg_alternative.attach(MIMEText(htmlstr, 'html'))        
+        msg.attach(msg_relative)
         if attachments or attachments is None:
             pass
         # attachments = self._prepare_attachments(msg, attachments, use_cache)
@@ -243,8 +246,10 @@ class Connect():
             return f.read().strip()
 
     @staticmethod        
-    def _make_addr_alias_user(x):
+    def _make_addr_alias_user(x): 
         if isinstance(x, str):
+            if '@' not in x:
+                x += '@gmail.com'
             return (x, x)
         if isinstance(x, dict):
             if len(x) == 1:
@@ -292,42 +297,32 @@ class Connect():
             except UnicodeDecodeError:
                 with open(content_string, 'rb') as f: 
                     content_object['encoding'] = 'base64'
-                    print('b64')
                     content = f.read()
         else:
+            content_object['main_type'] = 'text'
             try:
-                r = requests.get(content_string)
-                # pylint: disable=protected-access
-                # Used to obtain the raw content of requests object
-                content = r._content
-                if 'content-type' in r.headers:
-                    main_type, sub_type = r.headers['content-type'].split('/')
-                    content_object['main_type'] = main_type
-                    content_object['sub_type'] = sub_type
-            except (IOError, ValueError, requests.exceptions.MissingSchema):
-                content_object['main_type'] = 'text'
-                try:
-                    html_tree = lxml.html.fromstring(content_string)
-                    if html_tree.find('.//*') is not None or html_tree.tag != 'p':
-                        content_object['mime_object'] = MIMEText(content_string, 'html')
-                        content_object['sub_type'] = 'html'
-                    else:
-                        content_object['mime_object'] = MIMEText(content_string)
-                except NameError: 
-                    content_object['mime_object'] = MIMEText(content_string) 
-                if content_object['sub_type'] is None:
-                    content_object['sub_type'] = 'plain'
-                return content_object
+                html_tree = lxml.html.fromstring(content_string)
+                if html_tree.find('.//*') is not None or html_tree.tag != 'p':
+                    content_object['mime_object'] = MIMEText(content_string, 'html')
+                    content_object['sub_type'] = 'html'
+                else:
+                    content_object['mime_object'] = MIMEText(content_string)
+            except NameError: 
+                content_object['mime_object'] = MIMEText(content_string) 
+            if content_object['sub_type'] is None:
+                content_object['sub_type'] = 'plain'
+            return content_object
 
         if content_object['main_type'] is None:
-            content_type, content_encoding = mimetypes.guess_type(content_string) 
-
+            content_type, _ = mimetypes.guess_type(content_string) 
+            
             if content_type is not None:
                 content_object['main_type'], content_object['sub_type'] = content_type.split('/')
 
         if content_object['main_type'] is None or content_object['encoding'] is not None:
-            content_object['main_type'] = 'application'
-            content_object['sub_type'] = 'octet-stream'
+            if content_object['encoding'] != 'base64':
+                content_object['main_type'] = 'application'
+                content_object['sub_type'] = 'octet-stream'
 
         mime_object = MIMEBase(content_object['main_type'], content_object['sub_type'], name = content_name)
         mime_object.set_payload(content) 
