@@ -291,13 +291,9 @@ class Connect():
         else:
             content_name = os.path.basename(content_string)        
         if os.path.isfile(content_string):
-            try:
-                with open(content_string) as f:
-                    content = f.read()
-            except UnicodeDecodeError:
-                with open(content_string, 'rb') as f: 
-                    content_object['encoding'] = 'base64'
-                    content = f.read()
+            with open(content_string, 'rb') as f:
+                content_object['encoding'] = 'base64'
+                content = f.read()
         else:
             content_object['main_type'] = 'text'
             try:
