@@ -23,11 +23,17 @@ except (ValueError, SystemError):
     from validate import validate_email_with_regex
     from log import get_logger
     
-
 try:
     import lxml.html
 except ImportError:
     pass 
+
+class Connect():
+    # pylint: disable=unused-argument
+    def __init__(self, *args):
+        self.deprecatedMessage = 'DeprecationWarning: Connect is now deprecated. Please use "yagmail.SMTP" instead of "yagmail.Connect". It is just a name change. For recent info check out the repo at https://github.com/kootenpv/yagmail'
+        raise DeprecationWarning(self.deprecatedMessage)
+        
 
 class SMTP():
     """ Connection is the class that contains the SMTP connection and allows messages to be send """

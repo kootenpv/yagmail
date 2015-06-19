@@ -2,8 +2,8 @@ from setuptools import setup
 # run updater like: python setup.py sdist bdist_wininst upload
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '3'
-MICRO_VERSION = '81'
+MINOR_VERSION = '4'
+MICRO_VERSION = '82'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name = 'yagmail',

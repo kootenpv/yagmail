@@ -36,6 +36,7 @@ For Python 2.x and Python 3.x respectively:
 ```python
 pip install yagmail
 pip3 install yagmail
+
 ```
 
 As a side note, `yagmail` can now also be used to send emails from the command line.
@@ -153,8 +154,9 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
 - Add documentation to all functions (high, halfway)
-- Allow `.yagmail` file to contain more parameters (medium)
 - Go over documentation again (medium)
+- Get documentation on Sphinx
+- Allow `.yagmail` file to contain more parameters (medium)
 - Add option to shrink images (low)
 
 ### Errors
