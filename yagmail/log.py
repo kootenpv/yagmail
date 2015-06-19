@@ -1,14 +1,14 @@
 """
-The logging options for yagmail. Note that the logger is set on the Connect class.
+The logging options for yagmail. Note that the logger is set on the SMTP class.
 
 The default is to only log errors. If wanted, it is possible to do logging with:
 
-yag = Connect()
+yag = SMTP()
 yag.setLog(log_level = logging.DEBUG)
 
-Furthermore, after creating a Connect object, it is possible to overwrite and use your own logger by:
+Furthermore, after creating a SMTP object, it is possible to overwrite and use your own logger by:
 
-yag = Connect()
+yag = SMTP()
 yag.log = myOwnLogger
 """
 

@@ -29,7 +29,7 @@ try:
 except ImportError:
     pass 
 
-class Connect():
+class SMTP():
     """ Connection is the class that contains the SMTP connection and allows messages to be send """
 
     def __init__(self, user = None, password = None, host = 'smtp.gmail.com', port = '587',
@@ -56,7 +56,7 @@ class Connect():
         This function allows to change the logging backend, either output or file as backend 
         It also allows to set the logging level (whether to display only critical, error, info or debug.
         e.g.
-        yag = yagmail.Connect()
+        yag = yagmail.SMTP()
         yag.setLogging(yagmail.logging.DEBUG)  # to see everything
 
         and 
@@ -170,37 +170,43 @@ class Connect():
         """ Prepare a MIME message """
         if self.is_closed:
             raise YagConnectionClosed('Login required again')
+        if isinstance(contents, str):
+            contents = [contents]
         has_embedded_images, content_objects = self._prepare_contents(contents, use_cache)
         msg = MIMEMultipart()
         msg_alternative = MIMEMultipart('alternative')
-        msg_relative = MIMEMultipart('related')
+        msg_related = MIMEMultipart('related')
         msg.attach(msg_alternative)
         self._add_subject(msg, subject)
         self._add_recipients(msg, addresses)
         htmlstr = ''
+        altstr = []
         if has_embedded_images:
-            msg.preamble = "You need a MIME enabled mail reader to see this message."
+            msg.preamble = "This message is best displayed using a MIME capable email reader."
         if contents is not None:    
             for content_object, content_string in zip(content_objects, contents):
                 if content_object['main_type'] == 'image':
                     if isinstance(content_string, dict):
                         for x in content_string:
                             hashed_ref = content_string[x]
+                            base_name = hashed_ref
                     else:
-                        hashed_ref = str(abs(hash(os.path.basename(content_string))))
-                    htmlstr+='<img src="cid:{}" title="{}"/>'.format(hashed_ref, hashed_ref)
+                        base_name = os.path.basename(content_string)
+                        hashed_ref = str(abs(hash(base_name))) 
+                    htmlstr+='<img src="cid:{}" title="{}"/>'.format(hashed_ref, base_name)
                     content_object['mime_object'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
-                    msg_img_text = MIMEText('<div style="display:none"> img {} should be here </div>'.format(hashed_ref), 'html')
-                    msg_alternative.attach(msg_img_text) 
+                    altstr.append('-- img {} should be here -- '.format(base_name))
 
                 if content_object['encoding'] == 'base64': 
                     email.encoders.encode_base64(content_object['mime_object'])    
                     msg.attach(content_object['mime_object'])
                 else: 
                     htmlstr += '<div>{}</div>'.format(content_string)
+                    altstr.append(content_string)
                 
-        msg_alternative.attach(MIMEText(htmlstr, 'html'))        
-        msg.attach(msg_relative)
+        msg_related.attach(MIMEText(htmlstr, 'html'))        
+        msg_alternative.attach(MIMEText('\n'.join(altstr)))
+        msg_alternative.attach(msg_related)
         if attachments or attachments is None:
             pass
         # attachments = self._prepare_attachments(msg, attachments, use_cache)
@@ -213,8 +219,6 @@ class Connect():
         mime_objects = []
         has_embedded_images = False
         if contents is not None:
-            if isinstance(contents, str):
-                contents = [contents]
             for content in contents:
                 if use_cache: 
                     if content not in self.cache:
@@ -282,8 +286,7 @@ class Connect():
             Subject = ' '.join(Subject)
         msg['Subject'] = Subject
 
-    @staticmethod        
-    def _get_mime_object(content_string):
+    def _get_mime_object(self, content_string):
         content_object = {'mime_object': None, 'encoding': None, 'main_type': None, 'sub_type': None} 
         if isinstance(content_string, dict):
             for x in content_string:
@@ -304,6 +307,7 @@ class Connect():
                 else:
                     content_object['mime_object'] = MIMEText(content_string)
             except NameError: 
+                self.log.error("Sent as text email since `lxml` is not installed")
                 content_object['mime_object'] = MIMEText(content_string) 
             if content_object['sub_type'] is None:
                 content_object['sub_type'] = 'plain'
@@ -332,7 +336,7 @@ class Connect():
     def __del__(self): 
         """ When the object leaves scope / gets destroyed, it will neatly cleanup and log it"""
         self.close() 
-        self.log.info('Deleted SMTP @ %s:%s as %s', self.host, self.port, self.user)
+        self.log.info('Deleted SMTP @ %s:%s as %s', self.host, self.port, self.user) 
 
 
 def register(username, password):
@@ -350,4 +354,4 @@ def main():
     parser.add_argument('-user', '-u', help='Username') 
     parser.add_argument('-password', '-p', help='Preferable to use keyring rather than password here') 
     args = parser.parse_args() 
-    Connect(args.user, args.password).send(to = args.to, subject = args.subject, contents = args.contents)
+    SMTP(args.user, args.password).send(to = args.to, subject = args.subject, contents = args.contents)

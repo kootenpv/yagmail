@@ -10,21 +10,21 @@ In the end, your code will look something like this:
 
 ```python
 import yagmail
-yag = yagmail.Connect('mygmailusername')
-contents = ['This is the body, and here is an embedded image:', 'http://somedomain/image.png',
-            'You can also find an audio file attached.', '/local/path/song.mp3']
+yag = yagmail.SMTP()
+contents = ['This is the body, and here is just text http://somedomain/image.png',
+            'You can find an audio file attached.', '/local/path/song.mp3']
 yag.send('to@someone.com', 'subject', contents) 
 ```
 
 Or a simple one-liner (connection will automatically close):
 ```python
-yagmail.Connect('mygmailusername').send('to@someone.com', 'subject', 'This is the body')
+yagmail.SMTP('mygmailusername').send('to@someone.com', 'subject', 'This is the body')
 ```
 
 Note that it will read the password securely from your keyring (read below). If you don't want this, you can also initialize with:
 
 ```python
-yag = yagmail.Connect('mygmailusername', 'mygmailpassword')
+yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
 ```
 
 but honestly, do you want to have your password written in your script?
@@ -55,12 +55,12 @@ In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusern
 
 When no password is given and the user is not found in the keyring, `getpass.getpass()` is used to prompt the user for a password. Upon entering this once, it will be stored in the keyring and never asked again.
 
-Another convenience can be to save a .yagmail file in your home folder, containing just the email username. You can then omit everything, and simply use `yagmail.Connect()` to connect. Of course, this wouldn't work with more accounts, but it might be a nice default. Upon request I'll consider adding more details to this .yagmail file (host, port and other settings).
+Another convenience can be to save a .yagmail file in your home folder, containing just the email username. You can then omit everything, and simply use `yagmail.SMTP()` to connect. Of course, this wouldn't work with more accounts, but it might be a nice default. Upon request I'll consider adding more details to this .yagmail file (host, port and other settings).
 
 ### Start a connection
 
 ```python
-yag = yagmail.Connect('mygmailusername')
+yag = yagmail.SMTP('mygmailusername')
 ```
 
 Note that this connection is reusable, closable and when it leaves scope it will clean it self up (close).
@@ -127,12 +127,12 @@ Local files require to have an extension for their content type to be inferred. 
 
 I'll try to respond to issues within 24 hours at Github.....
 
-And please send me a line of feedback with `Connect().feedback('Great job!')` :-)
+And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 
 ### Roadmap (and priorities)
 
 - ~~Added possibility of Image~~ 
-- ~~Optional SMTP arguments should go with \**kwargs to my Connect~~
+- ~~Optional SMTP arguments should go with \**kwargs to my SMTP~~
 - ~~CC/BCC (high)~~
 - ~~Custom names (high)~~
 - ~~Allow send to return a preview rather than to actually send~~
@@ -147,7 +147,7 @@ And please send me a line of feedback with `Connect().feedback('Great job!')` :-
 - ~~Make lxml module optional magic (high)~~
 - ~~Provide automatic fallback for complex content(medium)~~ (should work)
 - ~~`yagmail` as a command on CLI upon install~~
-- ~~Added `feedback` function on Connect to be able to send me feedback directly :-)~~
+- ~~Added `feedback` function on SMTP to be able to send me feedback directly :-)~~
 - ~~Added the option to validate emailaddresses...~~
 - ~~however, I'm unhappy with the error handling/loggin of wrong emails~~
 - ~~Logging count & mail capability (very low)~~
@@ -168,5 +168,7 @@ And please send me a line of feedback with `Connect().feedback('Great job!')` :-
 - **YagAddressError**: This means that the address was given in an invalid format. Note that `From` can either be a string, or a dictionary where the key is an `email`, and the value is an `alias` {'sample@gmail.com', 'Sam'}. In the case of 'to', it can either be a string (`email`), a list of emails (email addresses without aliases) or a dictionary where keys are the email addresses and the values indicate the aliases.
 
 - **YagInvalidEmailAddress**: Note that this will only filter out syntax mistakes in emailaddresses. If a human would think it is probably a valid email, it will most likely pass. However, it could still very well be that the actual emailaddress has simply not be claimed by anyone (so then this function fails to devalidate).
+
+- Click to enable the email for being used externally https://www.google.com/settings/security/lesssecureapps
 
 - Make sure you have a working internet connection
