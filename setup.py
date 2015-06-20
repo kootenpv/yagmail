@@ -1,5 +1,6 @@
+import sys
 from setuptools import setup
-# run updater like: python setup.py sdist bdist_wininst upload
+from setuptools.command.test import test as TestCommand
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '4'
@@ -17,7 +18,10 @@ setup(name = 'yagmail',
       install_requires = [ 
           'keyring',
       ],
+      extras_require = {
+          'lxml' : 'lxml >= 3.4.0' 
+      },
       entry_points = { 
           'console_scripts': ['yagmail = yagmail.yagmail:main'] 
-          },
+      },
       zip_safe = False)

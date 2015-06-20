@@ -14,3 +14,4 @@ __pycache__/
 /include/
 /lib/
 /pip-selfcheck.json
+.tox/

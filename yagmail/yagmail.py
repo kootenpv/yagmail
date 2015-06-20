@@ -339,12 +339,6 @@ class SMTP():
         """ Most important function. Please send me feedback :-) """
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
         
-    def __del__(self): 
-        """ When the object leaves scope / gets destroyed, it will neatly cleanup and log it"""
-        self.close() 
-        self.log.info('Deleted SMTP @ %s:%s as %s', self.host, self.port, self.user) 
-
-
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""
     keyring.set_password('yagmail', username, password)
