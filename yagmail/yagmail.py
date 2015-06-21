@@ -73,13 +73,13 @@ class SMTP():
         """
         self.log = get_logger(log_level, file_path_name)
         
-    def send(self, to = None, subject = None, contents = None, attachments = None, cc = None, bcc = None,
+    def send(self, to = None, subject = None, contents = None, cc = None, bcc = None,
              preview_only=False, use_cache=False, validate_email = True, throw_invalid_exception = False):
         """ Use this to send an email with gmail"""
         addresses = self._resolveAddresses(to, cc, bcc, validate_email, throw_invalid_exception)
         if not addresses['recipients']:
             return {}
-        msg = self._prepare_message(addresses, subject, contents, attachments, use_cache)
+        msg = self._prepare_message(addresses, subject, contents, use_cache)
         if preview_only:
             return addresses, msg.as_string()
         return self._attempt_send(addresses['recipients'], msg.as_string())
@@ -172,7 +172,7 @@ class SMTP():
                         addresses['recipients'].remove(email_addr)
         return addresses
 
-    def _prepare_message(self, addresses, subject, contents, attachments, use_cache):
+    def _prepare_message(self, addresses, subject, contents, use_cache):
         """ Prepare a MIME message """
         if self.is_closed:
             raise YagConnectionClosed('Login required again')
@@ -212,14 +212,8 @@ class SMTP():
                 
         msg_related.attach(MIMEText(htmlstr, 'html'))        
         msg_alternative.attach(MIMEText('\n'.join(altstr)))
-        msg_alternative.attach(msg_related)
-        if attachments or attachments is None:
-            pass
-        # attachments = self._prepare_attachments(msg, attachments, use_cache)
+        msg_alternative.attach(msg_related) 
         return msg
-
-    def _prepare_attachments(self, msg, attachments, use_cache):
-        pass
 
     def _prepare_contents(self, contents, use_cache):
         mime_objects = []
