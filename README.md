@@ -1,3 +1,4 @@
+
 <p align="center">
   <img src="https://github.com/kootenpv/yagmail/blob/master/resources/icon.png" width="48px"/>
 </p>
@@ -29,6 +30,23 @@ yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
 
 but honestly, do you want to have your password written in your script?
 
+Similarly, I make use of having my username in a file named `.yagmail` in my home folder.
+
+### Table of Contents
+
+|Section|Explanation|
+|---------------------------------------------------------------|---------------------------------------------------------------------|
+|[Install](#install)                                            |   Find the instructions on how to install yagmail here              |
+|[Username and password](#username-and-password)                |   No more need to fill in username and password in scripts          |
+|[Start a connection](#start-a-connection)                      |   Get started                                                       |
+|[Usability](#usability)                                        |   Shows some usage patterns for sending                             |
+|[Recipients](#recipients)                                      |   How to send to multiple people, give an alias or send to self     |
+|[Magical contents](#magical-contents)                          |   Really easy to send text, html, images and attachments            |
+|[Feedback](#feedback)                                          |   How to send me feedback                                           |
+|[Roadmap (and priorities)](#roadmap-and-priorities)            |   Yup                                                               |
+|[Errors](#errors)                                              |   List of common errors for people dealing with sending emails      |
+
+
 ### Install
 
 For Python 2.x and Python 3.x respectively:
@@ -41,7 +59,7 @@ pip3 install yagmail
 
 As a side note, `yagmail` can now also be used to send emails from the command line.
 
-### Add yagmail to your keyring
+### Username and password
 
 [keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
 > The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage. 
@@ -54,7 +72,7 @@ yagmail.register('mygmailusername', 'mygmailpassword')
 
 In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusername', 'mygmailpassword')`.
 
-When no password is given and the user is not found in the keyring, `getpass.getpass()` is used to prompt the user for a password. Upon entering this once, it will be stored in the keyring and never asked again.
+When no password is given and the user is not found in the keyring, `getpass.getpass()` is used to prompt the user for a password. Upon entering this once, it can be stored in the keyring and never asked again.
 
 Another convenience can be to save a .yagmail file in your home folder, containing just the email username. You can then omit everything, and simply use `yagmail.SMTP()` to connect. Of course, this wouldn't work with more accounts, but it might be a nice default. Upon request I'll consider adding more details to this .yagmail file (host, port and other settings).
 
@@ -64,7 +82,7 @@ Another convenience can be to save a .yagmail file in your home folder, containi
 yag = yagmail.SMTP('mygmailusername')
 ```
 
-Note that this connection is reusable, closable and when it leaves scope it will clean it self up (close).
+Note that this connection is reusable, closable and when it leaves scope it will clean up after itself.
 
 ### Usability 
 
@@ -105,22 +123,27 @@ yag.send(to = {to : 'Alias1'}) # Dictionary for emailaddress *with* aliases
 yag.send(to = {to : 'Alias1', to2 : 'Alias2'}
 ```
 
-**All arguments are optional when sending.**
+Giving no `to` argument will send an email to yourself. In that sense, `yagmail.SMTP().send()` can already send an email.
+Be aware that if no explicit `to = ...` is used, the first argument will be used to send to. Can be avoided like:
 
-Furthermore, the `contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
+```python
+yag.send(subject = 'to self', contents = 'hi!')
+```
+
+### Magical `contents`
+
+The `contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
 
 - If it is a dictionary it will assume the key is the content and the value is an alias (only for images currently!)
   e.g. {'/path/to/image.png' : 'MyPicture'}
 - It will try to see if the content (string) can be read as a file locally,
   e.g. '/path/to/image.png'
-- if impossible, it will try to visit the string as a URL,
-  e.g. 'http://domain.com/image.png' or 'http://domain.com/html_template.html'
 - if impossible, it will check if the string is valid html
   e.g. `<h1>This is a big title</h1>`
 - if not, it must be text.
   e.g. 'Hi Dorika!'
 
-Note that local/external files can be html (inline), image (inline), everything else will be attached (if required, I can update to make it decidable by the user).  
+Note that local files can be html (inline), image (inline), everything else will be attached (if required, I can update to make it decidable by the user).  
 
 Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension, but for now it will work whenever an extension is present.
 
@@ -154,14 +177,14 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
 - Add documentation to all functions (high, halfway)
+- Prepare for official 1.0
 - Go over documentation again (medium)
-- Get documentation on Sphinx
 - Allow `.yagmail` file to contain more parameters (medium)
 - Add option to shrink images (low)
 
 ### Errors
 
-- Make sure you have a keyring entry (see section "Add yagmail to your keyring"), or use getpass to register. I discourage to use username / password in scripts.
+- Make sure you have a keyring entry (see section <a href="#no-more-password-and-username">No more password and username</a>), or use getpass to register. I discourage to use username / password in scripts.
 
 - [`smtplib.SMTPException: SMTP AUTH extension not supported by server`](http://stackoverflow.com/questions/10147455/trying-to-send-email-gmail-as-mail-provider-using-python)
 
@@ -174,3 +197,5 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - Click to enable the email for being used externally https://www.google.com/settings/security/lesssecureapps
 
 - Make sure you have a working internet connection
+
+  
