@@ -1,7 +1,5 @@
-from pkg_resources import get_distribution
-
 __project__ = 'yagmail'
-__version__ = get_distribution(__project__).version
+__version__ = "0.4.46"
 
 from .error import YagConnectionClosed
 from .error import YagAddressError

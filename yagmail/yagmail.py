@@ -138,10 +138,11 @@ class SMTP():
                 answer = ''
                 # Python 2 fix 
                 while answer != 'y' and answer != 'n':
+                    prompt_string = 'Save username and password in keyring? [y/n]: '
                     try: 
-                        answer = raw_input('Save username and password in keyring? [y/n]: ').strip()
+                        answer = raw_input(prompt_string).strip()
                     except NameError: 
-                        answer = input('Save username and password in keyring? [y/n]: ').strip()
+                        answer = input(prompt_string).strip()
                 if answer == 'y':    
                     register(self.user, password)    
         self.smtp.login(self.user, password)
