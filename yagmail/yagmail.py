@@ -80,13 +80,8 @@ class SMTP():
         addresses = self._resolveAddresses(to, cc, bcc, validate_email, throw_invalid_exception)
         if not addresses['recipients']:
             return {}
-        msg = self._prepare_message(addresses, subject, contents, use_cache)
-        
-        if headers is not None: 
-            # Strangely, msg does not have an update method, so then manually.
-            for k,v in headers.items(): 
-                msg[k] = v
-                
+        msg = self._prepare_message(addresses, subject, contents, use_cache, headers)
+ 
         if preview_only:
             return addresses, msg.as_string()
         return self._attempt_send(addresses['recipients'], msg.as_string())
@@ -180,7 +175,7 @@ class SMTP():
                         addresses['recipients'].remove(email_addr)
         return addresses
 
-    def _prepare_message(self, addresses, subject, contents, use_cache):
+    def _prepare_message(self, addresses, subject, contents, use_cache, headers):
         """ Prepare a MIME message """
         if self.is_closed:
             raise YagConnectionClosed('Login required again')
@@ -188,6 +183,11 @@ class SMTP():
             contents = [contents]
         has_embedded_images, content_objects = self._prepare_contents(contents, use_cache)
         msg = MIMEMultipart()
+        if headers is not None: 
+            # Strangely, msg does not have an update method, so then manually.
+            for k,v in headers.items(): 
+                msg[k] = v
+                
         msg_alternative = MIMEMultipart('alternative')
         msg_related = MIMEMultipart('related')
         msg.attach(msg_alternative)
