@@ -84,7 +84,7 @@ class SMTP():
         
         if headers is not None: 
             # Strangely, msg does not have an update method, so then manually.
-            for k,v in headers: 
+            for k,v in headers.items(): 
                 msg[k] = v
                 
         if preview_only:
