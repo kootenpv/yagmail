@@ -74,12 +74,19 @@ class SMTP():
         self.log = get_logger(log_level, file_path_name)
         
     def send(self, to = None, subject = None, contents = None, cc = None, bcc = None,
-             preview_only=False, use_cache=False, validate_email = True, throw_invalid_exception = False):
+             preview_only=False, use_cache=False, validate_email = True, throw_invalid_exception = False,
+             headers = None):
         """ Use this to send an email with gmail"""
         addresses = self._resolveAddresses(to, cc, bcc, validate_email, throw_invalid_exception)
         if not addresses['recipients']:
             return {}
         msg = self._prepare_message(addresses, subject, contents, use_cache)
+        
+        if headers is not None: 
+            # Strangely, msg does not have an update method, so then manually.
+            for k,v in headers: 
+                msg[k] = v
+                
         if preview_only:
             return addresses, msg.as_string()
         return self._attempt_send(addresses['recipients'], msg.as_string())
