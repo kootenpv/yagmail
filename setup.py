@@ -2,7 +2,7 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '4'
-MICRO_VERSION = '90'
+MICRO_VERSION = '91'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name = 'yagmail',
@@ -48,4 +48,5 @@ setup(name = 'yagmail',
           'Topic :: System :: Systems Administration',
           'Topic :: Utilities'
     ], 
-    zip_safe = False)
+    zip_safe = False,
+    platforms='any')
