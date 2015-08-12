@@ -22,7 +22,7 @@ with open('yagmail/__init__.py') as f:
 with open('yagmail/__init__.py', 'w') as f: 
     f.write(re.sub('__version__ = "[0-9.]+"', '__version__ = "{}"'.format(version), init))
     
-print(sh.python('setup.py', ['sdist', 'bdist_wheel', 'upload']))
+print(sh.python3('setup.py', ['sdist', 'bdist_wheel', 'upload']))
 
 sh.cd('../')
 

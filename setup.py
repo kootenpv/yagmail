@@ -2,7 +2,7 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '4'
-MICRO_VERSION = '91'
+MICRO_VERSION = '92'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name = 'yagmail',
@@ -25,7 +25,7 @@ setup(name = 'yagmail',
       classifiers = [ 
           'Environment :: Console',
           'Intended Audience :: Developers',
-          'Intended Audience :: Customer Service'
+          'Intended Audience :: Customer Service',
           'Intended Audience :: System Administrators',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
           'Operating System :: Microsoft',

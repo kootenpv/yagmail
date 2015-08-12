@@ -28,12 +28,13 @@ try:
 except ImportError:
     pass 
 
-class Connect():
-    # pylint: disable=unused-argument
-    def __init__(self, *args):
-        self.deprecatedMessage = 'DeprecationWarning: Connect is now deprecated. Please use "yagmail.SMTP" instead of "yagmail.Connect". It is just a name change. For recent info check out the repo at https://github.com/kootenpv/yagmail'
-        raise DeprecationWarning(self.deprecatedMessage)
-        
+class raw(str):
+    """ Ensure that a string is treated as text and will not receive 'magic'. """
+    pass
+
+class attach(str):
+    """ Only needed when wanting to attach an image rather than inline it """
+    pass
 
 class SMTP():
     """ Connection is the class that contains the SMTP connection and allows messages to be send """
@@ -141,12 +142,13 @@ class SMTP():
                 # Python 2 fix 
                 while answer != 'y' and answer != 'n':
                     prompt_string = 'Save username and password in keyring? [y/n]: '
+                    # pylint: disable=undefined-variable
                     try: 
                         answer = raw_input(prompt_string).strip()
                     except NameError: 
                         answer = input(prompt_string).strip()
                 if answer == 'y':    
-                    register(self.user, password)    
+                    register(self.user, password) 
         self.smtp.login(self.user, password)
         self.is_closed = False
 
@@ -181,7 +183,7 @@ class SMTP():
             raise YagConnectionClosed('Login required again')
         if isinstance(contents, str):
             contents = [contents]
-        has_embedded_images, content_objects = self._prepare_contents(contents, use_cache)
+        has_included_images, content_objects = self._prepare_contents(contents, use_cache)
         msg = MIMEMultipart()
         if headers is not None: 
             # Strangely, msg does not have an update method, so then manually.
@@ -195,21 +197,28 @@ class SMTP():
         self._add_recipients(msg, addresses)
         htmlstr = ''
         altstr = []
-        if has_embedded_images:
+        if has_included_images:
             msg.preamble = "This message is best displayed using a MIME capable email reader."
         if contents is not None:    
             for content_object, content_string in zip(content_objects, contents):
                 if content_object['main_type'] == 'image':
-                    if isinstance(content_string, dict):
+                    # aliased image {'path' : 'alias'}
+                    if isinstance(content_string, dict) and len(content_string) == 1:
                         for x in content_string:
-                            hashed_ref = content_string[x]
-                            base_name = hashed_ref
+                            hashed_ref = str(abs(hash(x))) 
+                            alias = content_string[x] 
+                        # pylint: disable=undefined-loop-variable
+                        content_string = x
                     else:
-                        base_name = os.path.basename(content_string)
-                        hashed_ref = str(abs(hash(base_name))) 
-                    htmlstr+='<img src="cid:{}" title="{}"/>'.format(hashed_ref, base_name)
-                    content_object['mime_object'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
-                    altstr.append('-- img {} should be here -- '.format(base_name))
+                        alias = os.path.basename(content_string)
+                        hashed_ref = str(abs(hash(alias))) 
+
+                    # if guarded by attach, attach, else, inline    
+                    # pylint: disable=unidiomatic-typecheck 
+                    if not type(content_string) == attach: 
+                        htmlstr+='<img src="cid:{}" title="{}"/>'.format(hashed_ref, alias)
+                        content_object['mime_object'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
+                        altstr.append('-- img {} should be here -- '.format(alias))
 
                 if content_object['encoding'] == 'base64': 
                     email.encoders.encode_base64(content_object['mime_object'])    
@@ -225,7 +234,7 @@ class SMTP():
 
     def _prepare_contents(self, contents, use_cache):
         mime_objects = []
-        has_embedded_images = False
+        has_included_images = False
         if contents is not None:
             for content in contents:
                 if use_cache: 
@@ -236,9 +245,9 @@ class SMTP():
                 else:
                     content_object = self._get_mime_object(content)
                 if content_object['main_type'] == 'image': 
-                    has_embedded_images = True
+                    has_included_images = True
                 mime_objects.append(content_object)
-        return has_embedded_images, mime_objects
+        return has_included_images, mime_objects
 
     def _add_recipients(self, msg, addresses):
         msg['From'] = '{} <{}>'.format(self.useralias, self.user)
@@ -300,22 +309,26 @@ class SMTP():
             for x in content_string:
                 content_string, content_name = x, content_string[x]
         else:
-            content_name = os.path.basename(content_string)        
-        if os.path.isfile(content_string):
+            content_name = os.path.basename(content_string)
+
+        # pylint: disable=unidiomatic-typecheck    
+        is_raw = type(content_string) == raw 
+        if os.path.isfile(content_string) and not is_raw:
             with open(content_string, 'rb') as f:
                 content_object['encoding'] = 'base64'
                 content = f.read()
         else:
             content_object['main_type'] = 'text'
             try:
-                html_tree = lxml.html.fromstring(content_string)
-                if html_tree.find('.//*') is not None or html_tree.tag != 'p':
-                    content_object['mime_object'] = MIMEText(content_string, 'html')
-                    content_object['sub_type'] = 'html'
-                else:
+                if not is_raw:
+                    html_tree = lxml.html.fromstring(content_string)
+                    if html_tree.find('.//*') is not None or html_tree.tag != 'p':
+                        content_object['mime_object'] = MIMEText(content_string, 'html')
+                        content_object['sub_type'] = 'html' 
+                if content_object['mime_object'] is None:
                     content_object['mime_object'] = MIMEText(content_string)
             except NameError: 
-                self.log.error("Sent as text email since `lxml` is not installed")
+                self.log.error("Sending as text email since `lxml` is not installed")
                 content_object['mime_object'] = MIMEText(content_string) 
             if content_object['sub_type'] is None:
                 content_object['sub_type'] = 'plain'
