@@ -3,7 +3,7 @@
   <img src="https://github.com/kootenpv/yagmail/blob/master/resources/icon.png" width="48px"/>
 </p>
 
-# yagmail -- Yet Another GMAIL client
+# yagmail -- Yet Another GMAIL/SMTP client
 
 The goal here is to make it as simple and painless as possible to send emails.
 
@@ -143,9 +143,14 @@ The `contents` argument will be smartly guessed. It can be passed a string (whic
 - if not, it must be text.
   e.g. 'Hi Dorika!'
 
-Note that local files can be html (inline), image (inline), everything else will be attached (if required, I can update to make it decidable by the user).  
+Note that local files can be html (inline); everything else will be attached. 
 
-Local files require to have an extension for their content type to be inferred. I will see if I can add `python-magic` package an optional dependency to not rely on extension, but for now it will work whenever an extension is present.
+Local files require to have an extension for their content type to be inferred.
+
+As of version 0.4.94, `raw` and `inline` have been added.
+
+- `raw` ensures a string will not receive any "magic" (inlining, html, attaching)
+- `inline` will make an image appear in the text.
 
 ### Feedback
 
@@ -176,6 +181,7 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~however, I'm unhappy with the error handling/loggin of wrong emails~~
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
+- ~~add `raw` and `inline```
 - Add documentation to all functions (high, halfway)
 - Prepare for official 1.0
 - Go over documentation again (medium)

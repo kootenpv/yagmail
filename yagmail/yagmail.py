@@ -32,8 +32,8 @@ class raw(str):
     """ Ensure that a string is treated as text and will not receive 'magic'. """
     pass
 
-class attach(str):
-    """ Only needed when wanting to attach an image rather than inline it """
+class inline(str):
+    """ Only needed when wanting to inline an image rather than attach it """
     pass
 
 class SMTP():
@@ -213,9 +213,9 @@ class SMTP():
                         alias = os.path.basename(content_string)
                         hashed_ref = str(abs(hash(alias))) 
 
-                    # if guarded by attach, attach, else, inline    
+                    # if string is `inline`, inline, else, attach
                     # pylint: disable=unidiomatic-typecheck 
-                    if not type(content_string) == attach: 
+                    if type(content_string) == inline: 
                         htmlstr+='<img src="cid:{}" title="{}"/>'.format(hashed_ref, alias)
                         content_object['mime_object'].add_header('Content-ID', '<{}>'.format(hashed_ref)) 
                         altstr.append('-- img {} should be here -- '.format(alias))
