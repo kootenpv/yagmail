@@ -2,7 +2,7 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '4'
-MICRO_VERSION = '93'
+MICRO_VERSION = '95'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name = 'yagmail',
@@ -11,7 +11,7 @@ setup(name = 'yagmail',
       url = 'https://github.com/kootenpv/yagmail',
       author = 'Pascal van Kooten',
       author_email = 'kootenpv@gmail.com',
-      license = 'GPL',
+      license = 'MIT',
       packages = ['yagmail'],
       install_requires = [ 
           'keyring',
