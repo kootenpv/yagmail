@@ -117,20 +117,7 @@ class SMTP():
         self.smtp.quit()
         self.log.info('Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
-    def login(self, password):
-        """ 
-        Login to the SMTP server using password. 
-        This only needs to be manually run when the connection to the SMTP server was closed by the user.
-        """
-        self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
-        self.smtp.set_debuglevel(self.debuglevel)
-        if self.starttls is not None:
-            self.smtp.ehlo()
-            if self.starttls:
-                self.smtp.starttls()
-            else:
-                self.smtp.starttls(**self.starttls)
-            self.smtp.ehlo()
+    def handle_password(self, password):
         if password is None:
             password = keyring.get_password('yagmail', self.user) 
             if password is None:
@@ -149,6 +136,23 @@ class SMTP():
                         answer = input(prompt_string).strip()
                 if answer == 'y':    
                     register(self.user, password) 
+        return password
+        
+    def login(self, password):
+        """ 
+        Login to the SMTP server using password. 
+        This only needs to be manually run when the connection to the SMTP server was closed by the user.
+        """
+        self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
+        self.smtp.set_debuglevel(self.debuglevel)
+        if self.starttls is not None:
+            self.smtp.ehlo()
+            if self.starttls:
+                self.smtp.starttls()
+            else:
+                self.smtp.starttls(**self.starttls)
+            self.smtp.ehlo() 
+        password = self.handle_password(password)
         self.smtp.login(self.user, password)
         self.is_closed = False
 
@@ -353,6 +357,17 @@ class SMTP():
     def feedback(self, message = "Awesome features! You made my day! How can I contribute? Winter is coming."):
         """ Most important function. Please send me feedback :-) """
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
+
+class SMTP_SSL(SMTP): 
+    def login(self, password): 
+        if self.port == '587':
+            self.port = '465'
+        self.smtp = smtplib.SMTP_SSL(self.host, self.port, **self.kwargs)
+        self.smtp.set_debuglevel(self.debuglevel) 
+        password = self.handle_password(password)
+        self.smtp.login(self.user, password)
+        self.is_closed = False
+        
         
 def register(username, password):
     """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail"""
