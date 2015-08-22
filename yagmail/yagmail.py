@@ -9,19 +9,11 @@ from email.mime.multipart import MIMEMultipart
 import email.encoders
 import mimetypes
 
-try:
-    from .error import YagConnectionClosed
-    from .error import YagAddressError
-    from .error import YagInvalidEmailAddress
-    from .validate import validate_email_with_regex
-    from .log import get_logger
-except (ValueError, SystemError):
-    # stupid fix to make it easy to load interactively
-    from error import YagConnectionClosed
-    from error import YagAddressError
-    from error import YagInvalidEmailAddress
-    from validate import validate_email_with_regex
-    from log import get_logger
+from yagmail.error import YagConnectionClosed
+from yagmail.error import YagAddressError
+from yagmail.error import YagInvalidEmailAddress
+from yagmail.validate import validate_email_with_regex
+from yagmail.log import get_logger
 
 try:
     import lxml.html
