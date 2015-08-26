@@ -181,7 +181,7 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~however, I'm unhappy with the error handling/loggin of wrong emails~~
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
-- ~~add `raw` and `inline```
+- ~~add `raw` and `inline```~~
 - Add documentation to all functions (high, halfway)
 - Prepare for official 1.0
 - Go over documentation again (medium)
