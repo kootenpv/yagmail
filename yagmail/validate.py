@@ -27,7 +27,10 @@
 
 import re
 
-from yagmail.error import YagInvalidEmailAddress
+try:
+    from yagmail.error import YagInvalidEmailAddress
+except (ValueError, SystemError):
+    from error import YagInvalidEmailAddress
 
 # All we are really doing is comparing the input string to one
 # gigantic regular expression.  But building that regexp, and
