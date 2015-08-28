@@ -5,7 +5,7 @@ from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 from yagmail import SMTP
-yag = SMTP()
+yag = SMTP("py.test", "py.test")
 
 
 def getCombinations():
