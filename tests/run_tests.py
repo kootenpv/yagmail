@@ -12,8 +12,7 @@ def getCombinations():
     tos = (None, (yag.user), [yag.user, yag.user],
            {yag.user: 'me', yag.user + '1': 'me'})
     subjects = ('subj', ['subj'], ['subj', 'subj1'])
-    contents = (None, ['body'], ['body', 'body1', '<h2><center>Text</center></h2>',
-                                 'http://github.com/kootenpv/yagmail', 'body', 'http://tinyurl.com/nwe5hxj'])
+    contents = (None, ['body'], ['body', 'body1', '<h2><center>Text</center></h2>'])
     results = []
     for x in itertools.product(tos, subjects, contents):
         options = {y: z for y, z in zip(['to', 'subject', 'contents'], x)}
