@@ -5,6 +5,9 @@
 
 # yagmail -- Yet Another GMAIL/SMTP client
 
+[![PyPI](https://img.shields.io/pypi/v/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
+[![PyPI](https://img.shields.io/pypi/pyversions/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
+
 The goal here is to make it as simple and painless as possible to send emails.
 
 In the end, your code will look something like this:
@@ -14,7 +17,7 @@ import yagmail
 yag = yagmail.SMTP()
 contents = ['This is the body, and here is just text http://somedomain/image.png',
             'You can find an audio file attached.', '/local/path/song.mp3']
-yag.send('to@someone.com', 'subject', contents) 
+yag.send('to@someone.com', 'subject', contents)
 ```
 
 Or a simple one-liner (connection will automatically close):
@@ -62,7 +65,7 @@ As a side note, `yagmail` can now also be used to send emails from the command l
 ### Username and password
 
 [keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
-> The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage. 
+> The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage.
 
 You know you want it. Set it up by running once:
 
@@ -84,7 +87,7 @@ yag = yagmail.SMTP('mygmailusername')
 
 Note that this connection is reusable, closable and when it leaves scope it will clean up after itself.
 
-### Usability 
+### Usability
 
 Defining some variables:
 
@@ -117,7 +120,7 @@ yag.send(to, subject, [body, img])
 It is also possible to send to a group of people by providing a list of email strings rather than a single string:
 
 ```python
-yag.send(to = to) 
+yag.send(to = to)
 yag.send(to = [to, to2]) # List or tuples for emailadresses *without* aliases
 yag.send(to = {to : 'Alias1'}) # Dictionary for emailaddress *with* aliases
 yag.send(to = {to : 'Alias1', to2 : 'Alias2'}
@@ -143,7 +146,7 @@ The `contents` argument will be smartly guessed. It can be passed a string (whic
 - if not, it must be text.
   e.g. 'Hi Dorika!'
 
-Note that local files can be html (inline); everything else will be attached. 
+Note that local files can be html (inline); everything else will be attached.
 
 Local files require to have an extension for their content type to be inferred.
 
@@ -160,7 +163,7 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 
 ### Roadmap (and priorities)
 
-- ~~Added possibility of Image~~ 
+- ~~Added possibility of Image~~
 - ~~Optional SMTP arguments should go with \**kwargs to my SMTP~~
 - ~~CC/BCC (high)~~
 - ~~Custom names (high)~~
@@ -203,5 +206,3 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - Click to enable the email for being used externally https://www.google.com/settings/security/lesssecureapps
 
 - Make sure you have a working internet connection
-
-  
