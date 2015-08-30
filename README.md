@@ -7,6 +7,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 [![PyPI](https://img.shields.io/pypi/pyversions/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/yagmail.svg)](https://pypi.python.org/pypi/yagmail)
 
 The goal here is to make it as simple and painless as possible to send emails.
 
