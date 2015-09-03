@@ -25,11 +25,13 @@
 # exception of a circular definition (see comments below), and
 # with the omission of the pattern components marked as "obsolete".
 
-from __future__ import absolute_import
 import re
 
-from yagmail.error import YagInvalidEmailAddress
-
+try:
+    from .error import YagInvalidEmailAddress
+except (ValueError, SystemError):
+    # stupid fix to make it easy to load interactively
+    from error import YagInvalidEmailAddress
 
 # All we are really doing is comparing the input string to one
 # gigantic regular expression.  But building that regexp, and

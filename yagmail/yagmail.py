@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import logging
 import time
 import os
@@ -11,12 +9,19 @@ from email.mime.multipart import MIMEMultipart
 import email.encoders
 import mimetypes
 
-from .error import YagConnectionClosed
-from .error import YagAddressError
-from .error import YagInvalidEmailAddress
-from .validate import validate_email_with_regex
-from .log import get_logger
-
+try:
+    from .error import YagConnectionClosed
+    from .error import YagAddressError
+    from .error import YagInvalidEmailAddress
+    from .validate import validate_email_with_regex
+    from .log import get_logger
+except (ValueError, SystemError):
+    # stupid fix to make it easy to load interactively
+    from error import YagConnectionClosed
+    from error import YagAddressError
+    from error import YagInvalidEmailAddress
+    from validate import validate_email_with_regex
+    from log import get_logger
 
 try:
     import lxml.html
