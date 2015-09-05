@@ -75,11 +75,11 @@ class SMTP():
         It also allows to set the logging level (whether to display only critical, error, info or debug.
         e.g.
         yag = yagmail.SMTP()
-        yag.setLogging(yagmail.logging.DEBUG)  # to see everything
+        yag.set_logging(yagmail.logging.DEBUG)  # to see everything
 
         and
 
-        yagmail.setLogging(yagmail.logging.DEBUG, 'somelocalfile.log')
+        yagmail.set_logging(yagmail.logging.DEBUG, 'somelocalfile.log')
 
         lastly, a log_level of None will make sure there is no I/O.
         """
