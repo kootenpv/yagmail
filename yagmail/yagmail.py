@@ -256,6 +256,7 @@ class SMTP():
                     email.encoders.encode_base64(content_object['mime_object'])
                     msg.attach(content_object['mime_object'])
                 else:
+                    content_string = content_string.replace('\n', '<br>')
                     htmlstr += '<div>{}</div>'.format(content_string)
                     altstr.append(content_string)
 
