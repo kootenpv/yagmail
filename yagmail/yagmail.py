@@ -1,3 +1,6 @@
+# when there is a bcc a different message has to be sent to the bcc
+# person, to show that they are bcc'ed
+
 import logging
 import time
 import os
@@ -312,7 +315,7 @@ class SMTP():
     def _make_addr_alias_target(x, addresses, which):
         if isinstance(x, str):
             addresses['recipients'].append(x)
-            addresses['To'] = x
+            addresses[which] = x
         elif isinstance(x, list) or isinstance(x, tuple):
             if not all([isinstance(k, str) for k in x]):
                 raise YagAddressError
