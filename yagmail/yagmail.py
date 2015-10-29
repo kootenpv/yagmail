@@ -221,7 +221,7 @@ class SMTP():
         msg_related = MIMEMultipart('related')
         msg.attach(msg_alternative)
         self._add_subject(msg, subject)
-        self._add_recipients(msg, addresses)
+        self._add_recipients_headers(msg, addresses)
         htmlstr = ''
         altstr = []
         if has_included_images:
@@ -282,7 +282,7 @@ class SMTP():
                 mime_objects.append(content_object)
         return has_included_images, mime_objects
 
-    def _add_recipients(self, msg, addresses):
+    def _add_recipients_headers(self, msg, addresses):
         msg['From'] = '{} <{}>'.format(self.useralias, self.user)
         if 'To' in addresses:
             msg['To'] = addresses['To']
@@ -290,8 +290,6 @@ class SMTP():
             msg['To'] = self.useralias
         if 'Cc' in addresses:
             msg['Cc'] = addresses['Cc']
-        if 'Bcc' in addresses:
-            msg['Bcc'] = addresses['Bcc']
 
     @staticmethod
     def _find_user_home_path():
@@ -315,18 +313,16 @@ class SMTP():
         if isinstance(x, str):
             addresses['recipients'].append(x)
             addresses['To'] = x
-            return addresses
-        if isinstance(x, list) or isinstance(x, tuple):
+        elif isinstance(x, list) or isinstance(x, tuple):
             if not all([isinstance(k, str) for k in x]):
                 raise YagAddressError
             addresses['recipients'].extend(x)
             addresses[which] = '; '.join(x)
-            return addresses
-        if isinstance(x, dict):
+        elif isinstance(x, dict):
             addresses['recipients'].extend(x.keys())
             addresses[which] = '; '.join(x.values())
-            return addresses
-        raise YagAddressError
+        else:
+            raise YagAddressError
 
     @staticmethod
     def _add_subject(msg, Subject):
