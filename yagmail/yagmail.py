@@ -18,7 +18,7 @@ try:
     from .error import YagInvalidEmailAddress
     from .validate import validate_email_with_regex
     from .log import get_logger
-except (ValueError, SystemError):
+except (ValueError, SystemError, ImportError):
     # stupid fix to make it easy to load interactively
     from error import YagConnectionClosed
     from error import YagAddressError

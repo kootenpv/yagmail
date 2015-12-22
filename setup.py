@@ -5,6 +5,23 @@ MINOR_VERSION = '4'
 MICRO_VERSION = '116'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
+from setuptools.command.test import test as TestCommand
+
+class PyTest(TestCommand):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import subprocess
+        import sys
+        errno = subprocess.call([sys.executable, 'tests/run_tests.py'])
+        raise SystemExit(errno)
+
 setup(name='yagmail',
       version=VERSION,
       description='Yet Another GMAIL client',
@@ -16,12 +33,15 @@ setup(name='yagmail',
       install_requires=[
           'keyring',
       ],
+      keywords='email mime automatic html attachment',
       extras_require={
           'lxml': 'lxml >= 3.4.0'
       },
       entry_points={
           'console_scripts': ['yagmail = yagmail.yagmail:main']
       },
+      tests_require=['pytest'],
+      cmdclass={'test': PyTest},
       classifiers=[
           'Environment :: Console',
           'Intended Audience :: Developers',
