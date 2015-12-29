@@ -209,3 +209,5 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - Click to enable the email for being used externally https://www.google.com/settings/security/lesssecureapps
 
 - Make sure you have a working internet connection
+
+- If you get an `ImportError` try to install with `sudo`, see issue #13
