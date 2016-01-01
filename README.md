@@ -211,3 +211,9 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - Make sure you have a working internet connection
 
 - If you get an `ImportError` try to install with `sudo`, see issue #13
+
+### Donate
+
+If you like `yagmail`, feel free (not pun intended) to donate :-)
+
+[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y7QCCEPGC6R5E)
