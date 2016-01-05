@@ -1,8 +1,9 @@
-# "Forked" only the regexp part from the "validate_email" package.
-# The reason is that if you plan on sending out loads of emails or
-# doing checks can actually get you blacklisted, if it would be reliable at all.
-# However, this regexp is the best one I've come accross, so props to Syrus Akbary.
-# His copyright below.
+""" Module for validating emails.
+"Forked" only the regexp part from the "validate_email", see copyright below.
+The reason is that if you plan on sending out loads of emails or
+doing checks can actually get you blacklisted, if it would be reliable at all.
+However, this regexp is the best one I've come accross, so props to Syrus Akbary.
+"""
 
 # -----------------------------------------------------------------------------------------------
 
@@ -26,6 +27,7 @@
 # with the omission of the pattern components marked as "obsolete".
 
 import re
+
 
 try:
     from .error import YagInvalidEmailAddress
@@ -95,14 +97,14 @@ ADDR_SPEC = LOCAL_PART + r'@' + DOMAIN               # see 3.4.1
 VALID_ADDRESS_REGEXP = '^' + ADDR_SPEC + '$'
 
 
-def validate_email_with_regex(emailAddress):
+def validate_email_with_regex(email_address):
     """
     Note that this will only filter out syntax mistakes in emailaddresses.
     If a human would think it is probably a valid email, it will most likely pass.
     However, it could still very well be that the actual emailaddress has simply
     not be claimed by anyone (so then this function fails to devalidate).
     """
-    if not re.match(VALID_ADDRESS_REGEXP, emailAddress):
+    if not re.match(VALID_ADDRESS_REGEXP, email_address):
         emsg = 'Emailaddress "{}" is not valid according to RFC 2822 standards'.format(
-            emailAddress)
+            email_address)
         raise YagInvalidEmailAddress(emsg)

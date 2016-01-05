@@ -1,21 +1,24 @@
-import itertools
+""" Testing module for yagmail """
 
+import itertools
 import sys
 from os import path
+
+
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 from yagmail import SMTP
-yag = SMTP("py.test", "py.test")
 
 
-def getCombinations():
+def get_combinations(yag):
+    """ Creates permutations of possible inputs """
     tos = (None, (yag.user), [yag.user, yag.user],
            {yag.user: 'me', yag.user + '1': 'me'})
     subjects = ('subj', ['subj'], ['subj', 'subj1'])
     contents = (None, ['body'], ['body', 'body1', '<h2><center>Text</center></h2>'])
     results = []
-    for x in itertools.product(tos, subjects, contents):
-        options = {y: z for y, z in zip(['to', 'subject', 'contents'], x)}
+    for row in itertools.product(tos, subjects, contents):
+        options = {y: z for y, z in zip(['to', 'subject', 'contents'], row)}
         options['preview_only'] = True
         options['use_cache'] = True
         results.append(options)
@@ -24,6 +27,8 @@ def getCombinations():
 
 
 def test_one():
-    mail_combinations = getCombinations()
+    """ Tests several versions of allowed input for yagamail """
+    yag = SMTP("py.test", "py.test")
+    mail_combinations = get_combinations(yag)
     for combination in mail_combinations:
         print(yag.send(**combination))
