@@ -1,16 +1,18 @@
 # when there is a bcc a different message has to be sent to the bcc
 # person, to show that they are bcc'ed
 
-import logging
-import time
-import os
-import keyring
-import smtplib
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import email.encoders
+import logging
 import mimetypes
+import os
+import smtplib
+import time
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import keyring
+
 
 try:
     from .error import YagConnectionClosed
@@ -33,23 +35,18 @@ except ImportError:
 
 
 class raw(str):
-
-    """ Ensure that a string is treated as text
-        and will not receive 'magic'. """
+    """ Ensure that a string is treated as text and will not receive 'magic'. """
     pass
 
 
 class inline(str):
-
-    """ Only needed when wanting to inline an image
-        rather than attach it """
+    """ Only needed when wanting to inline an image rather than attach it """
     pass
 
 
 class SMTP():
-
-    """ Connection is the class that contains the SMTP connection
-        and allows messages to be send """
+    """ yagmail.SMTP is a magic wrapper around smtplib's SMTP connection;
+        allows messages to be send """
 
     def __init__(self, user=None, password=None, host='smtp.gmail.com',
                  port='587', smtp_starttls=True, smtp_set_debuglevel=0,
@@ -75,7 +72,7 @@ class SMTP():
     def set_logging(self, log_level=logging.ERROR, file_path_name=None):
         """
         This function allows to change the logging backend, either output or file as backend
-        It also allows to set the logging level (whether to display only critical, error, info or debug.
+        It also allows to set the logging level (whether to display only critical/error/info/debug.
         e.g.
         yag = yagmail.SMTP()
         yag.set_logging(yagmail.logging.DEBUG)  # to see everything
@@ -93,7 +90,7 @@ class SMTP():
              throw_invalid_exception=False,
              headers=None):
         """ Use this to send an email with gmail"""
-        addresses = self._resolveAddresses(
+        addresses = self._resolve_addresses(
             to, cc, bcc, validate_email, throw_invalid_exception)
         if not addresses['recipients']:
             return {}
@@ -135,7 +132,8 @@ class SMTP():
         self.log.info(
             'Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
-    def handle_password(self, password):
+    def _handle_password(self, password):
+        """ Handles getting the password"""
         if password is None:
             password = keyring.get_password('yagmail', self.user)
             if password is None:
@@ -159,8 +157,8 @@ class SMTP():
 
     def login(self, password):
         """
-        Login to the SMTP server using password.
-        This only needs to be manually run when the connection to the SMTP server was closed by the user.
+        Login to the SMTP server using password. `login` only needs to be manually run when the
+        connection to the SMTP server was closed by the user.
         """
         self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
         self.smtp.set_debuglevel(self.debuglevel)
@@ -175,11 +173,10 @@ class SMTP():
         # skip login for test cases
         if 'py.test' == self.user or 'py.test' == password:
             return
-        password = self.handle_password(password)
+        password = self._handle_password(password)
         self.smtp.login(self.user, password)
 
-    def _resolveAddresses(self, to, cc, bcc, validate_email,
-                          throw_invalid_exception):
+    def _resolve_addresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
         """ Handle the targets addresses, adding aliases when defined """
         addresses = {'recipients': []}
         if to is not None:
@@ -197,16 +194,15 @@ class SMTP():
             for email_addr in addresses['recipients']:
                 try:
                     validate_email_with_regex(email_addr)
-                except YagInvalidEmailAddress as e:
+                except YagInvalidEmailAddress as err:
                     if throw_invalid_exception:
-                        raise e
+                        raise err
                     else:
-                        self.log.error(e)
+                        self.log.error(err)
                         addresses['recipients'].remove(email_addr)
         return addresses
 
-    def _prepare_message(self, addresses, subject, contents,
-                         use_cache, headers):
+    def _prepare_message(self, addresses, subject, contents, use_cache, headers):
         """ Prepare a MIME message """
         if self.is_closed:
             raise YagConnectionClosed('Login required again')
@@ -234,13 +230,12 @@ class SMTP():
                                                       contents):
                 if content_object['main_type'] == 'image':
                     # aliased image {'path' : 'alias'}
-                    if (isinstance(content_string, dict) and
-                            len(content_string) == 1):
-                        for x in content_string:
-                            hashed_ref = str(abs(hash(x)))
-                            alias = content_string[x]
+                    if isinstance(content_string, dict) and len(content_string) == 1:
+                        for key in content_string:
+                            hashed_ref = str(abs(hash(key)))
+                            alias = content_string[key]
                         # pylint: disable=undefined-loop-variable
-                        content_string = x
+                        content_string = key
                     else:
                         alias = os.path.basename(content_string)
                         hashed_ref = str(abs(hash(alias)))
@@ -301,14 +296,14 @@ class SMTP():
             return f.read().strip()
 
     @staticmethod
-    def _make_addr_alias_user(x):
-        if isinstance(x, str):
-            if '@' not in x:
-                x += '@gmail.com'
-            return (x, x)
-        if isinstance(x, dict):
-            if len(x) == 1:
-                return (list(x.keys())[0], list(x.values())[0])
+    def _make_addr_alias_user(email_addr):
+        if isinstance(email_addr, str):
+            if '@' not in email_addr:
+                email_addr += '@gmail.com'
+            return (email_addr, email_addr)
+        if isinstance(email_addr, dict):
+            if len(email_addr) == 1:
+                return (list(email_addr.keys())[0], list(email_addr.values())[0])
         raise YagAddressError
 
     @staticmethod
@@ -328,12 +323,12 @@ class SMTP():
             raise YagAddressError
 
     @staticmethod
-    def _add_subject(msg, Subject):
-        if not Subject:
+    def _add_subject(msg, subject):
+        if not subject:
             return
-        if isinstance(Subject, list):
-            Subject = ' '.join(Subject)
-        msg['Subject'] = Subject
+        if isinstance(subject, list):
+            subject = ' '.join(subject)
+        msg['Subject'] = subject
 
     def _get_mime_object(self, content_string):
         content_object = {
@@ -394,8 +389,7 @@ class SMTP():
         content_object['mime_object'] = mime_object
         return content_object
 
-    def feedback(self,
-                 message="Awesome features! You made my day! How can I contribute? Winter is coming."):
+    def feedback(self, message="Awesome features! You made my day! How can I contribute?"):
         """ Most important function. Please send me feedback :-) """
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
 
@@ -407,15 +401,13 @@ class SMTP_SSL(SMTP):
             self.port = '465'
         self.smtp = smtplib.SMTP_SSL(self.host, self.port, **self.kwargs)
         self.smtp.set_debuglevel(self.debuglevel)
-        password = self.handle_password(password)
+        password = self._handle_password(password)
         self.smtp.login(self.user, password)
         self.is_closed = False
 
 
 def register(username, password):
-    """ Use this to add a new gmail account to your OS' keyring
-         so it can be used in yagmail
-    """
+    """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail """
     keyring.set_password('yagmail', username, password)
 
 
