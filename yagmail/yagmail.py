@@ -68,6 +68,12 @@ class SMTP():
         self.log.info(
             'Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
         self.num_mail_sent = 0
+        
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return False
 
     def set_logging(self, log_level=logging.ERROR, file_path_name=None):
         """
