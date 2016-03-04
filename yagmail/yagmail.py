@@ -264,8 +264,8 @@ class SMTP():
                     htmlstr += '<div>{}</div>'.format(content_string)
                     altstr.append(content_string)
 
-        msg_related.attach(MIMEText(htmlstr, 'html'))
-        msg_alternative.attach(MIMEText('\n'.join(altstr)))
+        msg_related.attach(MIMEText(htmlstr, 'html', _charset='utf-8'))
+        msg_alternative.attach(MIMEText('\n'.join(altstr), _charset='utf-8'))
         msg_alternative.attach(msg_related)
         return msg
 
@@ -363,14 +363,14 @@ class SMTP():
                     if (html_tree.find('.//*') is not None or
                             html_tree.tag != 'p'):
                         content_object['mime_object'] = MIMEText(
-                            content_string, 'html')
+                            content_string, 'html', _charset='utf-8')
                         content_object['sub_type'] = 'html'
                 if content_object['mime_object'] is None:
-                    content_object['mime_object'] = MIMEText(content_string)
+                    content_object['mime_object'] = MIMEText(content_string, _charset='utf-8')
             except NameError:
                 self.log.error(
                     "Sending as text email since `lxml` is not installed")
-                content_object['mime_object'] = MIMEText(content_string)
+                content_object['mime_object'] = MIMEText(content_string, _charset='utf-8')
             if content_object['sub_type'] is None:
                 content_object['sub_type'] = 'plain'
             return content_object
