@@ -28,7 +28,7 @@ def get_combinations(yag):
 
 def test_one():
     """ Tests several versions of allowed input for yagamail """
-    yag = SMTP("py.test", "py.test")
+    yag = SMTP(smtp_skip_login=True)
     mail_combinations = get_combinations(yag)
     for combination in mail_combinations:
         print(yag.send(**combination))

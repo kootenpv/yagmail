@@ -49,7 +49,7 @@ class SMTP():
         allows messages to be send """
 
     def __init__(self, user=None, password=None, host='smtp.gmail.com',
-                 port='587', smtp_starttls=True, smtp_set_debuglevel=0,
+                 port='587', smtp_starttls=True, smtp_set_debuglevel=0, smtp_skip_login=False,
                  **kwargs):
         self.log = get_logger()
         self.set_logging()
@@ -60,6 +60,7 @@ class SMTP():
         self.host = host
         self.port = port
         self.starttls = smtp_starttls
+        self.smtp_skip_login = smtp_skip_login
         self.debuglevel = smtp_set_debuglevel
         self.kwargs = kwargs
         self.login(password)
@@ -68,10 +69,10 @@ class SMTP():
         self.log.info(
             'Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
         self.num_mail_sent = 0
-        
+
     def __enter__(self):
         return self
-        
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         return False
 
@@ -168,19 +169,18 @@ class SMTP():
         """
         self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
         self.smtp.set_debuglevel(self.debuglevel)
-        if self.starttls is not None:
+        if self.starttls:
             self.smtp.ehlo()
-            if self.starttls:
+            if self.starttls is True:
                 self.smtp.starttls()
             else:
                 self.smtp.starttls(**self.starttls)
             self.smtp.ehlo()
         self.is_closed = False
         # skip login for test cases
-        if 'py.test' == self.user or 'py.test' == password:
-            return
         password = self._handle_password(password)
-        self.smtp.login(self.user, password)
+        if not self.smtp_skip_login:
+            self.smtp.login(self.user, password)
 
     def _resolve_addresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
         """ Handle the targets addresses, adding aliases when defined """
