@@ -13,7 +13,6 @@ from email.mime.text import MIMEText
 
 import keyring
 
-
 try:
     from .error import YagConnectionClosed
     from .error import YagAddressError
@@ -53,8 +52,10 @@ class SMTP():
                  **kwargs):
         self.log = get_logger()
         self.set_logging()
-        if user is None:
+        if user is None and not smtp_skip_login:
             user = self._find_user_home_path()
+        else:
+            user = ''
         self.user, self.useralias = self._make_addr_alias_user(user)
         self.is_closed = None
         self.host = host
@@ -177,9 +178,8 @@ class SMTP():
                 self.smtp.starttls(**self.starttls)
             self.smtp.ehlo()
         self.is_closed = False
-        # skip login for test cases
-        password = self._handle_password(password)
         if not self.smtp_skip_login:
+            password = self._handle_password(password)
             self.smtp.login(self.user, password)
 
     def _resolve_addresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
@@ -297,8 +297,7 @@ class SMTP():
 
     @staticmethod
     def _find_user_home_path():
-        home = os.path.expanduser("~")
-        with open(home + '/.yagmail') as f:
+        with open(os.path.expanduser("~/.yagmail")) as f:
             return f.read().strip()
 
     @staticmethod
@@ -407,9 +406,10 @@ class SMTP_SSL(SMTP):
             self.port = '465'
         self.smtp = smtplib.SMTP_SSL(self.host, self.port, **self.kwargs)
         self.smtp.set_debuglevel(self.debuglevel)
-        password = self._handle_password(password)
-        self.smtp.login(self.user, password)
         self.is_closed = False
+        if not self.smtp_skip_login:
+            password = self._handle_password(password)
+            self.smtp.login(self.user, password)
 
 
 def register(username, password):
