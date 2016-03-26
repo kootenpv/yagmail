@@ -52,9 +52,9 @@ class SMTP():
                  **kwargs):
         self.log = get_logger()
         self.set_logging()
-        if user is None and not smtp_skip_login:
+        if user is None:
             user = self._find_user_home_path()
-        else:
+        elif smtp_skip_login:
             user = ''
         self.user, self.useralias = self._make_addr_alias_user(user)
         self.is_closed = None
