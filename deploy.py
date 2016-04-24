@@ -1,5 +1,7 @@
-import sh
 import re
+
+import sh
+
 
 commit_count = sh.git('rev-list', ['--all']).count('\n')
 
@@ -26,7 +28,7 @@ with open('yagmail/__init__.py', 'w') as f:
         re.sub('__version__ = "[0-9.]+"',
                '__version__ = "{}"'.format(version), init))
 
-print(sh.python3('setup.py', ['sdist', 'bdist_wheel', 'upload']))
+print(sh.python('setup.py', ['sdist', 'bdist_wheel', 'upload']))
 
 sh.cd('../')
 
