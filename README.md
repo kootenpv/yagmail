@@ -187,8 +187,8 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
 - ~~add `raw` and `inline```~~
-- Travis CI integration
-- Add documentation to all functions (high, halfway)
+- ~~Travis CI integration ~~
+- ~~ Add documentation to all functions (high, halfway) ~~
 - Prepare for official 1.0
 - Go over documentation again (medium)
 - Allow `.yagmail` file to contain more parameters (medium)

@@ -27,11 +27,6 @@ except (ValueError, SystemError, ImportError):
     from validate import validate_email_with_regex
     from log import get_logger
 
-try:
-    import lxml.html
-except ImportError:
-    pass
-
 
 class raw(str):
     """ Ensure that a string is treated as text and will not receive 'magic'. """
@@ -47,9 +42,9 @@ class SMTP():
     """ yagmail.SMTP is a magic wrapper around smtplib's SMTP connection;
         allows messages to be send """
 
-    def __init__(self, user=None, password=None, host='smtp.gmail.com',
-                 port='587', smtp_starttls=True, smtp_set_debuglevel=0, smtp_skip_login=False,
-                 **kwargs):
+    def __init__(self, user=None, password=None, host='smtp.gmail.com', port='587',
+                 smtp_starttls=True, smtp_set_debuglevel=0, smtp_skip_login=False,
+                 encoding="utf-8", ** kwargs):
         self.log = get_logger()
         self.set_logging()
         if smtp_skip_login:
@@ -63,12 +58,12 @@ class SMTP():
         self.starttls = smtp_starttls
         self.smtp_skip_login = smtp_skip_login
         self.debuglevel = smtp_set_debuglevel
+        self.encoding = encoding
         self.kwargs = kwargs
         self.login(password)
         self.cache = {}
         self.unsent = []
-        self.log.info(
-            'Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
+        self.log.info('Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
         self.num_mail_sent = 0
 
     def __enter__(self):
@@ -93,17 +88,13 @@ class SMTP():
         """
         self.log = get_logger(log_level, file_path_name)
 
-    def send(self, to=None, subject=None, contents=None, cc=None, bcc=None,
-             preview_only=False, use_cache=False, validate_email=True,
-             throw_invalid_exception=False,
-             headers=None):
+    def send(self, to=None, subject=None, contents=None, attachments=None, cc=None, bcc=None,
+             preview_only=False, validate_email=True, throw_invalid_exception=False, headers=None):
         """ Use this to send an email with gmail"""
-        addresses = self._resolve_addresses(
-            to, cc, bcc, validate_email, throw_invalid_exception)
+        addresses = self._resolve_addresses(to, cc, bcc, validate_email, throw_invalid_exception)
         if not addresses['recipients']:
             return {}
-        msg = self._prepare_message(
-            addresses, subject, contents, use_cache, headers)
+        msg = self._prepare_message(addresses, subject, contents, attachments, headers)
 
         if preview_only:
             return addresses, msg.as_string()
@@ -137,8 +128,7 @@ class SMTP():
         """ Close the connection to the SMTP server """
         self.is_closed = True
         self.smtp.quit()
-        self.log.info(
-            'Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
+        self.log.info('Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
 
     def _handle_password(self, password):
         """ Handles getting the password"""
@@ -188,8 +178,7 @@ class SMTP():
         if to is not None:
             self._make_addr_alias_target(to, addresses, 'To')
         elif cc is not None and bcc is not None:
-            self._make_addr_alias_target(
-                [self.user, self.useralias], addresses, 'To')
+            self._make_addr_alias_target([self.user, self.useralias], addresses, 'To')
         else:
             addresses['recipients'].append(self.user)
         if cc is not None:
@@ -208,14 +197,23 @@ class SMTP():
                         addresses['recipients'].remove(email_addr)
         return addresses
 
-    def _prepare_message(self, addresses, subject, contents, use_cache, headers):
+    def _prepare_message(self, addresses, subject, contents, attachments, headers):
         """ Prepare a MIME message """
         if self.is_closed:
             raise YagConnectionClosed('Login required again')
         if isinstance(contents, str):
             contents = [contents]
-        has_included_images, content_objects = self._prepare_contents(
-            contents, use_cache)
+        if isinstance(attachments, str):
+            attachments = [attachments]
+
+        # merge contents and attachments for now.
+        if attachments is not None:
+            for a in attachments:
+                if not os.path.isfile(a):
+                    raise TypeError("'{}' is not a valid filepath".format(a))
+            contents = attachments if contents is None else contents + attachments
+
+        has_included_images, content_objects = self._prepare_contents(contents)
         msg = MIMEMultipart()
         if headers is not None:
             # Strangely, msg does not have an update method, so then manually.
@@ -231,6 +229,7 @@ class SMTP():
         altstr = []
         if has_included_images:
             msg.preamble = "This message is best displayed using a MIME capable email reader."
+
         if contents is not None:
             for content_object, content_string in zip(content_objects,
                                                       contents):
@@ -246,15 +245,14 @@ class SMTP():
                         alias = os.path.basename(content_string)
                         hashed_ref = str(abs(hash(alias)))
 
+                    # TODO: I should probably remove inline now that there is "attachments"
                     # if string is `inline`, inline, else, attach
                     # pylint: disable=unidiomatic-typecheck
                     if type(content_string) == inline:
-                        htmlstr += '<img src="cid:{}" title="{}"/>'.format(
-                            hashed_ref, alias)
+                        htmlstr += '<img src="cid:{}" title="{}"/>'.format(hashed_ref, alias)
                         content_object['mime_object'].add_header(
                             'Content-ID', '<{}>'.format(hashed_ref))
-                        altstr.append(
-                            '-- img {} should be here -- '.format(alias))
+                        altstr.append('-- img {} should be here -- '.format(alias))
 
                 if content_object['encoding'] == 'base64':
                     email.encoders.encode_base64(content_object['mime_object'])
@@ -264,23 +262,17 @@ class SMTP():
                     htmlstr += '<div>{}</div>'.format(content_string)
                     altstr.append(content_string)
 
-        msg_related.attach(MIMEText(htmlstr, 'html', _charset='utf-8'))
-        msg_alternative.attach(MIMEText('\n'.join(altstr), _charset='utf-8'))
+        msg_related.attach(MIMEText(htmlstr, 'html', _charset=self.encoding))
+        msg_alternative.attach(MIMEText('\n'.join(altstr), _charset=self.encoding))
         msg_alternative.attach(msg_related)
         return msg
 
-    def _prepare_contents(self, contents, use_cache):
+    def _prepare_contents(self, contents):
         mime_objects = []
         has_included_images = False
         if contents is not None:
             for content in contents:
-                if use_cache:
-                    if content not in self.cache:
-                        content_object = self._get_mime_object(content)
-                        self.cache[content] = content_object
-                    content_object = self.cache[content]
-                else:
-                    content_object = self._get_mime_object(content)
+                content_object = self._get_mime_object(content)
                 if content_object['main_type'] == 'image':
                     has_included_images = True
                 mime_objects.append(content_object)
@@ -342,6 +334,7 @@ class SMTP():
             'main_type': None,
             'sub_type': None
         }
+
         if isinstance(content_string, dict):
             for x in content_string:
                 content_string, content_name = x, content_string[x]
@@ -356,20 +349,14 @@ class SMTP():
                 content = f.read()
         else:
             content_object['main_type'] = 'text'
-            try:
-                if not is_raw:
-                    html_tree = lxml.html.fromstring(content_string)
-                    if (html_tree.find('.//*') is not None or
-                            html_tree.tag != 'p'):
-                        content_object['mime_object'] = MIMEText(
-                            content_string, 'html', _charset='utf-8')
-                        content_object['sub_type'] = 'html'
-                if content_object['mime_object'] is None:
-                    content_object['mime_object'] = MIMEText(content_string, _charset='utf-8')
-            except NameError:
-                self.log.error(
-                    "Sending as text email since `lxml` is not installed")
-                content_object['mime_object'] = MIMEText(content_string, _charset='utf-8')
+
+            if is_raw:
+                content_object['mime_object'] = MIMEText(content_string, _charset=self.encoding)
+            else:
+                content_object['mime_object'] = MIMEText(
+                    content_string, 'html', _charset=self.encoding)
+                content_object['sub_type'] = 'html'
+
             if content_object['sub_type'] is None:
                 content_object['sub_type'] = 'plain'
             return content_object
@@ -378,8 +365,7 @@ class SMTP():
             content_type, _ = mimetypes.guess_type(content_string)
 
             if content_type is not None:
-                content_object['main_type'], content_object[
-                    'sub_type'] = content_type.split('/')
+                content_object['main_type'], content_object['sub_type'] = content_type.split('/')
 
         if (content_object['main_type'] is None or
                 content_object['encoding'] is not None):
@@ -387,9 +373,8 @@ class SMTP():
                 content_object['main_type'] = 'application'
                 content_object['sub_type'] = 'octet-stream'
 
-        mime_object = MIMEBase(
-            content_object['main_type'], content_object['sub_type'],
-            name=content_name)
+        mime_object = MIMEBase(content_object['main_type'], content_object['sub_type'],
+                               name=content_name)
         mime_object.set_payload(content)
         content_object['mime_object'] = mime_object
         return content_object
@@ -426,10 +411,11 @@ def main():
         '-to', '-t', help='Send an email to address "TO"', nargs='+')
     parser.add_argument('-subject', '-s', help='Subject of email', nargs='+')
     parser.add_argument('-contents', '-c', help='Contents to send', nargs='+')
+    parser.add_argument('-attachments', '-a', help='Attachments to attach', nargs='+')
     parser.add_argument('-user', '-u', help='Username')
     parser.add_argument(
         '-password', '-p',
         help='Preferable to use keyring rather than password here')
     args = parser.parse_args()
-    SMTP(args.user, args.password).send(
-        to=args.to, subject=args.subject, contents=args.contents)
+    yag = SMTP(args.user, args.password)
+    yag.send(to=args.to, subject=args.subject, contents=args.contents, attachments=args.attachments)

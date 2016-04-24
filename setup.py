@@ -1,11 +1,12 @@
 from setuptools import setup
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '4'
-MICRO_VERSION = '130'
+MINOR_VERSION = '5'
+MICRO_VERSION = '132'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 from setuptools.command.test import test as TestCommand
+
 
 class PyTest(TestCommand):
     user_options = []
@@ -34,9 +35,6 @@ setup(name='yagmail',
           'keyring',
       ],
       keywords='email mime automatic html attachment',
-      extras_require={
-          'lxml': 'lxml >= 3.4.0'
-      },
       entry_points={
           'console_scripts': ['yagmail = yagmail.yagmail:main']
       },
