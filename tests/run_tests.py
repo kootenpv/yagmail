@@ -20,7 +20,6 @@ def get_combinations(yag):
     for row in itertools.product(tos, subjects, contents):
         options = {y: z for y, z in zip(['to', 'subject', 'contents'], row)}
         options['preview_only'] = True
-        options['use_cache'] = True
         results.append(options)
 
     return results
