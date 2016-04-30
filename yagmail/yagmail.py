@@ -70,6 +70,7 @@ class SMTP():
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
         return False
 
     def set_logging(self, log_level=logging.ERROR, file_path_name=None):
@@ -382,6 +383,9 @@ class SMTP():
     def feedback(self, message="Awesome features! You made my day! How can I contribute?"):
         """ Most important function. Please send me feedback :-) """
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
+
+    def __del__(self):
+        self.close()
 
 
 class SMTP_SSL(SMTP):

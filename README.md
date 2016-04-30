@@ -22,7 +22,7 @@ contents = ['This is the body, and here is just text http://somedomain/image.png
 yag.send('to@someone.com', 'subject', contents)
 ```
 
-Or a simple one-liner (connection will automatically close):
+Or a simple one-liner:
 ```python
 yagmail.SMTP('mygmailusername').send('to@someone.com', 'subject', 'This is the body')
 ```
@@ -87,7 +87,10 @@ Another convenience can be to save a .yagmail file in your home folder, containi
 yag = yagmail.SMTP('mygmailusername')
 ```
 
-Note that this connection is reusable, closable and when it leaves scope it will clean up after itself.
+Note that this connection is reusable, closable and when it leaves scope it will **clean up after itself in CPython**.
+
+As [tilgovi](https://github.com/tilgovi) points out in [#39](https://github.com/kootenpv/yagmail/issues/39), SMTP does not automatically close in **PyPy**. The context manager `with` should be used in that case.
+
 
 ### Usability
 
