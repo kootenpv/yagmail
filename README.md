@@ -5,10 +5,9 @@
 
 # yagmail -- Yet Another GMAIL/SMTP client
 
-[![Join the chat at https://gitter.im/kootenpv/yagmail](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kootenpv/yagmail?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/kootenpv/yagmail](https://badges.gitter.im/kootenpv/yagmail.svg)](https://gitter.im/kootenpv/yagmail?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![PyPI](https://img.shields.io/pypi/v/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 [![PyPI](https://img.shields.io/pypi/pyversions/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/yagmail.svg)](https://pypi.python.org/pypi/yagmail)
 
 The goal here is to make it as simple and painless as possible to send emails.
 
