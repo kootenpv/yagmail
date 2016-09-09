@@ -179,7 +179,69 @@ class SMTP():
         if to is not None:
             self._make_addr_alias_target(to, addresses, 'To')
         elif cc is not None and bcc is not None:
-            self._make_addr_alias_target([self.user, self.useralias], addresses, 'To')
+       from collections import Counter
+import sys
+import random
+
+
+def err(*args):
+    sys.stderr.write(', '.join([str(arg) for arg in args]) + "\n")
+
+player_count, my_id, zone_count, link_count = [int(i) for i in input().split()]
+
+for i in range(zone_count):
+    zone_id, platinum_source = [int(j) for j in input().split()]
+
+
+def get_graph():
+    game_graph = {}
+    for i in range(link_count):
+        zone_1, zone_2 = [int(j) for j in input().split()]
+        if zone_1 not in game_graph:
+            game_graph[zone_1] = []
+        if zone_2 not in game_graph:
+            game_graph[zone_2] = []
+        game_graph[zone_1].append(zone_2)
+        game_graph[zone_2].append(zone_1)
+    return game_graph
+
+graph = get_graph()
+
+# game loop
+while 1:
+    moves = Counter()
+    my_platinum = int(input())  # your available Platinum
+
+    found = set()
+    zone_info = []
+    has_platinum = set()
+    for i in range(zone_count):
+        # z_id: this zone's ID
+        # owner_id: the player who owns this zone (-1 otherwise)
+        # pods_p0: player 0's PODs on this zone
+        # pods_p1: player 1's PODs on this zone
+        # visible: 1 if one of your units can see this tile, else 0
+        # platinum: the amount of Platinum this zone can provide (0 if hidden by fog)
+        z_id, owner_id, p0_count, p1_count, visible, platinum = [int(j) for j in input().split()]
+        zone_info.append([z_id, owner_id, p0_count, p1_count, visible, platinum])
+        if platinum:
+            has_platinum.add(z_id)
+    for z_id, owner_id, p0_count, p1_count, visible, platinum in zone_info:
+        pc = p0_count if owner_id == 0 else p1_count
+        if owner_id == my_id and pc > 0:
+            randoms = [random.choice(graph[z_id]) for _ in range(pc)]
+            good_opts = [x for x in graph[z_id] if zone_info[x][1] != my_id] + randoms
+            it = 0
+            while it < pc:
+                z = good_opts.pop(0)
+                moves[(z_id, z)] += 1
+                it += 1
+
+    # first line for movement commands, second line no longer used (see the
+    # protocol in the statement for details)
+    print(' '.join(["{} {} {}".format(v, k[0], k[1]) for k, v in moves.items()]))
+    print("WAIT")
+     self._make_addr_alias_target([self.user, self.useralias], addresses, 'To')
         else:
             addresses['recipients'].append(self.user)
         if cc is not None:
@@ -385,7 +447,8 @@ class SMTP():
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
 
     def __del__(self):
-        self.close()
+        if not self.is_closed:
+            self.close()
 
 
 class SMTP_SSL(SMTP):
