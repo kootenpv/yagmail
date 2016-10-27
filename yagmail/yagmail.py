@@ -47,7 +47,7 @@ class SMTP():
                  encoding="utf-8", ** kwargs):
         self.log = get_logger()
         self.set_logging()
-        if smtp_skip_login:
+        if smtp_skip_login and user is None:
             user = ''
         elif user is None:
             user = self._find_user_home_path()
