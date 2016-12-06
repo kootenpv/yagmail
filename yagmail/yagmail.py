@@ -243,7 +243,7 @@ class SMTP():
                         # pylint: disable=undefined-loop-variable
                         content_string = key
                     else:
-                        alias = os.path.basename(content_string)
+                        alias = os.path.basename(str(content_string))
                         hashed_ref = str(abs(hash(alias)))
 
                     # TODO: I should probably remove inline now that there is "attachments"
