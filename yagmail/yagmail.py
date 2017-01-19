@@ -11,7 +11,10 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-import keyring
+try:
+    import keyring
+except RuntimeError:
+    print("Keyring cannot be loaded.")
 
 try:
     from .error import YagConnectionClosed
@@ -44,7 +47,7 @@ class SMTP():
 
     def __init__(self, user=None, password=None, host='smtp.gmail.com', port='587',
                  smtp_starttls=True, smtp_set_debuglevel=0, smtp_skip_login=False,
-                 encoding="utf-8", ** kwargs):
+                 encoding="utf-8", **kwargs):
         self.log = get_logger()
         self.set_logging()
         if smtp_skip_login and user is None:
@@ -70,7 +73,8 @@ class SMTP():
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
+        if not self.is_closed:
+            self.close()
         return False
 
     def set_logging(self, log_level=logging.ERROR, file_path_name=None):
@@ -128,8 +132,10 @@ class SMTP():
     def close(self):
         """ Close the connection to the SMTP server """
         self.is_closed = True
-        self.smtp.quit()
-        self.log.info('Closed SMTP @ %s:%s as %s', self.host, self.port, self.user)
+        try:
+            self.smtp.quit()
+        except (TypeError, AttributeError, smtplib.SMTPServerDisconnected):
+            pass
 
     def _handle_password(self, password):
         """ Handles getting the password"""
@@ -340,7 +346,7 @@ class SMTP():
             for x in content_string:
                 content_string, content_name = x, content_string[x]
         else:
-            content_name = os.path.basename(content_string)
+            content_name = os.path.basename(str(content_string))
 
         # pylint: disable=unidiomatic-typecheck
         is_raw = type(content_string) == raw
