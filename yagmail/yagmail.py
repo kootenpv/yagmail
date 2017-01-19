@@ -286,7 +286,9 @@ class SMTP():
         return has_included_images, mime_objects
 
     def _add_recipients_headers(self, msg, addresses):
-        msg['From'] = '{} <{}>'.format(self.useralias, self.user)
+        # Quoting the useralias so it should match display-name from https://tools.ietf.org/html/rfc5322 ,
+        # even if it's an email address.
+        msg['From'] = '"{}" <{}>'.format(self.useralias.replace('\\', '\\\\').replace('"', '\\"'), self.user)
         if 'To' in addresses:
             msg['To'] = addresses['To']
         else:
