@@ -229,6 +229,7 @@ class SMTP():
 
         msg_alternative = MIMEMultipart('alternative')
         msg_related = MIMEMultipart('related')
+        msg_related.attach("-- HTML goes here --")
         msg.attach(msg_alternative)
         self._add_subject(msg, subject)
         self._add_recipients_headers(msg, addresses)
@@ -241,6 +242,8 @@ class SMTP():
             for content_object, content_string in zip(content_objects,
                                                       contents):
                 if content_object['main_type'] == 'image':
+                    # all image objects need base64 encoding, so do it now
+                    email.encoders.encode_base64(content_object['mime_object'])
                     # aliased image {'path' : 'alias'}
                     if isinstance(content_string, dict) and len(content_string) == 1:
                         for key in content_string:
@@ -260,16 +263,22 @@ class SMTP():
                         content_object['mime_object'].add_header(
                             'Content-ID', '<{}>'.format(hashed_ref))
                         altstr.append('-- img {} should be here -- '.format(alias))
+                        # inline images should be in related MIME block
+                        msg_related.attach(content_object['mime_object'])
+                    else:
+                        # non-inline images get attached like any other attachment
+                        msg.attach(content_object['mime_object'])
 
-                if content_object['encoding'] == 'base64':
-                    email.encoders.encode_base64(content_object['mime_object'])
-                    msg.attach(content_object['mime_object'])
                 else:
-                    content_string = content_string.replace('\n', '<br>')
-                    htmlstr += '<div>{}</div>'.format(content_string)
-                    altstr.append(content_string)
+                    if content_object['encoding'] == 'base64':
+                        email.encoders.encode_base64(content_object['mime_object'])
+                        msg.attach(content_object['mime_object'])
+                    else:
+                        content_string = content_string.replace('\n', '<br>')
+                        htmlstr += '<div>{}</div>'.format(content_string)
+                        altstr.append(content_string)
 
-        msg_related.attach(MIMEText(htmlstr, 'html', _charset=self.encoding))
+        msg_related.get_payload()[0] = MIMEText(htmlstr, 'html', _charset=self.encoding)
         msg_alternative.attach(MIMEText('\n'.join(altstr), _charset=self.encoding))
         msg_alternative.attach(msg_related)
         return msg
