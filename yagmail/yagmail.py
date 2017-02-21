@@ -297,7 +297,8 @@ class SMTP():
     def _add_recipients_headers(self, msg, addresses):
         # Quoting the useralias so it should match display-name from https://tools.ietf.org/html/rfc5322 ,
         # even if it's an email address.
-        msg['From'] = '"{}" <{}>'.format(self.useralias.replace('\\', '\\\\').replace('"', '\\"'), self.user)
+        msg['From'] = '"{}" <{}>'.format(self.useralias.replace(
+            '\\', '\\\\').replace('"', '\\"'), self.user)
         if 'To' in addresses:
             msg['To'] = addresses['To']
         else:
@@ -402,8 +403,11 @@ class SMTP():
         self.send('kootenpv@gmail.com', 'Yagmail feedback', message)
 
     def __del__(self):
-        if not self.is_closed:
-            self.close()
+        try:
+            if not self.is_closed:
+                self.close()
+        except AttributeError:
+            pass
 
 
 class SMTP_SSL(SMTP):
