@@ -56,10 +56,12 @@ Similarly, I make use of having my username in a file named `.yagmail` in my hom
 For Python 2.x and Python 3.x respectively:
 
 ```python
-pip install yagmail
-pip3 install yagmail
+pip install yagmail[all]
+pip3 install yagmail[all]
 
 ```
+
+If you get problems installing keyring, try installing without, i.e. `pip install yagmail`.
 
 As a side note, `yagmail` can now also be used to send emails from the command line.
 
@@ -68,9 +70,10 @@ As a side note, `yagmail` can now also be used to send emails from the command l
 [keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
 > The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage.
 
-You know you want it. Set it up by running once:
+You know you want it. Set it up by opening a Python interpreter and running:
 
 ```python
+import yagmail
 yagmail.register('mygmailusername', 'mygmailpassword')
 ```
 

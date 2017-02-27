@@ -13,8 +13,8 @@ from email.mime.text import MIMEText
 
 try:
     import keyring
-except RuntimeError:
-    print("Keyring cannot be loaded.")
+except (ImportError, NameError, RuntimeError):
+    pass
 
 try:
     from .error import YagConnectionClosed
@@ -140,9 +140,11 @@ class SMTP():
     def _handle_password(self, password):
         """ Handles getting the password"""
         if password is None:
-            password = keyring.get_password('yagmail', self.user)
-            if password is None:
+            try:
                 password = keyring.get_password('yagmail', self.user)
+            except NameError as e:
+                print("'keyring' cannot be loaded. Try 'pip install keyring' or continue without. See https://github.com/kootenpv/yagmail")
+                raise e
             if password is None:
                 import getpass
                 password = getpass.getpass(

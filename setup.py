@@ -2,7 +2,7 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '5'
-MICRO_VERSION = '156'
+MICRO_VERSION = '157'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 from setuptools.command.test import test as TestCommand
@@ -31,9 +31,9 @@ setup(name='yagmail',
       author_email='kootenpv@gmail.com',
       license='MIT',
       packages=['yagmail'],
-      install_requires=[
-          'keyring',
-      ],
+      extras_require={
+          "all": ["keyring"]
+      },
       keywords='email mime automatic html attachment',
       entry_points={
           'console_scripts': ['yagmail = yagmail.yagmail:main']
