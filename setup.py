@@ -1,8 +1,8 @@
 from setuptools import setup
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '5'
-MICRO_VERSION = '157'
+MINOR_VERSION = '6'
+MICRO_VERSION = '158'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 from setuptools.command.test import test as TestCommand
