@@ -5,6 +5,7 @@ import email.encoders
 import logging
 import mimetypes
 import os
+import sys
 import smtplib
 import time
 from email.mime.base import MIMEBase
@@ -29,6 +30,10 @@ except (ValueError, SystemError, ImportError):
     from error import YagInvalidEmailAddress
     from validate import validate_email_with_regex
     from log import get_logger
+
+
+PY3 = sys.version_info[0] == 3
+text_type = (str,) if PY3 else (str, unicode)
 
 
 class raw(str):
@@ -210,9 +215,9 @@ class SMTP():
         """ Prepare a MIME message """
         if self.is_closed:
             raise YagConnectionClosed('Login required again')
-        if isinstance(contents, str):
+        if isinstance(contents, text_type):
             contents = [contents]
-        if isinstance(attachments, str):
+        if isinstance(attachments, text_type):
             attachments = [attachments]
 
         # merge contents and attachments for now.
@@ -315,7 +320,7 @@ class SMTP():
 
     @staticmethod
     def _make_addr_alias_user(email_addr):
-        if isinstance(email_addr, str):
+        if isinstance(email_addr, text_type):
             if '@' not in email_addr:
                 email_addr += '@gmail.com'
             return (email_addr, email_addr)
@@ -326,11 +331,11 @@ class SMTP():
 
     @staticmethod
     def _make_addr_alias_target(x, addresses, which):
-        if isinstance(x, str):
+        if isinstance(x, text_type):
             addresses['recipients'].append(x)
             addresses[which] = x
         elif isinstance(x, list) or isinstance(x, tuple):
-            if not all([isinstance(k, str) for k in x]):
+            if not all([isinstance(k, text_type) for k in x]):
                 raise YagAddressError
             addresses['recipients'].extend(x)
             addresses[which] = '; '.join(x)
