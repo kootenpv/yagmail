@@ -1,13 +1,13 @@
 # when there is a bcc a different message has to be sent to the bcc
 # person, to show that they are bcc'ed
 
-import email.encoders
-import logging
-import mimetypes
 import os
 import sys
-import smtplib
 import time
+import logging
+import mimetypes
+import smtplib
+import email.encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -17,19 +17,13 @@ try:
 except (ImportError, NameError, RuntimeError):
     pass
 
-try:
-    from .error import YagConnectionClosed
-    from .error import YagAddressError
-    from .error import YagInvalidEmailAddress
-    from .validate import validate_email_with_regex
-    from .log import get_logger
-except (ValueError, SystemError, ImportError):
-    # stupid fix to make it easy to load interactively
-    from error import YagConnectionClosed
-    from error import YagAddressError
-    from error import YagInvalidEmailAddress
-    from validate import validate_email_with_regex
-    from log import get_logger
+
+from yagmail.error import YagConnectionClosed
+from yagmail.error import YagAddressError
+from yagmail.error import YagInvalidEmailAddress
+from yagmail.validate import validate_email_with_regex
+from yagmail.log import get_logger
+from yagmail.oauth2 import get_oauth2_info, get_oauth_string
 
 
 PY3 = sys.version_info[0] == 3
@@ -52,7 +46,7 @@ class SMTP():
 
     def __init__(self, user=None, password=None, host='smtp.gmail.com', port='587',
                  smtp_starttls=True, smtp_set_debuglevel=0, smtp_skip_login=False,
-                 encoding="utf-8", **kwargs):
+                 encoding="utf-8", oauth2_file=None, **kwargs):
         self.log = get_logger()
         self.set_logging()
         if smtp_skip_login and user is None:
@@ -68,7 +62,10 @@ class SMTP():
         self.debuglevel = smtp_set_debuglevel
         self.encoding = encoding
         self.kwargs = kwargs
-        self.login(password)
+        if oauth2_file is not None:
+            self.login_oauth2(oauth2_file)
+        else:
+            self.login(password)
         self.cache = {}
         self.unsent = []
         self.log.info('Connected to SMTP @ %s:%s as %s', self.host, self.port, self.user)
@@ -185,6 +182,15 @@ class SMTP():
         if not self.smtp_skip_login:
             password = self._handle_password(password)
             self.smtp.login(self.user, password)
+
+    def login_oauth2(self, oauth2_file):
+        self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
+        self.smtp.set_debuglevel(self.debuglevel)
+        oauth2_info = get_oauth2_info(oauth2_file)
+        auth_string = get_oauth_string(self.user, oauth2_info)
+        self.smtp.ehlo(oauth2_info["google_client_id"])
+        self.smtp.starttls()
+        self.smtp.docmd('AUTH', 'XOAUTH2 ' + auth_string)
 
     def _resolve_addresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
         """ Handle the targets addresses, adding aliases when defined """
@@ -428,27 +434,3 @@ class SMTP_SSL(SMTP):
         if not self.smtp_skip_login:
             password = self._handle_password(password)
             self.smtp.login(self.user, password)
-
-
-def register(username, password):
-    """ Use this to add a new gmail account to your OS' keyring so it can be used in yagmail """
-    keyring.set_password('yagmail', username, password)
-
-
-def main():
-    """ This is the function that is run from commandline with `yagmail` """
-    import argparse
-    parser = argparse.ArgumentParser(
-        description='Send a (g)mail with yagmail.')
-    parser.add_argument(
-        '-to', '-t', help='Send an email to address "TO"', nargs='+')
-    parser.add_argument('-subject', '-s', help='Subject of email', nargs='+')
-    parser.add_argument('-contents', '-c', help='Contents to send', nargs='+')
-    parser.add_argument('-attachments', '-a', help='Attachments to attach', nargs='+')
-    parser.add_argument('-user', '-u', help='Username')
-    parser.add_argument(
-        '-password', '-p',
-        help='Preferable to use keyring rather than password here')
-    args = parser.parse_args()
-    yag = SMTP(args.user, args.password)
-    yag.send(to=args.to, subject=args.subject, contents=args.contents, attachments=args.attachments)

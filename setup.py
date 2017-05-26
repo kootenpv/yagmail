@@ -1,7 +1,8 @@
 from setuptools import setup
+from setuptools import find_packages
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '6'
+MINOR_VERSION = '7'
 MICRO_VERSION = '158'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
@@ -23,6 +24,7 @@ class PyTest(TestCommand):
         errno = subprocess.call([sys.executable, 'tests/run_tests.py'])
         raise SystemExit(errno)
 
+
 setup(name='yagmail',
       version=VERSION,
       description='Yet Another GMAIL client',
@@ -30,13 +32,12 @@ setup(name='yagmail',
       author='Pascal van Kooten',
       author_email='kootenpv@gmail.com',
       license='MIT',
-      packages=['yagmail'],
       extras_require={
           "all": ["keyring"]
       },
       keywords='email mime automatic html attachment',
       entry_points={
-          'console_scripts': ['yagmail = yagmail.yagmail:main']
+          'console_scripts': ['yagmail = yagmail.__main__:main']
       },
       tests_require=['pytest'],
       cmdclass={'test': PyTest},
@@ -67,5 +68,6 @@ setup(name='yagmail',
           'Topic :: System :: Systems Administration',
           'Topic :: Utilities'
       ],
+      packages=find_packages(),
       zip_safe=False,
       platforms='any')

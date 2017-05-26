@@ -1,10 +1,10 @@
 __project__ = 'yagmail'
 __version__ = "0.5.158"
 
-from .error import YagConnectionClosed
-from .error import YagAddressError
-from .yagmail import SMTP
-from .yagmail import register
-from .yagmail import logging
-from .yagmail import raw
-from .yagmail import inline
+from yagmail.error import YagConnectionClosed
+from yagmail.error import YagAddressError
+from yagmail.__main__ import register
+from yagmail.sender import SMTP
+from yagmail.sender import logging
+from yagmail.sender import raw
+from yagmail.sender import inline
