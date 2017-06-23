@@ -284,7 +284,7 @@ class SMTP():
                         msg.attach(content_object['mime_object'])
                     else:
                         content_string = content_string.replace('\n', '<br>')
-                        htmlstr += '<div>{}</div>'.format(content_string)
+                        htmlstr += '<div>{0}</div>'.format(content_string)
                         altstr.append(content_string)
 
         msg_related.get_payload()[0] = MIMEText(htmlstr, 'html', _charset=self.encoding)
@@ -306,7 +306,7 @@ class SMTP():
     def _add_recipients_headers(self, msg, addresses):
         # Quoting the useralias so it should match display-name from https://tools.ietf.org/html/rfc5322 ,
         # even if it's an email address.
-        msg['From'] = '"{}" <{}>'.format(self.useralias.replace(
+        msg['From'] = '"{0}" <{1}>'.format(self.useralias.replace(
             '\\', '\\\\').replace('"', '\\"'), self.user)
         if 'To' in addresses:
             msg['To'] = addresses['To']
