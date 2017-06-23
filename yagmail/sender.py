@@ -146,7 +146,7 @@ class SMTP():
             if password is None:
                 import getpass
                 password = getpass.getpass(
-                    'Password for <{}>: '.format(self.user))
+                    'Password for <{0}>: '.format(self.user))
                 answer = ''
                 # Python 2 fix
                 while answer != 'y' and answer != 'n':
@@ -226,7 +226,7 @@ class SMTP():
         if attachments is not None:
             for a in attachments:
                 if not os.path.isfile(a):
-                    raise TypeError("'{}' is not a valid filepath".format(a))
+                    raise TypeError("'{0}' is not a valid filepath".format(a))
             contents = attachments if contents is None else contents + attachments
 
         has_included_images, content_objects = self._prepare_contents(contents)
@@ -268,10 +268,10 @@ class SMTP():
                     # if string is `inline`, inline, else, attach
                     # pylint: disable=unidiomatic-typecheck
                     if type(content_string) == inline:
-                        htmlstr += '<img src="cid:{}" title="{}"/>'.format(hashed_ref, alias)
+                        htmlstr += '<img src="cid:{0}" title="{1}"/>'.format(hashed_ref, alias)
                         content_object['mime_object'].add_header(
-                            'Content-ID', '<{}>'.format(hashed_ref))
-                        altstr.append('-- img {} should be here -- '.format(alias))
+                            'Content-ID', '<{0}>'.format(hashed_ref))
+                        altstr.append('-- img {0} should be here -- '.format(alias))
                         # inline images should be in related MIME block
                         msg_related.attach(content_object['mime_object'])
                     else:
