@@ -1,5 +1,5 @@
 __project__ = 'yagmail'
-__version__ = "0.7.165"
+__version__ = "0.8.170"
 
 from yagmail.error import YagConnectionClosed
 from yagmail.error import YagAddressError
