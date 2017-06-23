@@ -12,11 +12,6 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-try:
-    import keyring
-except (ImportError, NameError, RuntimeError):
-    pass
-
 
 from yagmail.error import YagConnectionClosed
 from yagmail.error import YagAddressError
@@ -24,6 +19,7 @@ from yagmail.error import YagInvalidEmailAddress
 from yagmail.validate import validate_email_with_regex
 from yagmail.log import get_logger
 from yagmail.oauth2 import get_oauth2_info, get_oauth_string
+from yagmail.utils import register
 
 
 PY3 = sys.version_info[0] == 3

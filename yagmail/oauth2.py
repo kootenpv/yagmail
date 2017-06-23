@@ -38,11 +38,11 @@ def url_format_params(params):
     return '&'.join(param_fragments)
 
 
-def generate_permission_url(client_id, scope='https://mail.google.com/'):
+def generate_permission_url(client_id):
     params = {}
     params['client_id'] = client_id
     params['redirect_uri'] = REDIRECT_URI
-    params['scope'] = scope
+    params['scope'] = 'https://www.googleapis.com/auth/gmail.send/'
     params['response_type'] = 'code'
     return '%s?%s' % (command_to_url('o/oauth2/auth'), url_format_params(params))
 
@@ -80,8 +80,7 @@ def generate_oauth2_string(username, access_token, as_base64=False):
 
 
 def get_authorization(google_client_id, google_client_secret):
-    scope = "https://mail.google.com/"
-    permission_url = generate_permission_url(google_client_id, scope)
+    permission_url = generate_permission_url(google_client_id)
     print('Navigate to the following URL to auth:\n' + permission_url)
     authorization_code = input('Enter verification code: ')
     response = call_authorize_tokens(google_client_id, google_client_secret, authorization_code)

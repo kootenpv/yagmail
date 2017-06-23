@@ -140,6 +140,25 @@ Be aware that if no explicit `to = ...` is used, the first argument will be used
 yag.send(subject = 'to self', contents = 'hi!')
 ```
 
+### Oauth2
+
+It is even safer to use Oauth2 for authentication, as you can revoke the rights of tokens.
+
+[This](http://blog.macuyiko.com/post/2016/how-to-send-html-mails-with-oauth2-and-gmail-in-python.html) is one of the best sources, upon which the oauth2 code is heavily based.
+
+The code:
+
+```python
+yag = SMTP("user@gmail.com", oauth2_file="~/oauth2_creds.json")
+yag.send(subject="Great!")
+```
+
+It will prompt for a `google_client_id` and a `google_client_secret`, when the file cannot be found. These variables can be obtained following [the previous link](http://blog.macuyiko.com/post/2016/how-to-send-html-mails-with-oauth2-and-gmail-in-python.html).
+
+After you provide them, a link will be shown in the terminal that you should followed to obtain a `google_refresh_token`. Paste this again, and you're set up!
+
+Note that people who obtain the file can send emails, but nothing else. As soon as you notice, you can simply disable the token.
+
 ### Magical `contents`
 
 The `contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
@@ -192,6 +211,7 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
 - ~~add `raw` and `inline```~~
+- ~~oauth2~~
 - ~~Travis CI integration ~~
 - ~~ Add documentation to all functions (high, halfway) ~~
 - Prepare for official 1.0
