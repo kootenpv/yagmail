@@ -42,7 +42,7 @@ def generate_permission_url(client_id):
     params = {}
     params['client_id'] = client_id
     params['redirect_uri'] = REDIRECT_URI
-    params['scope'] = 'https://www.googleapis.com/auth/gmail.send/'
+    params['scope'] = 'https://mail.google.com/'
     params['response_type'] = 'code'
     return '%s?%s' % (command_to_url('o/oauth2/auth'), url_format_params(params))
 
