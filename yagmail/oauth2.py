@@ -104,6 +104,9 @@ def get_oauth2_info(oauth2_file):
         with open(oauth2_file) as f:
             oauth2_info = json.load(f)
     else:
+        print("If you do not have an app registered for your email sending purposes, visit:")
+        print("https://console.developers.google.com")
+        print("and create a new project.\n")
         google_client_id = getpass.getpass("Your 'google_client_id': ")
         google_client_secret = getpass.getpass("Your 'google_client_secret': ")
         google_refresh_token, _, _ = get_authorization(google_client_id, google_client_secret)

@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '8'
-MICRO_VERSION = '171'
+MICRO_VERSION = '172'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 from setuptools.command.test import test as TestCommand
