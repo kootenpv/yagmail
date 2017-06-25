@@ -60,7 +60,7 @@ class SMTP():
             user = self._find_user_home_path()
         self.user, self.useralias = self._make_addr_alias_user(user)
         self.soft_email_validation = soft_email_validation
-        if soft_email_validation and not smtp_skip_login:
+        if soft_email_validation:
             validate_email_with_regex(self.user)
         self.is_closed = None
         self.host = host
