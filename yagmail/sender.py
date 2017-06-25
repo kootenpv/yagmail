@@ -51,7 +51,7 @@ class SMTP():
 
     def __init__(self, user=None, password=None, host='smtp.gmail.com', port='587',
                  smtp_starttls=True, smtp_set_debuglevel=0, smtp_skip_login=False,
-                 encoding="utf-8", oauth2_file=None, **kwargs):
+                 encoding="utf-8", oauth2_file=None, soft_email_validation=True, **kwargs):
         self.log = get_logger()
         self.set_logging()
         if smtp_skip_login and user is None:
@@ -59,6 +59,9 @@ class SMTP():
         elif user is None:
             user = self._find_user_home_path()
         self.user, self.useralias = self._make_addr_alias_user(user)
+        self.soft_email_validation = soft_email_validation
+        if soft_email_validation:
+            validate_email_with_regex(self.user)
         self.is_closed = None
         self.host = host
         self.port = port
@@ -101,9 +104,9 @@ class SMTP():
         self.log = get_logger(log_level, file_path_name)
 
     def send(self, to=None, subject=None, contents=None, attachments=None, cc=None, bcc=None,
-             preview_only=False, validate_email=True, throw_invalid_exception=False, headers=None):
+             preview_only=False, headers=None):
         """ Use this to send an email with gmail"""
-        addresses = self._resolve_addresses(to, cc, bcc, validate_email, throw_invalid_exception)
+        addresses = self._resolve_addresses(to, cc, bcc)
         if not addresses['recipients']:
             return {}
         msg = self._prepare_message(addresses, subject, contents, attachments, headers)
@@ -197,7 +200,7 @@ class SMTP():
         self.smtp.starttls()
         self.smtp.docmd('AUTH', 'XOAUTH2 ' + auth_string)
 
-    def _resolve_addresses(self, to, cc, bcc, validate_email, throw_invalid_exception):
+    def _resolve_addresses(self, to, cc, bcc):
         """ Handle the targets addresses, adding aliases when defined """
         addresses = {'recipients': []}
         if to is not None:
@@ -210,16 +213,9 @@ class SMTP():
             self._make_addr_alias_target(cc, addresses, 'Cc')
         if bcc is not None:
             self._make_addr_alias_target(bcc, addresses, 'Bcc')
-        if validate_email:
+        if self.soft_email_validation:
             for email_addr in addresses['recipients']:
-                try:
-                    validate_email_with_regex(email_addr)
-                except YagInvalidEmailAddress as err:
-                    if throw_invalid_exception:
-                        raise err
-                    else:
-                        self.log.error(err)
-                        addresses['recipients'].remove(email_addr)
+                validate_email_with_regex(email_addr)
         return addresses
 
     def _prepare_message(self, addresses, subject, contents, attachments, headers):

@@ -108,3 +108,6 @@ def validate_email_with_regex(email_address):
         emsg = 'Emailaddress "{}" is not valid according to RFC 2822 standards'.format(
             email_address)
         raise YagInvalidEmailAddress(emsg)
+    # apart from the standard, I personally do not trust email addresses without dot.
+    if "." not in email_address and "localhost" not in email_address.lower():
+        raise YagInvalidEmailAddress("Missing dot in emailaddress")
