@@ -140,6 +140,8 @@ Be aware that if no explicit `to = ...` is used, the first argument will be used
 yag.send(subject = 'to self', contents = 'hi!')
 ```
 
+Note that by default all email addresses are conservatively validated using `soft_email_validation==True` (default).
+
 ### Oauth2
 
 It is even safer to use Oauth2 for authentication, as you can revoke the rights of tokens.
