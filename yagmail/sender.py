@@ -50,8 +50,9 @@ class SMTP():
         allows messages to be send """
 
     def __init__(self, user=None, password=None, host='smtp.gmail.com', port='587',
-                 smtp_starttls=True, smtp_set_debuglevel=0, smtp_skip_login=False,
-                 encoding="utf-8", oauth2_file=None, soft_email_validation=True, **kwargs):
+                 smtp_starttls=True, smtp_ssl=False, smtp_set_debuglevel=0,
+                 smtp_skip_login=False, encoding="utf-8", oauth2_file=None,
+                 soft_email_validation=True, **kwargs):
         self.log = get_logger()
         self.set_logging()
         if smtp_skip_login and user is None:
@@ -66,6 +67,7 @@ class SMTP():
         self.host = host
         self.port = port
         self.starttls = smtp_starttls
+        self.ssl = smtp_ssl
         self.smtp_skip_login = smtp_skip_login
         self.debuglevel = smtp_set_debuglevel
         self.encoding = encoding
@@ -86,6 +88,10 @@ class SMTP():
         if not self.is_closed:
             self.close()
         return False
+
+    @property
+    def connection(self):
+        return smtplib.SMTP_SSL if self.ssl else smtplib.SMTP
 
     def set_logging(self, log_level=logging.ERROR, file_path_name=None):
         """
@@ -177,7 +183,7 @@ class SMTP():
         Login to the SMTP server using password. `login` only needs to be manually run when the
         connection to the SMTP server was closed by the user.
         """
-        self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
+        self.smtp = self.connection(self.host, self.port, **self.kwargs)
         self.smtp.set_debuglevel(self.debuglevel)
         if self.starttls:
             self.smtp.ehlo()
@@ -192,7 +198,7 @@ class SMTP():
             self.smtp.login(self.user, password)
 
     def login_oauth2(self, oauth2_file):
-        self.smtp = smtplib.SMTP(self.host, self.port, **self.kwargs)
+        self.smtp = self.connection(self.host, self.port, **self.kwargs)
         self.smtp.set_debuglevel(self.debuglevel)
         oauth2_info = get_oauth2_info(oauth2_file)
         auth_string = get_oauth_string(self.user, oauth2_info)
