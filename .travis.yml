@@ -1,8 +1,8 @@
 language: python
 matrix:
     include:
-        - python: 3.5
-          env: TOX_ENV=py35
+        - python: 3.6
+          env: TOX_ENV=py36
         - python: 2.7.10
           env: TOX_ENV=py27
 install:
