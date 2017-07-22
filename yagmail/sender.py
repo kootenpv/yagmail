@@ -266,6 +266,7 @@ class SMTP():
                         # pylint: disable=undefined-loop-variable
                         content_string = key
                     else:
+
                         alias = os.path.basename(str(content_string))
                         hashed_ref = str(abs(hash(alias)))
 
@@ -289,7 +290,10 @@ class SMTP():
                         msg.attach(content_object['mime_object'])
                     else:
                         content_string = content_string.replace('\n', '<br>')
-                        htmlstr += '<div>{0}</div>'.format(content_string)
+                        try:
+                            htmlstr += '<div>{0}</div>'.format(content_string)
+                        except UnicodeEncodeError:
+                            htmlstr += u'<div>{0}</div>'.format(content_string)
                         altstr.append(content_string)
 
         msg_related.get_payload()[0] = MIMEText(htmlstr, 'html', _charset=self.encoding)
@@ -372,7 +376,10 @@ class SMTP():
             for x in content_string:
                 content_string, content_name = x, content_string[x]
         else:
-            content_name = os.path.basename(str(content_string))
+            try:
+                content_name = os.path.basename(str(content_string))
+            except UnicodeEncodeError:
+                content_name = os.path.basename(content_string)
 
         # pylint: disable=unidiomatic-typecheck
         is_raw = type(content_string) == raw
