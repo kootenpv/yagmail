@@ -1,12 +1,6 @@
 """ Testing module for yagmail """
 
 import itertools
-import sys
-from os import path
-
-
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 from yagmail import SMTP
 
 
@@ -15,7 +9,8 @@ def get_combinations(yag):
     tos = (None, (yag.user), [yag.user, yag.user],
            {yag.user: 'me', yag.user + '1': 'me'})
     subjects = ('subj', ['subj'], ['subj', 'subj1'])
-    contents = (None, ['body'], ['body', 'body1', '<h2><center>Text</center></h2>'])
+    contents = (None, ['body'], ['body', 'body1',
+                                 '<h2><center>Text</center></h2>', u"<h1>\u2013</h1>"])
     results = []
     for row in itertools.product(tos, subjects, contents):
         options = {y: z for y, z in zip(['to', 'subject', 'contents'], row)}
