@@ -415,6 +415,8 @@ class SMTP():
 
         mime_object = MIMEBase(content_object['main_type'], content_object['sub_type'],
                                name=content_name)
+        mime_object.add_header('Content-Disposition', 'attachment',
+                               filename=(self.encoding, '', content_name))
         mime_object.set_payload(content)
         content_object['mime_object'] = mime_object
         return content_object
