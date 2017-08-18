@@ -16,7 +16,6 @@ from email.utils import formatdate
 
 from yagmail.error import YagConnectionClosed
 from yagmail.error import YagAddressError
-from yagmail.error import YagInvalidEmailAddress
 from yagmail.validate import validate_email_with_regex
 from yagmail.log import get_logger
 from yagmail.oauth2 import get_oauth2_info, get_oauth_string
@@ -50,8 +49,8 @@ class SMTP():
     """ yagmail.SMTP is a magic wrapper around smtplib's SMTP connection;
         allows messages to be send """
 
-    def __init__(self, user=None, password=None, host='smtp.gmail.com', port='587',
-                 smtp_starttls=True, smtp_ssl=False, smtp_set_debuglevel=0,
+    def __init__(self, user=None, password=None, host='smtp.gmail.com', port=None,
+                 smtp_starttls=None, smtp_ssl=True, smtp_set_debuglevel=0,
                  smtp_skip_login=False, encoding="utf-8", oauth2_file=None,
                  soft_email_validation=True, **kwargs):
         self.log = get_logger()
@@ -66,8 +65,8 @@ class SMTP():
             validate_email_with_regex(self.user)
         self.is_closed = None
         self.host = host
-        self.port = port
-        self.starttls = smtp_starttls
+        self.port = str(port) if port is not None else '465' if smtp_ssl else '587'
+        self.smtp_starttls = smtp_starttls
         self.ssl = smtp_ssl
         self.smtp_skip_login = smtp_skip_login
         self.debuglevel = smtp_set_debuglevel
@@ -93,6 +92,12 @@ class SMTP():
     @property
     def connection(self):
         return smtplib.SMTP_SSL if self.ssl else smtplib.SMTP
+
+    @property
+    def starttls(self):
+        if self.smtp_starttls is None:
+            return False if self.ssl else True
+        return self.smtp_starttls
 
     def set_logging(self, log_level=logging.ERROR, file_path_name=None):
         """
@@ -204,7 +209,8 @@ class SMTP():
         oauth2_info = get_oauth2_info(oauth2_file)
         auth_string = get_oauth_string(self.user, oauth2_info)
         self.smtp.ehlo(oauth2_info["google_client_id"])
-        self.smtp.starttls()
+        if self.starttls is True:
+            self.smtp.starttls()
         self.smtp.docmd('AUTH', 'XOAUTH2 ' + auth_string)
 
     def _resolve_addresses(self, to, cc, bcc):
@@ -248,7 +254,7 @@ class SMTP():
             for k, v in headers.items():
                 msg[k] = v
         if headers is None or not "Date" in headers:
-                msg["Date"] = formatdate()
+            msg["Date"] = formatdate()
 
         msg_alternative = MIMEMultipart('alternative')
         msg_related = MIMEMultipart('related')
@@ -275,7 +281,6 @@ class SMTP():
                         # pylint: disable=undefined-loop-variable
                         content_string = key
                     else:
-
                         alias = os.path.basename(str(content_string))
                         hashed_ref = str(abs(hash(alias)))
 
@@ -389,7 +394,6 @@ class SMTP():
                 content_name = os.path.basename(str(content_string))
             except UnicodeEncodeError:
                 content_name = os.path.basename(content_string)
-
         # pylint: disable=unidiomatic-typecheck
         is_raw = type(content_string) == raw
         if os.path.isfile(content_string) and not is_raw:
@@ -442,12 +446,9 @@ class SMTP():
 
 class SMTP_SSL(SMTP):
 
-    def login(self, password):
-        if self.port == '587':
-            self.port = '465'
-        self.smtp = smtplib.SMTP_SSL(self.host, self.port, **self.kwargs)
-        self.smtp.set_debuglevel(self.debuglevel)
-        self.is_closed = False
-        if not self.smtp_skip_login:
-            password = self._handle_password(password)
-            self.smtp.login(self.user, password)
+    def __init__(self, *args, **kwargs):
+        import warnings
+        warnings.warn("It is now possible to simply use 'SMTP' with smtp_ssl=True",
+                      category=DeprecationWarning)
+        kwargs["smtp_ssl"] = True
+        super(SMTP_SSL, self).__init__(*args, **kwargs)
