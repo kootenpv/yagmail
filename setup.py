@@ -2,8 +2,8 @@ from setuptools import setup
 from setuptools import find_packages
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '9'
-MICRO_VERSION = '179'
+MINOR_VERSION = '10'
+MICRO_VERSION = '189'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name='yagmail',
