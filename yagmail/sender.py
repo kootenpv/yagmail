@@ -11,6 +11,7 @@ import email.encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formatdate
 
 
 from yagmail.error import YagConnectionClosed
@@ -240,6 +241,8 @@ class SMTP():
             # Strangely, msg does not have an update method, so then manually.
             for k, v in headers.items():
                 msg[k] = v
+        if headers is None or not "Date" in headers:
+                msg["Date"] = formatdate()
 
         msg_alternative = MIMEMultipart('alternative')
         msg_related = MIMEMultipart('related')
