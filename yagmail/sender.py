@@ -11,7 +11,7 @@ import email.encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.Utils import formatdate
+from email.utils import formatdate
 
 
 from yagmail.error import YagConnectionClosed
