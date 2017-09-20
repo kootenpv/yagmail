@@ -90,7 +90,18 @@ html_theme = 'alabaster'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    # relative path from $PROJECT/_static/
+    'logo': "../../../../resources/icon.png",
+    'logo_name': True,
+    'description': ("yagmail makes sending emails very "
+                    "easy by doing all the magic for you"),
+
+    'github_user': "kootenpv",
+    'github_repo': "yagmail",
+    'github_button': True,
+    'github_type': 'star'
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
