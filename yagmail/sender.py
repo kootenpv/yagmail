@@ -46,8 +46,8 @@ class inline(str):
 
 
 class SMTP():
-    """ yagmail.SMTP is a magic wrapper around smtplib's SMTP connection;
-        allows messages to be send """
+    """ :class:`yagmail.SMTP` is a magic wrapper around
+    ``smtplib``'s SMTP connection, and allows messages to be sent."""
 
     def __init__(self, user=None, password=None, host='smtp.gmail.com', port=None,
                  smtp_starttls=None, smtp_ssl=True, smtp_set_debuglevel=0,
@@ -103,15 +103,16 @@ class SMTP():
         """
         This function allows to change the logging backend, either output or file as backend
         It also allows to set the logging level (whether to display only critical/error/info/debug.
-        e.g.
-        yag = yagmail.SMTP()
-        yag.set_logging(yagmail.logging.DEBUG)  # to see everything
+        for example::
 
-        and
+            yag = yagmail.SMTP()
+            yag.set_logging(yagmail.logging.DEBUG)  # to see everything
 
-        yagmail.set_logging(yagmail.logging.DEBUG, 'somelocalfile.log')
+        and::
 
-        lastly, a log_level of None will make sure there is no I/O.
+            yagmail.set_logging(yagmail.logging.DEBUG, 'somelocalfile.log')
+
+        lastly, a log_level of :py:class:`None` will make sure there is no I/O.
         """
         self.log = get_logger(log_level, file_path_name)
 
@@ -144,7 +145,7 @@ class SMTP():
 
     def send_unsent(self):
         """
-        Emails that were not being able to send will be stored in self.unsent.
+        Emails that were not being able to send will be stored in :attr:`self.unsent`.
         Use this function to attempt to send these again
         """
         for i in range(len(self.unsent)):
