@@ -91,8 +91,7 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
-    # relative path from $PROJECT/_static/
-    'logo': "../../../../resources/icon.png",
+    'logo': "icon.png",
     'logo_name': True,
     'description': ("yagmail makes sending emails very "
                     "easy by doing all the magic for you"),
