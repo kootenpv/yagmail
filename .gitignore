@@ -12,6 +12,8 @@ __pycache__/
 /.Python
 /bin/
 docs/_build/
+docs/_static/*
+!docs/_static/icon.png
 /include/
 /lib/
 /pip-selfcheck.json

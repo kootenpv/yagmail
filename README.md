@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="https://github.com/kootenpv/yagmail/blob/master/resources/icon.png" width="48px"/>
+  <img src="./docs/_static/icon.png" width="48px"/>
 </p>
 
 # yagmail -- Yet Another GMAIL/SMTP client
