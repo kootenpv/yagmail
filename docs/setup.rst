@@ -29,6 +29,7 @@ You can do this by running the following (for Python 2.x and 3.x respectively)::
 Just like with the PyPI installation method, if installing with ``keyring``
 causes issues, simply omit the ``[all]`` to install ``yagmail`` without it.
 
+.. _configuring_credentials:
 
 Configuring Credentials
 -----------------------

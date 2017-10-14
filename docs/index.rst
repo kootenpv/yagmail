@@ -13,6 +13,7 @@ make it as simple as possible to send emails.
 
    api
    setup
+   usage
 
 
 
