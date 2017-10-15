@@ -12,6 +12,8 @@ make it as simple as possible to send emails.
    :maxdepth: 2
 
    api
+   setup
+   usage
 
 
 

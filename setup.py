@@ -1,6 +1,8 @@
 from setuptools import setup
 from setuptools import find_packages
 
+with open('README.rst') as f:
+    LONG_DESCRIPTION = f.read()
 MAJOR_VERSION = '0'
 MINOR_VERSION = '10'
 MICRO_VERSION = '189'
@@ -9,6 +11,7 @@ VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 setup(name='yagmail',
       version=VERSION,
       description='Yet Another GMAIL client',
+      long_description=LONG_DESCRIPTION,
       url='https://github.com/kootenpv/yagmail',
       author='Pascal van Kooten',
       author_email='kootenpv@gmail.com',
@@ -25,7 +28,7 @@ setup(name='yagmail',
           'Intended Audience :: Developers',
           'Intended Audience :: Customer Service',
           'Intended Audience :: System Administrators',
-          'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+          'License :: OSI Approved :: MIT License',
           'Operating System :: Microsoft',
           'Operating System :: MacOS :: MacOS X',
           'Operating System :: Unix',
