@@ -15,6 +15,12 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(
         description='Send a (g)mail with yagmail.')
+    subparsers = parser.add_subparsers(dest="command")
+    oauth = subparsers.add_parser('oauth')
+    oauth.add_argument('--user', '-u', required=True,
+                       help='The gmail username to register oauth2 for')
+    oauth.add_argument('--file', '-f', required=True,
+                       help='The filepath to store the oauth2 credentials')
     parser.add_argument(
         '-to', '-t', help='Send an email to address "TO"', nargs='+')
     parser.add_argument('-subject', '-s', help='Subject of email', nargs='+')
@@ -25,5 +31,11 @@ def main():
         '-password', '-p',
         help='Preferable to use keyring rather than password here')
     args = parser.parse_args()
-    yag = SMTP(args.user, args.password)
-    yag.send(to=args.to, subject=args.subject, contents=args.contents, attachments=args.attachments)
+    if args.command == "oauth":
+        user = args.user
+        SMTP(args.user, oauth2_file=args.file)
+        print("Succesful.")
+    else:
+        yag = SMTP(args.user, args.password)
+        yag.send(to=args.to, subject=args.subject,
+                 contents=args.contents, attachments=args.attachments)
