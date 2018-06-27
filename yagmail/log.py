@@ -35,8 +35,8 @@ def get_logger(log_level=logging.DEBUG, file_path_name=None):
 
     # create formatter
     formatter = logging.Formatter(
-        "%(asctime)s [yagmail] [%(levelname)s] : %(message)s",
-        "%Y-%m-%d %H:%M:%S")
+        "%(asctime)s [yagmail] [%(levelname)s] : %(message)s", "%Y-%m-%d %H:%M:%S"
+    )
 
     # add formatter to ch
     ch.setFormatter(formatter)
