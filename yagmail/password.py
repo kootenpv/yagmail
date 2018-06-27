@@ -1,5 +1,3 @@
-import keyring
-
 try:
     import keyring
 except (ImportError, NameError, RuntimeError):
