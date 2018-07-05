@@ -141,7 +141,8 @@ class SMTPBase:
         headers=None,
     ):
         """ Use this to send an email with gmail"""
-        self.login()
+        if self.is_closed:
+            self.login()
         recipients, msg_string = self.prepare_send(
             to, subject, contents, attachments, cc, bcc, headers
         )
