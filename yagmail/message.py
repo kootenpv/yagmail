@@ -147,7 +147,7 @@ def get_mime_object(content_string, encoding):
             content_object["main_type"], content_object["sub_type"] = content_type.split("/")
 
     if content_object["main_type"] is None or content_object["encoding"] is not None:
-        if content_object["encoding"] != "base64":
+        if content_object["encoding"] != "base64" or content_object['sub_type'] == 'csv':
             content_object["main_type"] = "application"
             content_object["sub_type"] = "octet-stream"
 
