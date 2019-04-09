@@ -12,7 +12,7 @@ from email.utils import formatdate
 import mimetypes
 
 
-def prepare_message(user, useralias, addresses, subject, contents, attachments, headers, encoding):
+def prepare_message(user, useralias, addresses, subject, contents, attachments, headers, encoding, newline_to_break=True):
     # check if closed!!!!!! XXX
     """ Prepare a MIME message """
     if isinstance(contents, text_type):
@@ -85,7 +85,8 @@ def prepare_message(user, useralias, addresses, subject, contents, attachments, 
                 elif content_object["sub_type"] not in ["html", "plain"]:
                     msg.attach(content_object["mime_object"])
                 else:
-                    content_string = content_string.replace("\n", "<br>")
+                    if newline_to_break:
+                        content_string = content_string.replace("\n", "<br>")
                     try:
                         htmlstr += "<div>{0}</div>".format(content_string)
                     except UnicodeEncodeError:
