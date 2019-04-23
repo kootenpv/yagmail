@@ -4,7 +4,7 @@ except (ImportError, NameError, RuntimeError):
     pass
 
 
-def handle_password(user, password):
+def handle_password(user, password):  # pragma: no cover
     """ Handles getting the password"""
     if password is None:
         try:

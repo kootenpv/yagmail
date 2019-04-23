@@ -2,15 +2,19 @@
 
 import itertools
 from yagmail import SMTP
+from yagmail import raw, inline
 
 
 def get_combinations(yag):
     """ Creates permutations of possible inputs """
-    tos = (None, (yag.user), [yag.user, yag.user],
-           {yag.user: 'me', yag.user + '1': 'me'})
+    tos = (None, (yag.user), [yag.user, yag.user], {yag.user: 'me', yag.user + '1': 'me'})
     subjects = ('subj', ['subj'], ['subj', 'subj1'])
-    contents = (None, ['body'], ['body', 'body1',
-                                 '<h2><center>Text</center></h2>', u"<h1>\u2013</h1>"])
+    contents = (
+        None,
+        ['body'],
+        ['body', 'body1', '<h2><center>Text</center></h2>', u"<h1>\u2013</h1>"],
+        [raw("body")],
+    )
     results = []
     for row in itertools.product(tos, subjects, contents):
         options = {y: z for y, z in zip(['to', 'subject', 'contents'], row)}
