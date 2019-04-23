@@ -100,7 +100,7 @@ Defining some variables:
 
 ```python
 to = 'santa@someone.com'
-to2 = 'easterbunny@someone.com
+to2 = 'easterbunny@someone.com'
 to3 = 'sky@pip-package.com'
 subject = 'This is obviously the subject'
 body = 'This is obviously the body'
