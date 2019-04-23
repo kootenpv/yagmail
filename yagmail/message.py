@@ -124,7 +124,11 @@ def get_mime_object(content_string, encoding):
             content_name = os.path.basename(content_string)
     # pylint: disable=unidiomatic-typecheck
     is_raw = type(content_string) == raw
-    if not is_raw and os.path.isfile(content_string):
+    try:
+        is_file = os.path.isfile(content_string)
+    except ValueError:
+        is_file = False
+    if not is_raw and is_file:
         with open(content_string, "rb") as f:
             content_object["encoding"] = "base64"
             content = f.read()
