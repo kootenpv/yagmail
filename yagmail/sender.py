@@ -4,6 +4,7 @@
 import time
 import logging
 import smtplib
+import socks
 
 from yagmail.log import get_logger
 from yagmail.utils import find_user_home_path
@@ -32,6 +33,7 @@ class SMTPBase:
         encoding="utf-8",
         oauth2_file=None,
         soft_email_validation=True,
+        proxy = None, # eg: "socks5://127.0.0.1:1080"
         **kwargs
     ):
         self.log = get_logger()
@@ -62,6 +64,11 @@ class SMTPBase:
         self.num_mail_sent = 0
         self.oauth2_file = oauth2_file
         self.credentials = password if oauth2_file is None else oauth2_info
+        self.proxy = proxy
+        if proxy == None:
+            pass
+        else:
+            self.set_proxy()
 
     def __enter__(self):
         return self
@@ -236,6 +243,20 @@ class SMTPBase:
                 self.close()
         except AttributeError:
             pass
+    
+    def set_proxy(self):
+        proxy_list = self.proxy.replace('/', '').split(":")
+        proxy_type = str(proxy_list[0])
+        proxy_host = str(proxy_list[1])
+        proxy_port = int(proxy_list[2])
+        if proxy_type == "socks4":
+            SOCKS = socks.SOCKS4
+        elif proxy_type == "socks5":
+            SOCKS = socks.SOCKS5
+        elif proxy_type == "http":
+            SOCKS = socks.HTTP
+        socks.setdefaultproxy(SOCKS, proxy_host, proxy_port)
+        socks.wrapmodule(smtplib)
 
 
 class SMTP(SMTPBase):
