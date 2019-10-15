@@ -157,7 +157,7 @@ def get_mime_object(content_string, encoding):
             content_object["sub_type"] = "octet-stream"
 
     mime_object = MIMEBase(
-        content_object["main_type"], content_object["sub_type"], name=content_name
+        content_object["main_type"], content_object["sub_type"], name=(encoding, '', content_name)
     )
     mime_object.set_payload(content)
     content_object["mime_object"] = mime_object
