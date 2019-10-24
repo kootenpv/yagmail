@@ -1,9 +1,11 @@
 language: python
 matrix:
     include:
+        - python: 3.7
+          env: TOX_ENV=py37
         - python: 3.6
           env: TOX_ENV=py36
-        - python: 2.7.10
+        - python: 2.7
           env: TOX_ENV=py27
 install:
   - pip install tox
