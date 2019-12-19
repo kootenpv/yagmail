@@ -209,7 +209,7 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~`yagmail` as a command on CLI upon install~~
 - ~~Added `feedback` function on SMTP to be able to send me feedback directly :-)~~
 - ~~Added the option to validate emailaddresses...~~
-- ~~however, I'm unhappy with the error handling/loggin of wrong emails~~
+- ~~however, I'm unhappy with the error handling/logging of wrong emails~~
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
 - ~~add `raw` and `inline```~~
