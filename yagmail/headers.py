@@ -37,10 +37,10 @@ def make_addr_alias_target(x, addresses, which):
         if not all([isinstance(k, text_type) for k in x]):
             raise YagAddressError
         addresses["recipients"].extend(x)
-        addresses[which] = "; ".join(x)
+        addresses[which] = ",".join(x)
     elif isinstance(x, dict):
         addresses["recipients"].extend(x.keys())
-        addresses[which] = "; ".join(x.values())
+        addresses[which] = ",".join(x.values())
     else:
         raise YagAddressError
 

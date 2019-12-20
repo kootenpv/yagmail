@@ -7,7 +7,7 @@ from yagmail import raw, inline
 
 def get_combinations(yag):
     """ Creates permutations of possible inputs """
-    tos = (None, (yag.user), [yag.user, yag.user], {yag.user: 'me', yag.user + '1': 'me'})
+    tos = (None, (yag.user), [yag.user, yag.user], {yag.user: f'"me" <{yag.user}>', yag.user + '1': f'"me" <{yag.user}>'})
     subjects = ('subj', ['subj'], ['subj', 'subj1'])
     contents = (
         None,
