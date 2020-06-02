@@ -19,11 +19,18 @@ yag = yagmail.SMTP()
 contents = ['This is the body, and here is just text http://somedomain/image.png',
             'You can find an audio file attached.', '/local/path/song.mp3']
 yag.send('to@someone.com', 'subject', contents)
+yag.close()  # Don't forget to close the server
 ```
 
 Or a simple one-liner:
 ```python
 yagmail.SMTP('mygmailusername').send('to@someone.com', 'subject', 'This is the body')
+```
+
+Or a safer code using `with`:
+```python
+with yagmail.SMTP('from@someone.com') as yag:
+    yag.send('to@someone.com', 'subject', 'contents')
 ```
 
 Note that it will read the password securely from your keyring (read below). If you don't want this, you can also initialize with:
