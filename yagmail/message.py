@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from yagmail.compat import text_type
 from yagmail.utils import raw, inline
@@ -11,7 +12,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
 import mimetypes
-import premailer
+
+PY3 = sys.version_info[0] > 2
 
 
 def serialize_object(content):
@@ -115,7 +117,9 @@ def prepare_message(
                 else:
                     try:
                         htmlstr += "<div>{0}</div>".format(content_string)
-                        if prettify_html:
+                        if PY3 and prettify_html:
+                            import premailer
+
                             htmlstr = premailer.transform(htmlstr)
                     except UnicodeEncodeError:
                         htmlstr += u"<div>{0}</div>".format(content_string)
