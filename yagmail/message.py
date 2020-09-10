@@ -1,4 +1,5 @@
 import os
+import json
 from yagmail.compat import text_type
 from yagmail.utils import raw, inline
 from yagmail.headers import add_subject
@@ -10,22 +11,49 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
 import mimetypes
+import premailer
 
 
-def prepare_message(user, useralias, addresses, subject, contents, attachments, headers, encoding, newline_to_break=True):
+def serialize_object(content):
+    if isinstance(content, (dict, list, tuple, set)):
+        content = "<pre>" + json.dumps(content, indent=4) + "</pre>"
+    elif "DataFrame" in content.__class__.__name__:
+        try:
+            content = content.render()
+        except AttributeError:
+            content = content.to_html()
+    return content
+
+
+def prepare_message(
+    user,
+    useralias,
+    addresses,
+    subject,
+    contents,
+    attachments,
+    headers,
+    encoding,
+    prettify_html=True,
+):
     # check if closed!!!!!! XXX
     """ Prepare a MIME message """
-    if isinstance(contents, text_type):
-        contents = [contents]
-    if isinstance(attachments, text_type):
-        attachments = [attachments]
 
+    if not isinstance(contents, (list, tuple)):
+        if contents is not None:
+            contents = [contents]
+    if not isinstance(attachments, (list, tuple)):
+        if attachments is not None:
+            attachments = [attachments]
     # merge contents and attachments for now.
     if attachments is not None:
         for a in attachments:
             if not os.path.isfile(a):
                 raise TypeError("'{0}' is not a valid filepath".format(a))
         contents = attachments if contents is None else contents + attachments
+
+    if contents is not None:
+        contents = [serialize_object(x) for x in contents]
 
     has_included_images, content_objects = prepare_contents(contents, encoding)
     msg = MIMEMultipart()
@@ -85,10 +113,10 @@ def prepare_message(user, useralias, addresses, subject, contents, attachments, 
                 elif content_object["sub_type"] not in ["html", "plain"]:
                     msg.attach(content_object["mime_object"])
                 else:
-                    if newline_to_break:
-                        content_string = content_string.replace("\n", "<br>")
                     try:
                         htmlstr += "<div>{0}</div>".format(content_string)
+                        if prettify_html:
+                            htmlstr = premailer.transform(htmlstr)
                     except UnicodeEncodeError:
                         htmlstr += u"<div>{0}</div>".format(content_string)
                     altstr.append(content_string)
@@ -113,21 +141,17 @@ def prepare_contents(contents, encoding):
 
 def get_mime_object(content_string, encoding):
     content_object = {"mime_object": None, "encoding": None, "main_type": None, "sub_type": None}
-
-    if isinstance(content_string, dict):
-        for x in content_string:
-            content_string, content_name = x, content_string[x]
-    else:
-        try:
-            content_name = os.path.basename(str(content_string))
-        except UnicodeEncodeError:
-            content_name = os.path.basename(content_string)
+    try:
+        content_name = os.path.basename(str(content_string))
+    except UnicodeEncodeError:
+        content_name = os.path.basename(content_string)
     # pylint: disable=unidiomatic-typecheck
     is_raw = type(content_string) == raw
     try:
         is_file = os.path.isfile(content_string)
     except ValueError:
         is_file = False
+        content_name = str(abs(hash(content_string)))
     if not is_raw and is_file:
         with open(content_string, "rb") as f:
             content_object["encoding"] = "base64"
