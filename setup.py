@@ -5,7 +5,7 @@ with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
 MAJOR_VERSION = '0'
 MINOR_VERSION = '12'
-MICRO_VERSION = '220'
+MICRO_VERSION = '231'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
@@ -17,7 +17,8 @@ setup(
     author='Pascal van Kooten',
     author_email='kootenpv@gmail.com',
     license='MIT',
-    extras_require={"all": ["keyring", "premailer"]},
+    extras_require={"all": ["keyring"]},
+    install_requires=["premailer"],
     keywords='email mime automatic html attachment',
     entry_points={'console_scripts': ['yagmail = yagmail.__main__:main']},
     classifiers=[
