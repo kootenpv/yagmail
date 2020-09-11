@@ -9,7 +9,7 @@
 [![PyPI](https://img.shields.io/pypi/v/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 [![PyPI](https://img.shields.io/pypi/pyversions/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 
-**For the asynchronous asyncio version, look here*: https://github.com/kootenpv/aioyagmail
+*For the asynchronous asyncio version, look here*: https://github.com/kootenpv/aioyagmail
 
 The goal here is to make it as simple and painless as possible to send emails.
 
@@ -33,6 +33,8 @@ Note that it will read the password securely from your keyring (read below). If 
 ```python
 yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
 ```
+
+In 2020, I personally prefer: using an [Application-Specific Password](https://support.google.com/accounts/answer/185833)
 
 ### Table of Contents
 
