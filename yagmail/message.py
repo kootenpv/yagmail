@@ -5,6 +5,7 @@ from yagmail.compat import text_type
 from yagmail.utils import raw, inline
 from yagmail.headers import add_subject
 from yagmail.headers import add_recipients_headers
+from yagmail.headers import add_message_id
 
 import email.encoders
 from email.mime.base import MIMEBase
@@ -37,6 +38,8 @@ def prepare_message(
     headers,
     encoding,
     prettify_html=True,
+    message_id=None,
+    group_messages=True,
 ):
     # check if closed!!!!!! XXX
     """ Prepare a MIME message """
@@ -72,6 +75,7 @@ def prepare_message(
     msg.attach(msg_alternative)
     add_subject(msg, subject)
     add_recipients_headers(user, useralias, msg, addresses)
+    add_message_id(msg, message_id, group_messages)
     htmlstr = ""
     altstr = []
     if has_included_images:

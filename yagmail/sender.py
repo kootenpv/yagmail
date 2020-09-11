@@ -108,6 +108,8 @@ class SMTPBase:
         bcc=None,
         headers=None,
         prettify_html=True,
+        message_id=None,
+        group_messages=True,
     ):
         addresses = resolve_addresses(self.user, self.useralias, to, cc, bcc)
 
@@ -125,6 +127,8 @@ class SMTPBase:
             headers,
             self.encoding,
             prettify_html,
+            message_id,
+            group_messages,
         )
 
         recipients = addresses["recipients"]
@@ -142,11 +146,22 @@ class SMTPBase:
         preview_only=False,
         headers=None,
         prettify_html=True,
+        message_id=None,
+        group_messages=True,
     ):
         """ Use this to send an email with gmail"""
         self.login()
         recipients, msg_string = self.prepare_send(
-            to, subject, contents, attachments, cc, bcc, headers, prettify_html
+            to,
+            subject,
+            contents,
+            attachments,
+            cc,
+            bcc,
+            headers,
+            prettify_html,
+            message_id,
+            group_messages,
         )
         if preview_only:
             return (recipients, msg_string)

@@ -1,3 +1,6 @@
+import time
+import random
+import hashlib
 from yagmail.compat import text_type
 from yagmail.error import YagAddressError
 
@@ -63,3 +66,13 @@ def add_recipients_headers(user, useralias, msg, addresses):
         msg["To"] = useralias
     if "Cc" in addresses:
         msg["Cc"] = addresses["Cc"]
+
+
+def add_message_id(msg, message_id=None, group_messages=True):
+    if message_id is None:
+        if group_messages:
+            addr = " ".join(sorted([msg["From"], msg["To"]])) + msg.get("Subject", "None")
+        else:
+            addr = str(time.time() + random.random())
+    message_id = "<" + hashlib.md5(addr.encode()).hexdigest() + "@yagmail>"
+    msg["Message-ID"] = message_id
