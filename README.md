@@ -9,6 +9,8 @@
 [![PyPI](https://img.shields.io/pypi/v/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 [![PyPI](https://img.shields.io/pypi/pyversions/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 
+**For the asynchronous asyncio version, look here*: https://github.com/kootenpv/aioyagmail
+
 The goal here is to make it as simple and painless as possible to send emails.
 
 In the end, your code will look something like this:
@@ -19,7 +21,6 @@ yag = yagmail.SMTP()
 contents = ['This is the body, and here is just text http://somedomain/image.png',
             'You can find an audio file attached.', '/local/path/song.mp3']
 yag.send('to@someone.com', 'subject', contents)
-yag.close()  # Don't forget to close the server
 ```
 
 Or a simple one-liner:
@@ -27,21 +28,11 @@ Or a simple one-liner:
 yagmail.SMTP('mygmailusername').send('to@someone.com', 'subject', 'This is the body')
 ```
 
-Or a safer code using `with`:
-```python
-with yagmail.SMTP('from@someone.com') as yag:
-    yag.send('to@someone.com', 'subject', 'contents')
-```
-
 Note that it will read the password securely from your keyring (read below). If you don't want this, you can also initialize with:
 
 ```python
 yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
 ```
-
-but honestly, do you want to have your password written in your script?
-
-Similarly, I make use of having my username in a file named `.yagmail` in my home folder.
 
 ### Table of Contents
 
@@ -219,7 +210,7 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~however, I'm unhappy with the error handling/logging of wrong emails~~
 - ~~Logging count & mail capability (very low)~~
 - ~~Add documentation to exception classes (low)~~
-- ~~add `raw` and `inline```~~
+- ~~add `raw` and `inline`~~
 - ~~oauth2~~
 - ~~Travis CI integration ~~
 - ~~ Add documentation to all functions (high, halfway) ~~
