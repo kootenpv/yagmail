@@ -74,5 +74,5 @@ def add_message_id(msg, message_id=None, group_messages=True):
             addr = " ".join(sorted([msg["From"], msg["To"]])) + msg.get("Subject", "None")
         else:
             addr = str(time.time() + random.random())
-    message_id = "<" + hashlib.md5(addr.encode()).hexdigest() + "@yagmail>"
+        message_id = "<" + hashlib.md5(addr.encode()).hexdigest() + "@yagmail>"
     msg["Message-ID"] = message_id
