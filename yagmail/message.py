@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import datetime
 from yagmail.compat import text_type
 from yagmail.utils import raw, inline
 from yagmail.headers import add_subject
@@ -17,9 +18,14 @@ import mimetypes
 PY3 = sys.version_info[0] > 2
 
 
+def dt_converter(o):
+    if isinstance(o, (datetime.date, datetime.datetime)):
+        return o.isoformat()
+
+
 def serialize_object(content):
     if isinstance(content, (dict, list, tuple, set)):
-        content = "<pre>" + json.dumps(content, indent=4) + "</pre>"
+        content = "<pre>" + json.dumps(content, indent=4, default=dt_converter) + "</pre>"
     elif "DataFrame" in content.__class__.__name__:
         try:
             content = content.render()
