@@ -70,7 +70,8 @@ def prepare_message(
         contents = [serialize_object(x) for x in contents]
 
     has_included_images, content_objects = prepare_contents(contents, encoding)
-    contents = [x[1] if x is not None else None for x in contents]
+    if contents is not None:
+        contents = [x[1] for x in contents]
 
     msg = MIMEMultipart()
     if headers is not None:

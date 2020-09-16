@@ -1,5 +1,4 @@
 """ Testing module for yagmail """
-
 import itertools
 from yagmail import SMTP
 from yagmail import raw, inline
@@ -14,6 +13,7 @@ def get_combinations(yag):
         ['body'],
         ['body', 'body1', '<h2><center>Text</center></h2>', u"<h1>\u2013</h1>"],
         [raw("body")],
+        [{"a": 1}],
     )
     results = []
     for row in itertools.product(tos, subjects, contents):
