@@ -24,14 +24,17 @@ def dt_converter(o):
 
 
 def serialize_object(content):
+    is_marked_up = False
     if isinstance(content, (dict, list, tuple, set)):
         content = "<pre>" + json.dumps(content, indent=4, default=dt_converter) + "</pre>"
+        is_marked_up = True
     elif "DataFrame" in content.__class__.__name__:
         try:
             content = content.render()
         except AttributeError:
             content = content.to_html()
-    return content
+        is_marked_up = True
+    return is_marked_up, content
 
 
 def prepare_message(
@@ -67,6 +70,8 @@ def prepare_message(
         contents = [serialize_object(x) for x in contents]
 
     has_included_images, content_objects = prepare_contents(contents, encoding)
+    contents = [x[1] for x in contents]
+
     msg = MIMEMultipart()
     if headers is not None:
         # Strangely, msg does not have an update method, so then manually.
@@ -125,6 +130,8 @@ def prepare_message(
                 elif content_object["sub_type"] not in ["html", "plain"]:
                     msg.attach(content_object["mime_object"])
                 else:
+                    if not content_object["is_marked_up"]:
+                        content_string = content_string.replace("\n", "<br>")
                     try:
                         htmlstr += "<div>{0}</div>".format(content_string)
                         if PY3 and prettify_html:
@@ -145,16 +152,22 @@ def prepare_contents(contents, encoding):
     mime_objects = []
     has_included_images = False
     if contents is not None:
-        for content in contents:
-            content_object = get_mime_object(content, encoding)
+        for is_marked_up, content in contents:
+            content_object = get_mime_object(is_marked_up, content, encoding)
             if content_object["main_type"] == "image":
                 has_included_images = True
             mime_objects.append(content_object)
     return has_included_images, mime_objects
 
 
-def get_mime_object(content_string, encoding):
-    content_object = {"mime_object": None, "encoding": None, "main_type": None, "sub_type": None}
+def get_mime_object(is_marked_up, content_string, encoding):
+    content_object = {
+        "mime_object": None,
+        "encoding": None,
+        "main_type": None,
+        "sub_type": None,
+        "is_marked_up": is_marked_up,
+    }
     try:
         content_name = os.path.basename(str(content_string))
     except UnicodeEncodeError:
