@@ -4,8 +4,8 @@ from setuptools import find_packages
 with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
 MAJOR_VERSION = '0'
-MINOR_VERSION = '13'
-MICRO_VERSION = '238'
+MINOR_VERSION = '14'
+MICRO_VERSION = '241'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(

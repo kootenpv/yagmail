@@ -15,7 +15,7 @@ from yagmail.message import prepare_message
 from yagmail.headers import make_addr_alias_user
 
 
-class SMTPBase:
+class SMTP:
     """ :class:`yagmail.SMTP` is a magic wrapper around
     ``smtplib``'s SMTP connection, and allows messages to be sent."""
 
@@ -199,6 +199,12 @@ class SMTPBase:
         except (TypeError, AttributeError, smtplib.SMTPServerDisconnected):
             pass
 
+    def login(self):
+        if self.oauth2_file is not None:
+            self._login_oauth2(self.credentials)
+        else:
+            self._login(self.credentials)
+
     def _login(self, password):
         """
         Login to the SMTP server using password. `login` only needs to be manually run when the
@@ -251,23 +257,3 @@ class SMTPBase:
                 self.close()
         except AttributeError:
             pass
-
-
-class SMTP(SMTPBase):
-    def login(self):
-        if self.oauth2_file is not None:
-            self._login_oauth2(self.credentials)
-        else:
-            self._login(self.credentials)
-
-
-class SMTP_SSL(SMTP):
-    def __init__(self, *args, **kwargs):
-        import warnings
-
-        warnings.warn(
-            "It is now possible to simply use 'SMTP' with smtp_ssl=True",
-            category=DeprecationWarning,
-        )
-        kwargs["smtp_ssl"] = True
-        super(SMTP_SSL, self).__init__(*args, **kwargs)
