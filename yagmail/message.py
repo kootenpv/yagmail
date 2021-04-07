@@ -1,19 +1,18 @@
+import datetime
+import email.encoders
+import json
+import mimetypes
 import os
 import sys
-import json
-import datetime
-from yagmail.compat import text_type
-from yagmail.utils import raw, inline
-from yagmail.headers import add_subject
-from yagmail.headers import add_recipients_headers
-from yagmail.headers import add_message_id
-
-import email.encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
-import mimetypes
+
+from yagmail.headers import add_message_id
+from yagmail.headers import add_recipients_headers
+from yagmail.headers import add_subject
+from yagmail.utils import raw, inline
 
 PY3 = sys.version_info[0] > 2
 
@@ -25,7 +24,7 @@ def dt_converter(o):
 
 def serialize_object(content):
     is_marked_up = False
-    if isinstance(content, (dict, list, tuple, set)):
+    if isinstance(content, (dict, list, set)):  # Removed tuple, as this conflicted with attaching binary files with the filename as metadata
         content = "<pre>" + json.dumps(content, indent=4, default=dt_converter) + "</pre>"
         is_marked_up = True
     elif "DataFrame" in content.__class__.__name__:
@@ -62,8 +61,8 @@ def prepare_message(
     # merge contents and attachments for now.
     if attachments is not None:
         for a in attachments:
-            if not os.path.isfile(a):
-                raise TypeError("'{0}' is not a valid filepath".format(a))
+            if not isinstance(a, bytes) and not isinstance(a, tuple) and not os.path.isfile(a):
+                raise TypeError(f'{a} must be a valid filepath, bytes object or tuple (str, bytes). {a} is of type {type(a)}')
         contents = attachments if contents is None else contents + attachments
 
     if contents is not None:
@@ -180,10 +179,25 @@ def get_mime_object(is_marked_up, content_string, encoding):
     except ValueError:
         is_file = False
         content_name = str(abs(hash(content_string)))
+    except TypeError:
+        # This happens when e.g. tuple is passed.
+        is_file = False
     if not is_raw and is_file:
         with open(content_string, "rb") as f:
             content_object["encoding"] = "base64"
             content = f.read()
+
+    elif isinstance(content_string, tuple):
+        content_name, content = content_string
+        content_object["encoding"] = "base64"
+        content_string = content_name  # for MIME-Type guessing 'fake' the filename as a URL path
+
+    elif isinstance(content_string, bytes):  # attachment is already present as a bytes object
+        content_object["encoding"] = "base64"
+        content_object["main_type"] = "application"
+        content_object["sub_type"] = "octet-stream"
+        content = content_string
+
     else:
         content_object["main_type"] = "text"
 
@@ -198,7 +212,10 @@ def get_mime_object(is_marked_up, content_string, encoding):
         return content_object
 
     if content_object["main_type"] is None:
-        content_type, _ = mimetypes.guess_type(content_string)
+        if isinstance(content_string, str):  # Only guess type if it is an URL (i.e. a string)
+            content_type, _ = mimetypes.guess_type(content_string)
+        else:
+            content_type = None
 
         if content_type is not None:
             content_object["main_type"], content_object["sub_type"] = content_type.split("/")
