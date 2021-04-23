@@ -63,7 +63,7 @@ def prepare_message(
     if attachments is not None:
         for a in attachments:
             if not isinstance(a, io.IOBase) and not os.path.isfile(a):
-                raise TypeError(f'{a} must be a valid filepath or instance of io.IOBase. {a} is of type {type(a)}')
+                raise TypeError(f'{a} must be a valid filepath or file handle (instance of io.IOBase). {a} is of type {type(a)}')
         contents = attachments if contents is None else contents + attachments
 
     if contents is not None:
