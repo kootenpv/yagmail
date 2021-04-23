@@ -165,7 +165,7 @@ Note that people who obtain the file can send emails, but nothing else. As soon 
 
 The `contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
 
-- If it is a dictionary it will assume the key is the content and the value is an alias (only for images currently!)
+- If it is a dictionary it will assume the key is the content, and the value is an alias (only for images currently!)
   e.g. {'/path/to/image.png' : 'MyPicture'}
 - It will try to see if the content (string) can be read as a file locally,
   e.g. '/path/to/image.png'
@@ -182,6 +182,34 @@ As of version 0.4.94, `raw` and `inline` have been added.
 
 - `raw` ensures a string will not receive any "magic" (inlining, html, attaching)
 - `inline` will make an image appear in the text.
+
+### Attaching Files
+There are multiple ways to attach files in the `attachments` parameter (in addition to magical `contents` parameter).
+1. One can pass a list of paths i.e.
+```python
+yag.send(to=recipients,
+         subject=email_subject,
+         contents=contents,
+         attachments=['path/to/attachment1.png', 'path/to/attachment2.pdf', 'path/to/attachment3.zip']
+)
+```
+2. One can pass an instance of [`io.IOBase`](https://docs.python.org/3/library/io.html#io.IOBase).
+```python
+with open('path/to/attachment', 'rb') as f:
+    yag.send(to=recipients,
+             subject=email_subject,
+             contents=contents,
+             attachments=f
+             )
+```
+In this example `f` is an instance of `_io.BufferedReader` a subclass of the abstract class `io.IOBase`.
+
+`f` has in this example the attribute `.name`, which is used by yagmail as filename as well as to detect the correct MIME-type.
+Not all `io.IOBase` instances have the `.name` attribute in which case yagmail names the attachments `attachment1`, `attachment2`, ... without a file extension!
+Therefore, it is highly recommended setting the filename with extension manually e.g. `f.name = 'my_document.pdf'`
+
+A real-world example would be if the attachment is retrieved from a different source than the disk (e.g. downloaded from the internet or [uploaded by a user in a web-application](https://docs.streamlit.io/en/stable/api.html#streamlit.file_uploader)) 
+
 
 ### Feedback
 
