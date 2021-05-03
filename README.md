@@ -151,7 +151,7 @@ It is even safer to use Oauth2 for authentication, as you can revoke the rights 
 The code:
 
 ```python
-yag = SMTP("user@gmail.com", oauth2_file="~/oauth2_creds.json")
+yag = yagmail.SMTP("user@gmail.com", oauth2_file="~/oauth2_creds.json")
 yag.send(subject="Great!")
 ```
 
