@@ -5,7 +5,7 @@ with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
 MAJOR_VERSION = '0'
 MINOR_VERSION = '14'
-MICRO_VERSION = '244'
+MICRO_VERSION = '247'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
