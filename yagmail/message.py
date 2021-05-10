@@ -1,19 +1,19 @@
+import datetime
+import email.encoders
+import io
+import json
+import mimetypes
 import os
 import sys
-import json
-import datetime
-from yagmail.compat import text_type
-from yagmail.utils import raw, inline
-from yagmail.headers import add_subject
-from yagmail.headers import add_recipients_headers
-from yagmail.headers import add_message_id
-
-import email.encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
-import mimetypes
+
+from yagmail.headers import add_message_id
+from yagmail.headers import add_recipients_headers
+from yagmail.headers import add_subject
+from yagmail.utils import raw, inline
 
 PY3 = sys.version_info[0] > 2
 
@@ -62,8 +62,8 @@ def prepare_message(
     # merge contents and attachments for now.
     if attachments is not None:
         for a in attachments:
-            if not os.path.isfile(a):
-                raise TypeError("'{0}' is not a valid filepath".format(a))
+            if not isinstance(a, io.IOBase) and not os.path.isfile(a):
+                raise TypeError(f'{a} must be a valid filepath or file handle (instance of io.IOBase). {a} is of type {type(a)}')
         contents = attachments if contents is None else contents + attachments
 
     if contents is not None:
@@ -153,7 +153,13 @@ def prepare_contents(contents, encoding):
     mime_objects = []
     has_included_images = False
     if contents is not None:
+        unnamed_attachment_id = 1
         for is_marked_up, content in contents:
+            if isinstance(content, io.IOBase):
+                if not hasattr(content, 'name'):
+                    # If the IO object has no name attribute, give it one.
+                    content.name = f'attachment_{unnamed_attachment_id}'
+
             content_object = get_mime_object(is_marked_up, content, encoding)
             if content_object["main_type"] == "image":
                 has_included_images = True
@@ -180,10 +186,20 @@ def get_mime_object(is_marked_up, content_string, encoding):
     except ValueError:
         is_file = False
         content_name = str(abs(hash(content_string)))
+    except TypeError:
+        # This happens when e.g. tuple is passed.
+        is_file = False
     if not is_raw and is_file:
         with open(content_string, "rb") as f:
             content_object["encoding"] = "base64"
             content = f.read()
+
+    elif isinstance(content_string, io.IOBase):
+        content = content_string.read()
+        # no need to except AttributeError, as we set missing name attributes in the `prepare_contents` function
+        content_name = os.path.basename(content_string.name)
+        content_object["encoding"] = "base64"
+
     else:
         content_object["main_type"] = "text"
 
@@ -198,7 +214,8 @@ def get_mime_object(is_marked_up, content_string, encoding):
         return content_object
 
     if content_object["main_type"] is None:
-        content_type, _ = mimetypes.guess_type(content_string)
+        # Guess the mimetype with the filename
+        content_type, _ = mimetypes.guess_type(content_name)
 
         if content_type is not None:
             content_object["main_type"], content_object["sub_type"] = content_type.split("/")
