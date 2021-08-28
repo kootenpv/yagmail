@@ -103,6 +103,22 @@ def get_oauth2_info(oauth2_file):
     if os.path.isfile(oauth2_file):
         with open(oauth2_file) as f:
             oauth2_info = json.load(f)
+        try:
+            oauth2_info = oauth2_info["installed"]
+        except KeyError:
+            return oauth2_info
+        email_addr = input("Your 'email address': ")
+        google_client_id = oauth2_info["client_id"]
+        google_client_secret = oauth2_info["client_secret"]
+        google_refresh_token, _, _ = get_authorization(google_client_id, google_client_secret)
+        oauth2_info = {
+            "email_address": email_addr,
+            "google_client_id": google_client_id.strip(),
+            "google_client_secret": google_client_secret.strip(),
+            "google_refresh_token": google_refresh_token.strip(),
+        }
+        with open(oauth2_file, "w") as f:
+            json.dump(oauth2_info, f)
     else:
         print("If you do not have an app registered for your email sending purposes, visit:")
         print("https://console.developers.google.com")
