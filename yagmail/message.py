@@ -229,7 +229,7 @@ def get_mime_object(is_marked_up, content_string, encoding):
         content_object["main_type"], content_object["sub_type"], name=(encoding, '', content_name)
     )
     mime_object.set_payload(content)
-    if content_object["main_type"] == "application":
+    if content_object["encoding"] == "base64":
         mime_object.add_header('Content-Disposition', 'attachment', filename=content_name)
     content_object["mime_object"] = mime_object
     return content_object
