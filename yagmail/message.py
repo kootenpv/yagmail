@@ -10,6 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
 
+from yagmail.dkim import DKIMHandler
 from yagmail.headers import add_message_id
 from yagmail.headers import add_recipients_headers
 from yagmail.headers import add_subject
@@ -49,6 +50,7 @@ def prepare_message(
     prettify_html=True,
     message_id=None,
     group_messages=True,
+    dkim=None,
 ):
     # check if closed!!!!!! XXX
     """ Prepare a MIME message """
@@ -146,6 +148,10 @@ def prepare_message(
     msg_related.get_payload()[0] = MIMEText(htmlstr, "html", _charset=encoding)
     msg_alternative.attach(MIMEText("\n".join(altstr), _charset=encoding))
     msg_alternative.attach(msg_related)
+
+    if dkim:
+        DKIMHandler(dkim).add_dkim_sig_to_message(msg)
+    
     return msg
 
 

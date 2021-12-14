@@ -32,6 +32,7 @@ class SMTP:
         encoding="utf-8",
         oauth2_file=None,
         soft_email_validation=True,
+        dkim=None,
         **kwargs
     ):
         self.log = get_logger()
@@ -62,6 +63,7 @@ class SMTP:
         self.num_mail_sent = 0
         self.oauth2_file = oauth2_file
         self.credentials = password if oauth2_file is None else oauth2_info
+        self.dkim = dkim
 
     def __enter__(self):
         return self
