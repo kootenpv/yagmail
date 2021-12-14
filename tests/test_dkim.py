@@ -1,3 +1,4 @@
+import base64
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -35,6 +36,9 @@ def test_email_with_dkim():
     )
 
     assert recipients == [to]
+    assert "Subject: hello from tests" in msg_string
+    text_b64 = base64.b64encode(b"important message").decode("utf8")
+    assert text_b64 in msg_string
 
     dkim_string1 = "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=a.com; i=@a.com;\n " \
                    "q=dns/txt; s=selector; t="
@@ -42,5 +46,3 @@ def test_email_with_dkim():
 
     dkim_string2 = "h=to : from : subject;"
     assert dkim_string2 in msg_string
-
-    assert "Subject: hello from tests" in msg_string
