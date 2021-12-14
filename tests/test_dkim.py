@@ -42,3 +42,5 @@ def test_email_with_dkim():
 
     dkim_string2 = "h=to : from : subject;"
     assert dkim_string2 in msg_string
+
+    assert "Subject: hello from tests" in msg_string
