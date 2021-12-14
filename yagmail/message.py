@@ -151,7 +151,7 @@ def prepare_message(
 
     if dkim:
         DKIMHandler(dkim).add_dkim_sig_to_message(msg)
-    
+
     return msg
 
 

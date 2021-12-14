@@ -4,10 +4,10 @@ import dkim
 
 
 class DKIM(NamedTuple):
-    domain: str
-    private_key: str
+    domain: bytes
+    private_key: bytes
     include_headers: list
-    selector: str
+    selector: bytes
 
 
 class DKIMHandler:
