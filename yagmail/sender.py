@@ -135,8 +135,8 @@ class SMTP:
         )
 
         recipients = addresses["recipients"]
-        msg_string = msg.as_bytes()
-        return recipients, msg_string
+        msg_bytes = msg.as_bytes()
+        return recipients, msg_bytes
 
     def send(
         self,
@@ -154,7 +154,7 @@ class SMTP:
     ):
         """ Use this to send an email with gmail"""
         self.login()
-        recipients, msg_string = self.prepare_send(
+        recipients, msg_bytes = self.prepare_send(
             to,
             subject,
             contents,
@@ -167,14 +167,15 @@ class SMTP:
             group_messages,
         )
         if preview_only:
-            return (recipients, msg_string)
-        return self._attempt_send(recipients, msg_string)
+            return recipients, msg_bytes
 
-    def _attempt_send(self, recipients, msg_string):
+        return self._attempt_send(recipients, msg_bytes)
+
+    def _attempt_send(self, recipients, msg_bytes):
         attempts = 0
         while attempts < 3:
             try:
-                result = self.smtp.sendmail(self.user, recipients, msg_string)
+                result = self.smtp.sendmail(self.user, recipients, msg_bytes)
                 self.log.info("Message sent to %s", recipients)
                 self.num_mail_sent += 1
                 return result
