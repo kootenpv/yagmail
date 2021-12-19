@@ -1,6 +1,15 @@
 import base64
+import logging
 from pathlib import Path
 from unittest.mock import Mock
+
+import dkim
+
+
+def get_txt_from_test_file(*args, **kwargs):
+    dns_data_file = Path(__file__).parent / "domainkey-dns.txt"
+
+    return Path(dns_data_file).read_bytes()
 
 
 def test_email_with_dkim():
@@ -11,7 +20,7 @@ def test_email_with_dkim():
 
     private_key = private_key_path.read_bytes()
 
-    dkim = DKIM(
+    dkim_obj = DKIM(
         domain=b"a.com",
         selector=b"selector",
         private_key=private_key,
@@ -21,7 +30,7 @@ def test_email_with_dkim():
         user="a@a.com",
         host="smtp.blabla.com",
         port=25,
-        dkim=dkim,
+        dkim=dkim_obj,
     )
 
     yag.login = Mock()
@@ -46,3 +55,13 @@ def test_email_with_dkim():
 
     dkim_string2 = "h=to : from : subject;"
     assert dkim_string2 in msg_string
+
+    l = logging.getLogger()
+    l.setLevel(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+
+    assert dkim.verify(
+        message=msg_string.encode("utf8"),
+        logger=l,
+        dnsfunc=get_txt_from_test_file
+    )
