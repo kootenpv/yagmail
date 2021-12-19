@@ -10,7 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
 
-from yagmail.dkim import DKIMHandler
+from yagmail.dkim import add_dkim_sig_to_message
 from yagmail.headers import add_message_id
 from yagmail.headers import add_recipients_headers
 from yagmail.headers import add_subject
@@ -149,8 +149,8 @@ def prepare_message(
     msg_alternative.attach(MIMEText("\n".join(altstr), _charset=encoding))
     msg_alternative.attach(msg_related)
 
-    if dkim:
-        DKIMHandler(dkim).add_dkim_sig_to_message(msg)
+    if dkim is not None:
+        add_dkim_sig_to_message(msg, dkim)
 
     return msg
 

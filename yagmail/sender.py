@@ -112,7 +112,6 @@ class SMTP:
         prettify_html=True,
         message_id=None,
         group_messages=True,
-        dkim=None,
     ):
         addresses = resolve_addresses(self.user, self.useralias, to, cc, bcc)
 
@@ -132,7 +131,7 @@ class SMTP:
             prettify_html,
             message_id,
             group_messages,
-            dkim,
+            self.dkim,
         )
 
         recipients = addresses["recipients"]
@@ -166,7 +165,6 @@ class SMTP:
             prettify_html,
             message_id,
             group_messages,
-            self.dkim,
         )
         if preview_only:
             return (recipients, msg_string)
