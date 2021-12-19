@@ -135,7 +135,7 @@ class SMTP:
         )
 
         recipients = addresses["recipients"]
-        msg_string = msg.as_string()
+        msg_string = msg.as_bytes()
         return recipients, msg_string
 
     def send(
