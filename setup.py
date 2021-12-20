@@ -4,8 +4,8 @@ from setuptools import find_packages
 with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
 MAJOR_VERSION = '0'
-MINOR_VERSION = '14'
-MICRO_VERSION = '256'
+MINOR_VERSION = '15'
+MICRO_VERSION = '0'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
@@ -18,7 +18,7 @@ setup(
     author_email='kootenpv@gmail.com',
     license='MIT',
     extras_require={"all": ["keyring"]},
-    install_requires=["premailer"],
+    install_requires=["premailer", "dkimpy"],
     keywords='email mime automatic html attachment',
     entry_points={'console_scripts': ['yagmail = yagmail.__main__:main']},
     classifiers=[
