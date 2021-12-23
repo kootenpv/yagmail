@@ -46,6 +46,8 @@ In 2020, I personally prefer: using an [Application-Specific Password](https://s
 |[Usability](#usability)                                        |   Shows some usage patterns for sending                             |
 |[Recipients](#recipients)                                      |   How to send to multiple people, give an alias or send to self     |
 |[Magical contents](#magical-contents)                          |   Really easy to send text, html, images and attachments            |
+|[Attaching files](#attaching-files)                            |   How attach files to the email                                     |
+|[DKIM Support](#dkim-support)                                  |   Add DKIM signature to your emails with your private key           |
 |[Feedback](#feedback)                                          |   How to send me feedback                                           |
 |[Roadmap (and priorities)](#roadmap-and-priorities)            |   Yup                                                               |
 |[Errors](#errors)                                              |   List of common errors for people dealing with sending emails      |
