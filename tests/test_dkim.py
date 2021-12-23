@@ -79,6 +79,6 @@ def test_email_with_dkim():
 def test_dkim_without_including_headers():
     msg_string = _test_email_with_dkim(include_headers=None)
 
-    dkim_string_headers = "h=content-type : mime-version :\n date : subject : from : to : message-id : from;\n"     
+    dkim_string_headers = "h=content-type : mime-version :\n date : subject : from : to : message-id : from;\n"
     assert dkim_string_headers in msg_string
 
