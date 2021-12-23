@@ -12,7 +12,7 @@ def get_txt_from_test_file(*args, **kwargs):
     return Path(dns_data_file).read_bytes()
 
 
-def test_email_with_dkim():
+def _test_email_with_dkim(include_headers):
     from yagmail import SMTP
     from yagmail.dkim import DKIM
 
@@ -24,8 +24,9 @@ def test_email_with_dkim():
         domain=b"a.com",
         selector=b"selector",
         private_key=private_key,
-        include_headers=[b"To", b"From", b"Subject"]
+        include_headers=include_headers,
     )
+
     yag = SMTP(
         user="a@a.com",
         host="smtp.blabla.com",
@@ -55,9 +56,6 @@ def test_email_with_dkim():
                    "q=dns/txt; s=selector; t="
     assert dkim_string1 in msg_string
 
-    dkim_string2 = "h=to : from : subject;"
-    assert dkim_string2 in msg_string
-
     l = logging.getLogger()
     l.setLevel(level=logging.DEBUG)
     logging.basicConfig(level=logging.DEBUG)
@@ -67,3 +65,20 @@ def test_email_with_dkim():
         logger=l,
         dnsfunc=get_txt_from_test_file
     )
+
+    return msg_string
+
+
+def test_email_with_dkim():
+    msg_string = _test_email_with_dkim(include_headers=[b"To", b"From", b"Subject"])
+
+    dkim_string2 = "h=to : from : subject;"
+    assert dkim_string2 in msg_string
+
+
+def test_dkim_without_including_headers():
+    msg_string = _test_email_with_dkim(include_headers=None)
+
+    dkim_string_headers = "h=content-type : mime-version :\n date : subject : from : to : message-id : from;\n"     
+    assert dkim_string_headers in msg_string
+

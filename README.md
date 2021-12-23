@@ -233,6 +233,8 @@ dkim_obj = DKIM(
   selector=b"selector",
   private_key=private_key,
   include_headers=[b"To", b"From", b"Subject"],
+  # To include all default headers just pass None instead
+  # include_headers=None,
 )
 
 yag = SMTP(dkim=dkim_obj)
