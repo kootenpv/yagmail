@@ -1,7 +1,11 @@
 from email.mime.base import MIMEBase
 from typing import NamedTuple
 
-import dkim
+try:
+    import dkim
+except ImportError:
+    dkim = None
+    pass
 
 
 class DKIM(NamedTuple):
@@ -12,6 +16,9 @@ class DKIM(NamedTuple):
 
 
 def add_dkim_sig_to_message(msg: MIMEBase, dkim_obj: DKIM) -> None:
+    if dkim is None:
+        raise RuntimeError("dkim package not installed")
+
     # Based on example from:
     # https://github.com/russellballestrini/russell.ballestrini.net/blob/master/content/
     # 2018-06-04-quickstart-to-dkim-sign-email-with-python.rst

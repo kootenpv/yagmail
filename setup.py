@@ -17,7 +17,7 @@ setup(
     author='Pascal van Kooten',
     author_email='kootenpv@gmail.com',
     license='MIT',
-    extras_require={"all": ["keyring"]},
+    extras_require={"all": ["keyring", "dkimpy"], "dkim": ["dkimpy"]},
     install_requires=["premailer", "dkimpy"],
     keywords='email mime automatic html attachment',
     entry_points={'console_scripts': ['yagmail = yagmail.__main__:main']},

@@ -210,7 +210,35 @@ Therefore, it is highly recommended setting the filename with extension manually
 
 A real-world example would be if the attachment is retrieved from a different source than the disk (e.g. downloaded from the internet or [uploaded by a user in a web-application](https://docs.streamlit.io/en/stable/api.html#streamlit.file_uploader)) 
 
+### DKIM Support
 
+To send emails with dkim signature, you need to install the package with all related packages.
+```
+pip install yagmail[all]
+# or
+pip install yagmail[dkim]
+```
+
+Usage:
+```python
+from yagmail import SMTP
+from yagmail.dkim import DKIM
+from pathlib import Path
+
+# load private key from file/secrets manager
+private_key = Path("privkey.pem").read_bytes()
+
+dkim_obj = DKIM(
+  domain=b"a.com",
+  selector=b"selector",
+  private_key=private_key,
+  include_headers=[b"To", b"From", b"Subject"],
+)
+
+yag = SMTP(dkim=dkim_obj)
+
+# all the rest is the same
+```
 ### Feedback
 
 I'll try to respond to issues within 24 hours at Github.....
