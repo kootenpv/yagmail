@@ -53,7 +53,7 @@ def prepare_message(
     dkim=None,
 ):
     # check if closed!!!!!! XXX
-    """ Prepare a MIME message """
+    """Prepare a MIME message"""
 
     if not isinstance(contents, (list, tuple)):
         if contents is not None:
@@ -65,7 +65,8 @@ def prepare_message(
     if attachments is not None:
         for a in attachments:
             if not isinstance(a, io.IOBase) and not os.path.isfile(a):
-                raise TypeError(f'{a} must be a valid filepath or file handle (instance of io.IOBase). {a} is of type {type(a)}')
+                msg = "{a} must be a valid filepath or file handle (instance of io.IOBase). {a} is of type {tp}"
+                raise TypeError(msg.format(a=a, tp=type(a)))
         contents = attachments if contents is None else contents + attachments
 
     if contents is not None:
@@ -116,9 +117,7 @@ def prepare_message(
                 # pylint: disable=unidiomatic-typecheck
                 if type(content_string) == inline:
                     htmlstr += '<img src="cid:{0}" title="{1}"/>'.format(hashed_ref, alias)
-                    content_object["mime_object"].add_header(
-                        "Content-ID", "<{0}>".format(hashed_ref)
-                    )
+                    content_object["mime_object"].add_header("Content-ID", "<{0}>".format(hashed_ref))
                     altstr.append("-- img {0} should be here -- ".format(alias))
                     # inline images should be in related MIME block
                     msg_related.attach(content_object["mime_object"])
@@ -162,9 +161,9 @@ def prepare_contents(contents, encoding):
         unnamed_attachment_id = 1
         for is_marked_up, content in contents:
             if isinstance(content, io.IOBase):
-                if not hasattr(content, 'name'):
+                if not hasattr(content, "name"):
                     # If the IO object has no name attribute, give it one.
-                    content.name = f'attachment_{unnamed_attachment_id}'
+                    content.name = "attachment_{}".format(unnamed_attachment_id)
 
             content_object = get_mime_object(is_marked_up, content, encoding)
             if content_object["main_type"] == "image":
@@ -231,11 +230,9 @@ def get_mime_object(is_marked_up, content_string, encoding):
             content_object["main_type"] = "application"
             content_object["sub_type"] = "octet-stream"
 
-    mime_object = MIMEBase(
-        content_object["main_type"], content_object["sub_type"], name=(encoding, '', content_name)
-    )
+    mime_object = MIMEBase(content_object["main_type"], content_object["sub_type"], name=(encoding, "", content_name))
     mime_object.set_payload(content)
     if content_object["main_type"] == "application":
-        mime_object.add_header('Content-Disposition', 'attachment', filename=content_name)
+        mime_object.add_header("Content-Disposition", "attachment", filename=content_name)
     content_object["mime_object"] = mime_object
     return content_object
