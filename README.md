@@ -46,6 +46,8 @@ In 2020, I personally prefer: using an [Application-Specific Password](https://s
 |[Usability](#usability)                                        |   Shows some usage patterns for sending                             |
 |[Recipients](#recipients)                                      |   How to send to multiple people, give an alias or send to self     |
 |[Magical contents](#magical-contents)                          |   Really easy to send text, html, images and attachments            |
+|[Attaching files](#attaching-files)                            |   How attach files to the email                                     |
+|[DKIM Support](#dkim-support)                                  |   Add DKIM signature to your emails with your private key           |
 |[Feedback](#feedback)                                          |   How to send me feedback                                           |
 |[Roadmap (and priorities)](#roadmap-and-priorities)            |   Yup                                                               |
 |[Errors](#errors)                                              |   List of common errors for people dealing with sending emails      |
@@ -210,7 +212,37 @@ Therefore, it is highly recommended setting the filename with extension manually
 
 A real-world example would be if the attachment is retrieved from a different source than the disk (e.g. downloaded from the internet or [uploaded by a user in a web-application](https://docs.streamlit.io/en/stable/api.html#streamlit.file_uploader)) 
 
+### DKIM Support
 
+To send emails with dkim signature, you need to install the package with all related packages.
+```
+pip install yagmail[all]
+# or
+pip install yagmail[dkim]
+```
+
+Usage:
+```python
+from yagmail import SMTP
+from yagmail.dkim import DKIM
+from pathlib import Path
+
+# load private key from file/secrets manager
+private_key = Path("privkey.pem").read_bytes()
+
+dkim_obj = DKIM(
+  domain=b"a.com",
+  selector=b"selector",
+  private_key=private_key,
+  include_headers=[b"To", b"From", b"Subject"],
+  # To include all default headers just pass None instead
+  # include_headers=None,
+)
+
+yag = SMTP(dkim=dkim_obj)
+
+# all the rest is the same
+```
 ### Feedback
 
 I'll try to respond to issues within 24 hours at Github.....

@@ -32,6 +32,7 @@ class SMTP:
         encoding="utf-8",
         oauth2_file=None,
         soft_email_validation=True,
+        dkim=None,
         **kwargs
     ):
         self.log = get_logger()
@@ -62,6 +63,7 @@ class SMTP:
         self.num_mail_sent = 0
         self.oauth2_file = oauth2_file
         self.credentials = password if oauth2_file is None else oauth2_info
+        self.dkim = dkim
 
     def __enter__(self):
         return self
@@ -129,11 +131,12 @@ class SMTP:
             prettify_html,
             message_id,
             group_messages,
+            self.dkim,
         )
 
         recipients = addresses["recipients"]
-        msg_string = msg.as_string()
-        return recipients, msg_string
+        msg_bytes = msg.as_bytes()
+        return recipients, msg_bytes
 
     def send(
         self,
@@ -151,7 +154,7 @@ class SMTP:
     ):
         """ Use this to send an email with gmail"""
         self.login()
-        recipients, msg_string = self.prepare_send(
+        recipients, msg_bytes = self.prepare_send(
             to,
             subject,
             contents,
@@ -164,14 +167,15 @@ class SMTP:
             group_messages,
         )
         if preview_only:
-            return (recipients, msg_string)
-        return self._attempt_send(recipients, msg_string)
+            return recipients, msg_bytes
 
-    def _attempt_send(self, recipients, msg_string):
+        return self._attempt_send(recipients, msg_bytes)
+
+    def _attempt_send(self, recipients, msg_bytes):
         attempts = 0
         while attempts < 3:
             try:
-                result = self.smtp.sendmail(self.user, recipients, msg_string)
+                result = self.smtp.sendmail(self.user, recipients, msg_bytes)
                 self.log.info("Message sent to %s", recipients)
                 self.num_mail_sent += 1
                 return result
