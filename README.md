@@ -17,21 +17,10 @@ In the end, your code will look something like this:
 
 ```python
 import yagmail
-yag = yagmail.SMTP()
+yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
 contents = ['This is the body, and here is just text http://somedomain/image.png',
             'You can find an audio file attached.', '/local/path/song.mp3']
 yag.send('to@someone.com', 'subject', contents)
-```
-
-Or a simple one-liner:
-```python
-yagmail.SMTP('mygmailusername').send('to@someone.com', 'subject', 'This is the body')
-```
-
-Note that it will read the password securely from your keyring (read below). If you don't want this, you can also initialize with:
-
-```python
-yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
 ```
 
 In 2020, I personally prefer: using an [Application-Specific Password](https://support.google.com/accounts/answer/185833)
@@ -41,7 +30,6 @@ In 2020, I personally prefer: using an [Application-Specific Password](https://s
 |Section|Explanation|
 |---------------------------------------------------------------|---------------------------------------------------------------------|
 |[Install](#install)                                            |   Find the instructions on how to install yagmail here              |
-|[Username and password](#username-and-password)                |   No more need to fill in username and password in scripts          |
 |[Start a connection](#start-a-connection)                      |   Get started                                                       |
 |[Usability](#usability)                                        |   Shows some usage patterns for sending                             |
 |[Recipients](#recipients)                                      |   How to send to multiple people, give an alias or send to self     |
@@ -63,32 +51,12 @@ pip3 install yagmail[all]
 
 ```
 
-If you get problems installing keyring, try installing without, i.e. `pip install yagmail`.
-
 As a side note, `yagmail` can now also be used to send emails from the command line.
-
-### Username and password
-
-[keyring quoted](https://pypi.python.org/pypi/keyring#what-is-python-keyring-lib):
-> The Python `keyring` lib provides a easy way to access the system keyring service from python. It can be used in any application that needs safe password storage.
-
-You know you want it. Set it up by opening a Python interpreter and running:
-
-```python
-import yagmail
-yagmail.register('mygmailusername', 'mygmailpassword')
-```
-
-In fact, it is just a wrapper for `keyring.set_password('yagmail', 'mygmailusername', 'mygmailpassword')`.
-
-When no password is given and the user is not found in the keyring, `getpass.getpass()` is used to prompt the user for a password. Upon entering this once, it can be stored in the keyring and never asked again.
-
-Another convenience can be to save a .yagmail file in your home folder, containing just the email username. You can then omit everything, and simply use `yagmail.SMTP()` to connect. Of course, this wouldn't work with more accounts, but it might be a nice default. Upon request I'll consider adding more details to this .yagmail file (host, port and other settings).
 
 ### Start a connection
 
 ```python
-yag = yagmail.SMTP('mygmailusername')
+yag = yagmail.SMTP('mygmailusername', 'mygmailpassword)
 ```
 
 Note that this connection is reusable, closable and when it leaves scope it will **clean up after itself in CPython**.
@@ -210,7 +178,7 @@ In this example `f` is an instance of `_io.BufferedReader` a subclass of the abs
 Not all `io.IOBase` instances have the `.name` attribute in which case yagmail names the attachments `attachment1`, `attachment2`, ... without a file extension!
 Therefore, it is highly recommended setting the filename with extension manually e.g. `f.name = 'my_document.pdf'`
 
-A real-world example would be if the attachment is retrieved from a different source than the disk (e.g. downloaded from the internet or [uploaded by a user in a web-application](https://docs.streamlit.io/en/stable/api.html#streamlit.file_uploader)) 
+A real-world example would be if the attachment is retrieved from a different source than the disk (e.g. downloaded from the internet or [uploaded by a user in a web-application](https://docs.streamlit.io/en/stable/api.html#streamlit.file_uploader))
 
 ### DKIM Support
 
@@ -282,8 +250,6 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - Add option to shrink images (low)
 
 ### Errors
-
-- Make sure you have a keyring entry (see section <a href="#no-more-password-and-username">No more password and username</a>), or use getpass to register. I discourage to use username / password in scripts.
 
 - [`smtplib.SMTPException: SMTP AUTH extension not supported by server`](http://stackoverflow.com/questions/10147455/trying-to-send-email-gmail-as-mail-provider-using-python)
 
