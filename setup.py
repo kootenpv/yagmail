@@ -5,15 +5,19 @@ with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
 MAJOR_VERSION = '0'
 MINOR_VERSION = '15'
-MICRO_VERSION = '277'
+# MICRO_VERSION = '277'
+MICRO_VERSION = '281'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
+    # name='yagmail',
     name='yagmail',
     version=VERSION,
-    description='Yet Another GMAIL client',
-    long_description=LONG_DESCRIPTION,
-    url='https://github.com/kootenpv/yagmail',
+    # description='Yet Another GMAIL client',
+    description='fork of yagmail 0.15.280',
+    # long_description=LONG_DESCRIPTION,
+    long_description='fork of yagmail 0.15.280, fixed Fixed the problem in issue: https://github.com/kootenpv/yagmail/issues/242',
+    url='https://github.com/leffss/yagmail',
     author='Pascal van Kooten',
     author_email='kootenpv@gmail.com',
     license='MIT',
