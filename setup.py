@@ -11,7 +11,7 @@ VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
     # name='yagmail',
-    name='yagmail',
+    name='yagmail2',
     version=VERSION,
     # description='Yet Another GMAIL client',
     description='fork of yagmail 0.15.280',
