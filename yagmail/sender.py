@@ -183,7 +183,7 @@ class SMTP:
                 self.log.error(e)
                 attempts += 1
                 time.sleep(attempts * 3)
-        self.unsent.append((recipients, msg_string))
+        self.unsent.append((recipients, msg_bytes))
         return False
 
     def send_unsent(self):
@@ -192,8 +192,8 @@ class SMTP:
         Use this function to attempt to send these again
         """
         for i in range(len(self.unsent)):
-            recipients, msg_string = self.unsent.pop(i)
-            self._attempt_send(recipients, msg_string)
+            recipients, msg_bytes = self.unsent.pop(i)
+            self._attempt_send(recipients, msg_bytes)
 
     def close(self):
         """ Close the connection to the SMTP server """
