@@ -135,8 +135,8 @@ class SMTP:
         )
 
         recipients = addresses["recipients"]
-        msg_bytes = msg.as_bytes()
-        return recipients, msg_bytes
+        msg_strings = msg.as_string()
+        return recipients, msg_strings
 
     def send(
         self,
@@ -154,7 +154,7 @@ class SMTP:
     ):
         """ Use this to send an email with gmail"""
         self.login()
-        recipients, msg_bytes = self.prepare_send(
+        recipients, msg_strings = self.prepare_send(
             to,
             subject,
             contents,
@@ -167,15 +167,15 @@ class SMTP:
             group_messages,
         )
         if preview_only:
-            return recipients, msg_bytes
+            return recipients, msg_strings
 
-        return self._attempt_send(recipients, msg_bytes)
+        return self._attempt_send(recipients, msg_strings)
 
-    def _attempt_send(self, recipients, msg_bytes):
+    def _attempt_send(self, recipients, msg_strings):
         attempts = 0
         while attempts < 3:
             try:
-                result = self.smtp.sendmail(self.user, recipients, msg_bytes)
+                result = self.smtp.sendmail(self.user, recipients, msg_strings)
                 self.log.info("Message sent to %s", recipients)
                 self.num_mail_sent += 1
                 return result
@@ -183,7 +183,7 @@ class SMTP:
                 self.log.error(e)
                 attempts += 1
                 time.sleep(attempts * 3)
-        self.unsent.append((recipients, msg_bytes))
+        self.unsent.append((recipients, msg_strings))
         return False
 
     def send_unsent(self):
@@ -192,8 +192,8 @@ class SMTP:
         Use this function to attempt to send these again
         """
         for i in range(len(self.unsent)):
-            recipients, msg_bytes = self.unsent.pop(i)
-            self._attempt_send(recipients, msg_bytes)
+            recipients, msg_strings = self.unsent.pop(i)
+            self._attempt_send(recipients, msg_strings)
 
     def close(self):
         """ Close the connection to the SMTP server """
