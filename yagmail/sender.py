@@ -39,7 +39,7 @@ class SMTP:
         self.set_logging()
         self.soft_email_validation = soft_email_validation
         if oauth2_file is not None:
-            oauth2_info = get_oauth2_info(oauth2_file)
+            oauth2_info = get_oauth2_info(oauth2_file, user)
             if user is None:
                 user = oauth2_info["email_address"]
         if smtp_skip_login and user is None:
