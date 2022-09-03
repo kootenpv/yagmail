@@ -12,10 +12,11 @@ import json
 import getpass
 
 try:
-    from urllib.parse import urlencode, quote, unquote
+    from urllib.parse import urlencode, quote, unquote, parse_qs, urlsplit
     from urllib.request import urlopen
 except ImportError:
     from urllib import urlencode, quote, unquote, urlopen
+    from urlparse import parse_qs, urlsplit
 
 try:
     input = raw_input
@@ -23,7 +24,7 @@ except NameError:
     pass
 
 GOOGLE_ACCOUNTS_BASE_URL = 'https://accounts.google.com'
-REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
+REDIRECT_URI = 'http://localhost'
 
 
 def command_to_url(command):
@@ -82,7 +83,8 @@ def generate_oauth2_string(username, access_token, as_base64=False):
 def get_authorization(google_client_id, google_client_secret):
     permission_url = generate_permission_url(google_client_id)
     print('Navigate to the following URL to auth:\n' + permission_url)
-    authorization_code = input('Enter verification code: ')
+    url = input('Enter the localhost URL you were redirected to: ')
+    authorization_code = parse_qs(urlsplit(url).query)['code'][0]
     response = call_authorize_tokens(google_client_id, google_client_secret, authorization_code)
     return response['refresh_token'], response['access_token'], response['expires_in']
 
