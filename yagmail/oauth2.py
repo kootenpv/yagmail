@@ -101,6 +101,8 @@ def get_oauth_string(user, oauth2_info):
 
 
 def get_oauth2_info(oauth2_file):
+    oauth_setup_readme_link = "See readme for proper setup, preventing authorization from expiring after 7 days!"
+
     oauth2_file = os.path.expanduser(oauth2_file)
     if os.path.isfile(oauth2_file):
         with open(oauth2_file) as f:
@@ -109,6 +111,7 @@ def get_oauth2_info(oauth2_file):
             oauth2_info = oauth2_info["installed"]
         except KeyError:
             return oauth2_info
+        print(oauth_setup_readme_link)
         email_addr = input("Your 'email address': ")
         google_client_id = oauth2_info["client_id"]
         google_client_secret = oauth2_info["client_secret"]
@@ -125,6 +128,7 @@ def get_oauth2_info(oauth2_file):
         print("If you do not have an app registered for your email sending purposes, visit:")
         print("https://console.developers.google.com")
         print("and create a new project.\n")
+        print(oauth_setup_readme_link)
         email_addr = input("Your 'email address': ")
         google_client_id = input("Your 'google_client_id': ")
         google_client_secret = getpass.getpass("Your 'google_client_secret': ")
