@@ -100,9 +100,8 @@ def get_oauth_string(user, oauth2_info):
     return auth_string
 
 
-def get_oauth2_info(oauth2_file):
+def get_oauth2_info(oauth2_file: str, email_addr: str):
     oauth_setup_readme_link = "See readme for proper setup, preventing authorization from expiring after 7 days!"
-
     oauth2_file = os.path.expanduser(oauth2_file)
     if os.path.isfile(oauth2_file):
         with open(oauth2_file) as f:
@@ -112,7 +111,8 @@ def get_oauth2_info(oauth2_file):
         except KeyError:
             return oauth2_info
         print(oauth_setup_readme_link)
-        email_addr = input("Your 'email address': ")
+        if email_addr is None:
+            email_addr = input("Your 'email address': ")
         google_client_id = oauth2_info["client_id"]
         google_client_secret = oauth2_info["client_secret"]
         google_refresh_token, _, _ = get_authorization(google_client_id, google_client_secret)
@@ -129,7 +129,8 @@ def get_oauth2_info(oauth2_file):
         print("https://console.developers.google.com")
         print("and create a new project.\n")
         print(oauth_setup_readme_link)
-        email_addr = input("Your 'email address': ")
+        if email_addr is None:
+            email_addr = input("Your 'email address': ")
         google_client_id = input("Your 'google_client_id': ")
         google_client_secret = getpass.getpass("Your 'google_client_secret': ")
         google_refresh_token, _, _ = get_authorization(google_client_id, google_client_secret)
