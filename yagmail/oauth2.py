@@ -101,7 +101,7 @@ def get_oauth_string(user, oauth2_info):
 
 
 def get_oauth2_info(oauth2_file: str, email_addr: str):
-    oauth_setup_readme_link = "See readme for proper setup, preventing authorization from expiring after 7 days!"
+    oauth_setup_readme_link = "See readme for proper setup, preventing authorization from expiring after 7 days! https://github.com/kootenpv/yagmail/blob/master/README.md#preventing-oauth-authorization-from-expiring-after-7-days"
     oauth2_file = os.path.expanduser(oauth2_file)
     if os.path.isfile(oauth2_file):
         with open(oauth2_file) as f:
