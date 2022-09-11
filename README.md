@@ -131,6 +131,12 @@ After you provide them, a link will be shown in the terminal that you should fol
 
 Note that people who obtain the file can send emails, but nothing else. As soon as you notice, you can simply disable the token.
 
+#### Preventing OAuth authorization from expiring after 7 days
+
+Your Google Cloud Platform project's OAuth consent screen must be in **"In production" publishing status** before authorizing to not have the authorization expire after 7 days. See status at https://console.cloud.google.com/apis/credentials/consent
+
+Your OAuth **client ID must be of type "Desktop"**. Check at https://console.cloud.google.com/apis/credentials
+
 ### Magical `contents`
 
 The `contents` argument will be smartly guessed. It can be passed a string (which will be turned into a list); or a list. For each object in the list:
