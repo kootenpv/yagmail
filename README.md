@@ -56,7 +56,7 @@ As a side note, `yagmail` can now also be used to send emails from the command l
 ### Start a connection
 
 ```python
-yag = yagmail.SMTP('mygmailusername', 'mygmailpassword)
+yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
 ```
 
 Note that this connection is reusable, closable and when it leaves scope it will **clean up after itself in CPython**.
