@@ -123,6 +123,8 @@ def prepare_message(
                     msg_related.attach(content_object["mime_object"])
                 else:
                     # non-inline images get attached like any other attachment
+                    content_object["mime_object"].add_header("Content-Disposition",
+                                                            f"attachment; filename= {content_string}")
                     msg.attach(content_object["mime_object"])
 
             else:
