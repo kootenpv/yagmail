@@ -9,11 +9,11 @@
 [![PyPI](https://img.shields.io/pypi/v/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 [![PyPI](https://img.shields.io/pypi/pyversions/yagmail.svg?style=flat-square)](https://pypi.python.org/pypi/yagmail/)
 
-*For the asynchronous asyncio version, look here*: https://github.com/kootenpv/aioyagmail
+*An asynchronous `asyncio` version is built-in (see [Asynchronous Client](#asynchronous-client) below).*
 
 The goal here is to make it as simple and painless as possible to send emails.
 
-In the end, your code will look something like this:
+In the end, your code will look something like this (an async version is also available below):
 
 ```python
 import yagmail
@@ -35,6 +35,7 @@ In 2020, I personally prefer: using an [Application-Specific Password](https://s
 |[Recipients](#recipients)                                      |   How to send to multiple people, give an alias or send to self     |
 |[Magical contents](#magical-contents)                          |   Really easy to send text, html, images and attachments            |
 |[Attaching files](#attaching-files)                            |   How attach files to the email                                     |
+|[Asynchronous Client](#asynchronous-client)                    |   Send emails asynchronously using `asyncio`                       |
 |[DKIM Support](#dkim-support)                                  |   Add DKIM signature to your emails with your private key           |
 |[Feedback](#feedback)                                          |   How to send me feedback                                           |
 |[Roadmap (and priorities)](#roadmap-and-priorities)            |   Yup                                                               |
@@ -181,6 +182,23 @@ Not all `io.IOBase` instances have the `.name` attribute in which case yagmail n
 Therefore, it is highly recommended setting the filename with extension manually e.g. `f.name = 'my_document.pdf'`
 
 A real-world example would be if the attachment is retrieved from a different source than the disk (e.g. downloaded from the internet or [uploaded by a user in a web-application](https://docs.streamlit.io/en/stable/api.html#streamlit.file_uploader))
+
+### Asynchronous Client
+
+yagmail includes a built-in asynchronous client (`yagmail.AsyncClient`, also aliased as `yagmail.AsyncSMTP` and `yagmail.AIOSMTP`) using standard library `asyncio` streams. This provides fully non-blocking asynchronous email sending without external dependencies.
+
+```python
+import asyncio
+import yagmail
+
+async def main():
+    # Use AsyncClient as an async context manager
+    async with yagmail.AsyncClient('mygmailusername', 'mygmailpassword') as yag:
+        contents = ['This is the body of the async email.', '/local/path/song.mp3']
+        await yag.send('to@someone.com', 'subject', contents)
+
+asyncio.run(main())
+```
 
 ### DKIM Support
 
