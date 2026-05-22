@@ -429,8 +429,14 @@ class AsyncSMTP(yagmail.SMTP):
         return False
 
     def __del__(self) -> None:
-        """Not required in async."""
-        pass
+        try:
+            if not self.is_closed:
+                self.is_closed = True
+                if self.smtp is not None:
+                    self.smtp.close()
+                    self.smtp = None
+        except Exception:
+            pass
 
 
 # For backward compatibility

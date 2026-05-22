@@ -99,3 +99,18 @@ def test_async_send_unsent():
         assert call_count == 1
         await yag.aclose()
     asyncio.run(run())
+
+def test_async_garbage_collection():
+    import gc
+    async def run():
+        yag = AsyncConnection(smtp_skip_login=True, soft_email_validation=False)
+        await yag.login()
+        assert not yag.is_closed
+        smtp_ref = yag.smtp
+        assert smtp_ref is not None
+        assert smtp_ref.writer is not None
+        del yag
+        gc.collect()
+        assert smtp_ref.writer is None
+    asyncio.run(run())
+
