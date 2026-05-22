@@ -2,7 +2,7 @@ import pytest
 import asyncio
 import itertools
 import base64
-from yagmail import AIOSMTP
+from yagmail import AsyncSMTP, AIOSMTP
 from yagmail.utils import raw
 
 def get_combinations(yag):
@@ -29,9 +29,12 @@ def get_combinations(yag):
 
     return results
 
+def test_async_alias():
+    assert AIOSMTP is AsyncSMTP
+
 def test_async_context_manager():
     async def run():
-        async with AIOSMTP(smtp_skip_login=True, soft_email_validation=False) as yag:
+        async with AsyncSMTP(smtp_skip_login=True, soft_email_validation=False) as yag:
             assert not yag.is_closed
             recipients, msg_string = await yag.send(
                 to="test@example.com",
@@ -48,7 +51,7 @@ def test_async_context_manager():
 
 def test_async_combinations():
     async def run():
-        yag = AIOSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
         combinations = get_combinations(yag)
         
         async def run_comb(c):
@@ -61,14 +64,14 @@ def test_async_combinations():
 
 def test_async_close_error():
     async def run():
-        yag = AIOSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
         with pytest.raises(ValueError, match="Should be `async with` or use `await aclose\\(\\)`"):
             await yag.close()
     asyncio.run(run())
 
 def test_async_aclose_and_login():
     async def run():
-        yag = AIOSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
         await yag.login()
         assert not yag.is_closed
         await yag.aclose()
@@ -77,7 +80,7 @@ def test_async_aclose_and_login():
 
 def test_async_send_unsent():
     async def run():
-        yag = AIOSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
         await yag.login()
         yag.unsent.append((["test@example.com"], "Subject: unsent\n\nunsent content"))
         assert len(yag.unsent) == 1

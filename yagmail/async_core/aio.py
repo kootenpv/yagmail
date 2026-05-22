@@ -255,7 +255,7 @@ class RawAsyncSMTP:
             self.reader = None
 
 
-class AIOSMTP(yagmail.SMTP):
+class AsyncSMTP(yagmail.SMTP):
     """
     Asynchronous version of yagmail.SMTP.
     Provides non-blocking versions of login, send, send_unsent, and close
@@ -419,7 +419,7 @@ class AIOSMTP(yagmail.SMTP):
                 finally:
                     self.smtp = None
 
-    async def __aenter__(self) -> "AIOSMTP":
+    async def __aenter__(self) -> "AsyncSMTP":
         await self.login()
         return self
 
@@ -431,3 +431,7 @@ class AIOSMTP(yagmail.SMTP):
     def __del__(self) -> None:
         """Not required in async."""
         pass
+
+
+# For backward compatibility
+AIOSMTP = AsyncSMTP
