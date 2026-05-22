@@ -5,6 +5,7 @@ from yagmail.error import YagConnectionClosed, YagAddressError
 from yagmail.password import register
 from yagmail.sender import SMTP, logging
 from yagmail.utils import raw, inline
+from yagmail.async_core.aio import AIOSMTP
 
 __all__ = [
     "YagConnectionClosed",
@@ -14,4 +15,5 @@ __all__ = [
     "logging",
     "raw",
     "inline",
+    "AIOSMTP",
 ]
