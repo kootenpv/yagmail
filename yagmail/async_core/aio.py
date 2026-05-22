@@ -296,28 +296,43 @@ class AIOSMTP(yagmail.SMTP):
         self.is_closed = True
         self.smtp: Optional[RawAsyncSMTP] = None  # type: ignore[assignment]
 
+    @property
+    def send_lock(self) -> asyncio.Lock:
+        if not hasattr(self, "_send_lock"):
+            self._send_lock = asyncio.Lock()
+        return self._send_lock
+
+    @property
+    def login_lock(self) -> asyncio.Lock:
+        if not hasattr(self, "_login_lock"):
+            self._login_lock = asyncio.Lock()
+        return self._login_lock
+
     async def login(self) -> None:  # type: ignore[override]
         """Connect and login to the SMTP server asynchronously."""
-        use_tls = str(self.port) == "465"
-        self.smtp = RawAsyncSMTP(
-            host=self.host,
-            port=int(self.port),
-            timeout=self.kwargs.get("timeout", 30.0)
-        )
-        await self.smtp.connect(use_tls=use_tls, start_tls=bool(self.starttls))
+        async with self.login_lock:
+            if self.smtp is not None and not self.is_closed:
+                return
+            use_tls = str(self.port) == "465"
+            self.smtp = RawAsyncSMTP(
+                host=self.host,
+                port=int(self.port),
+                timeout=self.kwargs.get("timeout", 30.0)
+            )
+            await self.smtp.connect(use_tls=use_tls, start_tls=bool(self.starttls))
 
-        if not self.smtp_skip_login:
-            if self.oauth2_file is not None:
-                if isinstance(self.credentials, dict):
-                    auth_string = self.get_oauth_string(self.user, self.credentials)
-                    await self.smtp.login_oauth2(self.user, auth_string)
+            if not self.smtp_skip_login:
+                if self.oauth2_file is not None:
+                    if isinstance(self.credentials, dict):
+                        auth_string = self.get_oauth_string(self.user, self.credentials)
+                        await self.smtp.login_oauth2(self.user, auth_string)
+                    else:
+                        raise TypeError("OAuth2 credentials must be a dictionary")
                 else:
-                    raise TypeError("OAuth2 credentials must be a dictionary")
-            else:
-                password = self.handle_password(self.user, self.credentials if isinstance(self.credentials, str) else None)
-                await self.smtp.login(self.user, password)
+                    password = self.handle_password(self.user, self.credentials if isinstance(self.credentials, str) else None)
+                    await self.smtp.login(self.user, password)
 
-        self.is_closed = False
+            self.is_closed = False
 
     async def send(  # type: ignore[override]
         self,
@@ -334,9 +349,6 @@ class AIOSMTP(yagmail.SMTP):
         group_messages: bool = True,
     ) -> Union[Tuple[List[str], str], Dict[str, Any], bool]:
         """Send an email asynchronously."""
-        if self.smtp is None or self.is_closed:
-            await self.login()
-
         recipients, msg_strings = self.prepare_send(
             to=to,
             subject=subject,
@@ -352,7 +364,10 @@ class AIOSMTP(yagmail.SMTP):
         if preview_only:
             return recipients, msg_strings
 
-        return await self._attempt_send_async(recipients, msg_strings)
+        async with self.send_lock:
+            if self.smtp is None or self.is_closed:
+                await self.login()
+            return await self._attempt_send_async(recipients, msg_strings)
 
     async def _attempt_send_async(self, recipients: List[str], msg_strings: str) -> Union[Dict[str, Any], bool]:
         if self.smtp is None:
@@ -366,6 +381,7 @@ class AIOSMTP(yagmail.SMTP):
                 return result
             except SMTPServerDisconnected as e:
                 self.log.error(e)
+                self.is_closed = True
                 attempts += 1
                 if attempts < 3:
                     try:
@@ -378,13 +394,14 @@ class AIOSMTP(yagmail.SMTP):
 
     async def send_unsent(self) -> None:  # type: ignore[override]
         """Attempt to send unsent emails asynchronously."""
-        if self.smtp is None or self.is_closed:
-            await self.login()
+        async with self.send_lock:
+            if self.smtp is None or self.is_closed:
+                await self.login()
 
-        unsent_copy = list(self.unsent)
-        self.unsent.clear()
-        if unsent_copy:
-            await asyncio.gather(*(self._attempt_send_async(r, m) for r, m in unsent_copy))
+            unsent_copy = list(self.unsent)
+            self.unsent.clear()
+            for recipients, msg_strings in unsent_copy:
+                await self._attempt_send_async(recipients, msg_strings)
 
     async def close(self) -> None:  # type: ignore[override]
         """Synchronous-like close method that raises error to match aioyagmail API."""
@@ -392,14 +409,15 @@ class AIOSMTP(yagmail.SMTP):
 
     async def aclose(self) -> None:
         """Close the SMTP connection asynchronously."""
-        self.is_closed = True
-        if self.smtp is not None:
-            try:
-                await self.smtp.quit()
-            except Exception:
-                pass
-            finally:
-                self.smtp = None
+        async with self.send_lock:
+            self.is_closed = True
+            if self.smtp is not None:
+                try:
+                    await self.smtp.quit()
+                except Exception:
+                    pass
+                finally:
+                    self.smtp = None
 
     async def __aenter__(self) -> "AIOSMTP":
         await self.login()
