@@ -17,7 +17,7 @@ In the end, your code will look something like this (an async version is also av
 
 ```python
 import yagmail
-yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
+yag = yagmail.Client('mygmailusername', 'mygmailpassword')
 contents = ['This is the body, and here is just text http://somedomain/image.png',
             'You can find an audio file attached.', '/local/path/song.mp3']
 yag.send('to@someone.com', 'subject', contents)
@@ -52,13 +52,15 @@ As a side note, `yagmail` can now also be used to send emails from the command l
 
 ### Start a connection
 
+`yagmail.Client` is the preferred class to instantiate (the legacy name `yagmail.SMTP` is kept as a backward-compatible alias):
+
 ```python
-yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
+yag = yagmail.Client('mygmailusername', 'mygmailpassword')
 ```
 
 Note that this connection is reusable, closable and when it leaves scope it will **clean up after itself in CPython**.
 
-As [tilgovi](https://github.com/tilgovi) points out in [#39](https://github.com/kootenpv/yagmail/issues/39), SMTP does not automatically close in **PyPy**. The context manager `with` should be used in that case.
+As [tilgovi](https://github.com/tilgovi) points out in [#39](https://github.com/kootenpv/yagmail/issues/39), SMTP/Client connections do not automatically close in **PyPy**. The context manager `with` should be used in that case.
 
 
 ### Usability
@@ -100,7 +102,7 @@ yag.send(to = {to : 'Alias1'}) # Dictionary for emailaddress *with* aliases
 yag.send(to = {to : 'Alias1', to2 : 'Alias2'}
 ```
 
-Giving no `to` argument will send an email to yourself. In that sense, `yagmail.SMTP().send()` can already send an email.
+Giving no `to` argument will send an email to yourself. In that sense, `yagmail.Client().send()` can already send an email.
 Be aware that if no explicit `to = ...` is used, the first argument will be used to send to. Can be avoided like:
 
 ```python
@@ -118,7 +120,7 @@ It is even safer to use Oauth2 for authentication, as you can revoke the rights 
 The code:
 
 ```python
-yag = yagmail.SMTP("user@gmail.com", oauth2_file="~/oauth2_creds.json")
+yag = yagmail.Client("user@gmail.com", oauth2_file="~/oauth2_creds.json")
 yag.send(subject="Great!")
 ```
 
@@ -211,7 +213,7 @@ pip install yagmail[dkim]
 
 Usage:
 ```python
-from yagmail import SMTP
+from yagmail import Client
 from yagmail.dkim import DKIM
 from pathlib import Path
 
@@ -227,7 +229,7 @@ dkim_obj = DKIM(
   # include_headers=None,
 )
 
-yag = SMTP(dkim=dkim_obj)
+yag = Client(dkim=dkim_obj)
 
 # all the rest is the same
 ```
@@ -235,7 +237,7 @@ yag = SMTP(dkim=dkim_obj)
 
 I'll try to respond to issues within 24 hours at Github.....
 
-And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
+And please send me a line of feedback with `Client().feedback('Great job!')` :-)
 
 ### Roadmap (and priorities)
 
