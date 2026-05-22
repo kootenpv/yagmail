@@ -273,3 +273,6 @@ class SMTP:
                 self.close()
         except AttributeError:
             pass
+
+
+Connection = SMTP

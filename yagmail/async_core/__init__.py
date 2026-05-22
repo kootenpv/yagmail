@@ -1,3 +1,3 @@
-from yagmail.async_core.aio import AsyncSMTP, AIOSMTP
+from yagmail.async_core.aio import AsyncSMTP, AIOSMTP, AsyncConnection
 
-__all__ = ["AsyncSMTP", "AIOSMTP"]
+__all__ = ["AsyncSMTP", "AIOSMTP", "AsyncConnection"]

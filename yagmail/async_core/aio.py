@@ -435,3 +435,4 @@ class AsyncSMTP(yagmail.SMTP):
 
 # For backward compatibility
 AIOSMTP = AsyncSMTP
+AsyncConnection = AsyncSMTP
