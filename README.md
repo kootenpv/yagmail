@@ -264,8 +264,10 @@ And please send me a line of feedback with `SMTP().feedback('Great job!')` :-)
 - ~~oauth2~~
 - ~~Travis CI integration ~~
 - ~~ Add documentation to all functions (high, halfway) ~~
-- Prepare for official 1.0
-- Go over documentation again (medium)
+- ~~Prepare for official 1.0~~
+- ~~Go over documentation again (medium)~~
+- ~~Add built-in dependency-free asyncio client support (AsyncClient)~~
+- ~~Modernize codebase (Python 3.8+, pyproject.toml, type annotations)~~
 - Allow `.yagmail` file to contain more parameters (medium)
 - Add option to shrink images (low)
 
