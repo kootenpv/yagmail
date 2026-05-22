@@ -2,7 +2,7 @@ import pytest
 import asyncio
 import itertools
 import base64
-from yagmail import AsyncSMTP, AIOSMTP, Connection, AsyncConnection, SMTP, Client, AsyncClient
+from yagmail import Client, AsyncClient, SMTP, AsyncSMTP, AIOSMTP
 from yagmail.utils import raw
 
 def get_combinations(yag):
@@ -30,15 +30,13 @@ def get_combinations(yag):
     return results
 
 def test_async_alias():
-    assert AIOSMTP is AsyncSMTP
-    assert Connection is SMTP
-    assert AsyncConnection is AsyncSMTP
-    assert Client is SMTP
-    assert AsyncClient is AsyncSMTP
+    assert SMTP is Client
+    assert AsyncSMTP is AsyncClient
+    assert AIOSMTP is AsyncClient
 
 def test_async_context_manager():
     async def run():
-        async with AsyncSMTP(smtp_skip_login=True, soft_email_validation=False) as yag:
+        async with AsyncClient(smtp_skip_login=True, soft_email_validation=False) as yag:
             assert not yag.is_closed
             recipients, msg_string = await yag.send(
                 to="test@example.com",
@@ -55,7 +53,7 @@ def test_async_context_manager():
 
 def test_async_combinations():
     async def run():
-        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncClient(smtp_skip_login=True, soft_email_validation=False)
         combinations = get_combinations(yag)
         
         async def run_comb(c):
@@ -68,14 +66,14 @@ def test_async_combinations():
 
 def test_async_close_error():
     async def run():
-        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncClient(smtp_skip_login=True, soft_email_validation=False)
         with pytest.raises(ValueError, match="Should be `async with` or use `await aclose\\(\\)`"):
             await yag.close()
     asyncio.run(run())
 
 def test_async_aclose_and_login():
     async def run():
-        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncClient(smtp_skip_login=True, soft_email_validation=False)
         await yag.login()
         assert not yag.is_closed
         await yag.aclose()
@@ -84,7 +82,7 @@ def test_async_aclose_and_login():
 
 def test_async_send_unsent():
     async def run():
-        yag = AsyncSMTP(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncClient(smtp_skip_login=True, soft_email_validation=False)
         await yag.login()
         yag.unsent.append((["test@example.com"], "Subject: unsent\n\nunsent content"))
         assert len(yag.unsent) == 1
@@ -105,7 +103,7 @@ def test_async_send_unsent():
 def test_async_garbage_collection():
     import gc
     async def run():
-        yag = AsyncConnection(smtp_skip_login=True, soft_email_validation=False)
+        yag = AsyncClient(smtp_skip_login=True, soft_email_validation=False)
         await yag.login()
         assert not yag.is_closed
         smtp_ref = yag.smtp

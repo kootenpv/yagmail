@@ -17,8 +17,8 @@ from yagmail.headers import make_addr_alias_user
 from yagmail.dkim import DKIM
 
 
-class SMTP:
-    """ :class:`yagmail.SMTP` is a magic wrapper around
+class Client:
+    """ :class:`yagmail.Client` is a magic wrapper around
     ``smtplib``'s SMTP connection, and allows messages to be sent."""
 
     def __init__(
@@ -68,7 +68,7 @@ class SMTP:
         self.dkim = dkim
         self.smtp: Union[smtplib.SMTP, smtplib.SMTP_SSL] = None  # type: ignore
 
-    def __enter__(self) -> "SMTP":
+    def __enter__(self) -> "Client":
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> Literal[False]:
@@ -275,5 +275,4 @@ class SMTP:
             pass
 
 
-Client = SMTP
-Connection = Client
+SMTP = Client

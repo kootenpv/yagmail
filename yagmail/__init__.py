@@ -3,9 +3,9 @@ __version__ = "0.15.277"
 
 from yagmail.error import YagConnectionClosed, YagAddressError
 from yagmail.password import register
-from yagmail.sender import SMTP, logging, Connection, Client
+from yagmail.sender import SMTP, logging, Client
 from yagmail.utils import raw, inline
-from yagmail.async_core.aio import AsyncSMTP, AIOSMTP, AsyncConnection, AsyncClient
+from yagmail.async_core.aio import AsyncSMTP, AIOSMTP, AsyncClient
 
 __all__ = [
     "YagConnectionClosed",
@@ -17,8 +17,6 @@ __all__ = [
     "inline",
     "AsyncSMTP",
     "AIOSMTP",
-    "Connection",
-    "AsyncConnection",
     "Client",
     "AsyncClient",
 ]

@@ -1,4 +1,4 @@
-from yagmail.sender import SMTP
+from yagmail.sender import Client
 import argparse
 from typing import List, Optional
 
@@ -27,5 +27,6 @@ def main() -> None:
         "-password", "-p", help="Preferable to use keyring rather than password here"
     )
     args = parser.parse_args()
-    yag = SMTP(args.user, args.password)
+    yag = Client(args.user, args.password)
+
     yag.send(to=args.to, subject=args.subject, contents=args.contents, attachments=args.attachments)

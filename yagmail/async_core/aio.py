@@ -255,9 +255,9 @@ class RawAsyncSMTP:
             self.reader = None
 
 
-class AsyncSMTP(yagmail.SMTP):
+class AsyncClient(yagmail.Client):
     """
-    Asynchronous version of yagmail.SMTP.
+    Asynchronous version of yagmail.Client.
     Provides non-blocking versions of login, send, send_unsent, and close
     using Python's built-in asyncio event loop and raw socket streams.
     """
@@ -419,7 +419,7 @@ class AsyncSMTP(yagmail.SMTP):
                 finally:
                     self.smtp = None
 
-    async def __aenter__(self) -> "AsyncSMTP":
+    async def __aenter__(self) -> "AsyncClient":
         await self.login()
         return self
 
@@ -440,6 +440,5 @@ class AsyncSMTP(yagmail.SMTP):
 
 
 # For backward compatibility
-AIOSMTP = AsyncSMTP
-AsyncClient = AsyncSMTP
-AsyncConnection = AsyncClient
+AsyncSMTP = AsyncClient
+AIOSMTP = AsyncClient
