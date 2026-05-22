@@ -367,6 +367,11 @@ class AIOSMTP(yagmail.SMTP):
             except SMTPServerDisconnected as e:
                 self.log.error(e)
                 attempts += 1
+                if attempts < 3:
+                    try:
+                        await self.login()
+                    except Exception as reconnect_err:
+                        self.log.error("Failed to reconnect during retry: %s", reconnect_err)
                 await asyncio.sleep(attempts * 3)
         self.unsent.append((recipients, msg_strings))
         return False
