@@ -9,11 +9,11 @@ duplicated for completeness.
 Start a Connection
 ------------------
 As mentioned in :ref:`configuring_credentials`, there
-are three ways to initialize a connection by instantiating
-:class:`yagmail.SMTP`:
+are multiple ways to initialize a connection by instantiating
+:class:`yagmail.Client` (formerly and still aliased as ``yagmail.SMTP``):
 
 1. **With Username and Password**:
-e.g. ``yagmail.SMTP('mygmailusername', 'mygmailpassword')``
+e.g. ``yagmail.Client('mygmailusername', 'mygmailpassword')``
 This method is not recommended, since you would be storing
 the full credentials to your account in your script in plain text.
 A better alternative is using ``keyring``, as described in the
@@ -22,45 +22,51 @@ following section:
 2. **With Username and keyring**:
 After registering a ``keyring`` entry for ``yagmail``, you can
 instantiate the client by simply passing your username, e.g.
-``yagmail.SMTP('mygmailusername')``.
+``yagmail.Client('mygmailusername')``.
 
 3. **With keyring and .yagmail**:
 As explained in the `Setup` documentation, you can also
 omit the username if you have a ``.yagmail`` file in your
 home folder, containing just your GMail username. This way,
-you can initialize :class:`yagmail.SMTP` without any arguments.
+you can initialize :class:`yagmail.Client` without any arguments.
 
 4. **With OAuth2**:
 This is probably the safest method of authentication, as you
 can revoke the rights of tokens. To initialize with OAuth2
 credentials (after obtaining these as shown in `Setup`),
-simply pass an ``oauth2_file`` to :class:`yagmail.SMTP`,
-for example ``yagmail.SMTP('user@gmail.com', oauth2_file='~/oauth2_creds.json')``.
+simply pass an ``oauth2_file`` to :class:`yagmail.Client`,
+for example ``yagmail.Client('user@gmail.com', oauth2_file='~/oauth2_creds.json')``.
 
 
 Closing and reusing the Connection
 ----------------------------------
-By default, :class:`yagmail.SMTP` will clean up after itself
+By default, :class:`yagmail.Client` will clean up after itself
 **in CPython**. This is an implementation detail of CPython and as such
 may not work in other implementations such as PyPy (reported in
 `issue #39 <https://github.com/kootenpv/yagmail/issues/39>`_). In those
-cases, you can use :class:`yagmail.SMTP` with ``with`` instead.
+cases, you can use :class:`yagmail.Client` with ``with`` instead.
+
+For asynchronous use, you should use the async context manager of :class:`yagmail.AsyncClient`:
+
+.. code-block:: python
+
+    async with yagmail.AsyncClient() as yag:
+        await yag.send(contents="Hello!")
 
 Alternatively, you can close and re-use the connection with
-:meth:`yagmail.SMTP.close` and :meth:`yagmail.SMTP.login` (or
-:meth:`yagmail.SMTP.oauth2_file` if you are using OAuth2).
+:meth:`yagmail.Client.close` and :meth:`yagmail.Client.login` (or
+``aclose()`` and ``login()`` for :class:`yagmail.AsyncClient`).
 
 
 Sending E-Mails
 ---------------
-:meth:`yagmail.SMTP.send` is a fairly versatile method that allows
+:meth:`yagmail.Client.send` (or :meth:`yagmail.AsyncClient.send`) is a fairly versatile method that allows
 you to adjust more or less anything about your Mail.
-First of all, all parameters for :meth:`yagmail.SMTP.send` are optional.
+First of all, all parameters are optional.
 If you omit the recipient (specified with ``to``), you will send an
 E-Mail to yourself.
 
-Since the use of the (keyword) arguments of :meth:`yagmail.SMTP.send`
-are fairly obvious, they will simply be listed here:
+Since the use of the (keyword) arguments are fairly obvious, they will simply be listed here:
 
 - ``to``
 - ``subject``
