@@ -43,12 +43,8 @@ In 2020, I personally prefer: using an [Application-Specific Password](https://s
 
 ### Install
 
-For Python 2.x and Python 3.x respectively:
-
-```python
+```bash
 pip install yagmail[all]
-pip3 install yagmail[all]
-
 ```
 
 As a side note, `yagmail` can now also be used to send emails from the command line.

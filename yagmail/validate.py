@@ -29,11 +29,7 @@ However, this regexp is the best one I've come accross, so props to Syrus Akbary
 import re
 
 
-try:
-    from .error import YagInvalidEmailAddress
-except (ValueError, SystemError):
-    # stupid fix to make it easy to load interactively
-    from error import YagInvalidEmailAddress
+from yagmail.error import YagInvalidEmailAddress
 
 # All we are really doing is comparing the input string to one
 # gigantic regular expression.  But building that regexp, and
@@ -97,7 +93,7 @@ ADDR_SPEC = LOCAL_PART + r'@' + DOMAIN               # see 3.4.1
 VALID_ADDRESS_REGEXP = '^' + ADDR_SPEC + '$'
 
 
-def validate_email_with_regex(email_address):
+def validate_email_with_regex(email_address: str) -> None:
     """
     Note that this will only filter out syntax mistakes in emailaddresses.
     If a human would think it is probably a valid email, it will most likely pass.

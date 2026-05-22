@@ -13,6 +13,6 @@ class inline(str):
     pass
 
 
-def find_user_home_path():
+def find_user_home_path() -> str:
     with open(os.path.expanduser("~/.yagmail")) as f:
         return f.read().strip()

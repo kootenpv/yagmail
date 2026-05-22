@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yagmail"
+dynamic = ["version"]
+description = "Yet Another GMAIL client"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Pascal van Kooten", email = "kootenpv@gmail.com"}
+]
+keywords = ["email", "mime", "automatic", "html", "attachment"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Customer Service",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Unix",
+    "Operating System :: POSIX",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Communications :: Email",
+    "Topic :: Communications :: Email :: Email Clients (MUA)",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Software Distribution",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "premailer",
+]
+
+[project.optional-dependencies]
+all = [
+    "keyring",
+    "dkimpy",
+]
+dkim = [
+    "dkimpy",
+]
+
+[project.urls]
+Homepage = "https://github.com/kootenpv/yagmail"
+
+[project.scripts]
+yagmail = "yagmail.__main__:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "yagmail.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["yagmail*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.8"
+strict = false
+ignore_missing_imports = true

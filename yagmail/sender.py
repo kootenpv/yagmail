@@ -4,15 +4,17 @@
 import time
 import logging
 import smtplib
+from typing import Optional, Union, List, Dict, Tuple, Any, Literal, Type
 
 from yagmail.log import get_logger
 from yagmail.utils import find_user_home_path
 from yagmail.oauth2 import get_oauth2_info, get_oauth_string
-from yagmail.headers import resolve_addresses
+from yagmail.headers import resolve_addresses, AddressInput
 from yagmail.validate import validate_email_with_regex
 from yagmail.password import handle_password
 from yagmail.message import prepare_message
 from yagmail.headers import make_addr_alias_user
+from yagmail.dkim import DKIM
 
 
 class SMTP:
@@ -21,19 +23,19 @@ class SMTP:
 
     def __init__(
         self,
-        user=None,
-        password=None,
-        host="smtp.gmail.com",
-        port=None,
-        smtp_starttls=None,
-        smtp_ssl=True,
-        smtp_set_debuglevel=0,
-        smtp_skip_login=False,
-        encoding="utf-8",
-        oauth2_file=None,
-        soft_email_validation=True,
-        dkim=None,
-        **kwargs
+        user: Optional[str] = None,
+        password: Optional[Union[str, Dict[str, Any]]] = None,
+        host: str = "smtp.gmail.com",
+        port: Optional[Union[int, str]] = None,
+        smtp_starttls: Optional[Union[bool, dict]] = None,
+        smtp_ssl: bool = True,
+        smtp_set_debuglevel: int = 0,
+        smtp_skip_login: bool = False,
+        encoding: str = "utf-8",
+        oauth2_file: Optional[str] = None,
+        soft_email_validation: bool = True,
+        dkim: Optional[DKIM] = None,
+        **kwargs: Any
     ):
         self.log = get_logger()
         self.set_logging()
@@ -49,7 +51,7 @@ class SMTP:
         self.user, self.useralias = make_addr_alias_user(user)
         if soft_email_validation:
             validate_email_with_regex(self.user)
-        self.is_closed = None
+        self.is_closed: Optional[bool] = None
         self.host = host
         self.port = str(port) if port is not None else "465" if smtp_ssl else "587"
         self.smtp_starttls = smtp_starttls
@@ -58,32 +60,33 @@ class SMTP:
         self.debuglevel = smtp_set_debuglevel
         self.encoding = encoding
         self.kwargs = kwargs
-        self.cache = {}
-        self.unsent = []
+        self.cache: Dict[Any, Any] = {}
+        self.unsent: List[Tuple[List[str], str]] = []
         self.num_mail_sent = 0
         self.oauth2_file = oauth2_file
         self.credentials = password if oauth2_file is None else oauth2_info
         self.dkim = dkim
+        self.smtp: Union[smtplib.SMTP, smtplib.SMTP_SSL] = None  # type: ignore
 
-    def __enter__(self):
+    def __enter__(self) -> "SMTP":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> Literal[False]:
         if not self.is_closed:
             self.close()
         return False
 
     @property
-    def connection(self):
+    def connection(self) -> Union[Type[smtplib.SMTP_SSL], Type[smtplib.SMTP]]:
         return smtplib.SMTP_SSL if self.ssl else smtplib.SMTP
 
     @property
-    def starttls(self):
+    def starttls(self) -> Union[bool, dict]:
         if self.smtp_starttls is None:
             return False if self.ssl else True
         return self.smtp_starttls
 
-    def set_logging(self, log_level=logging.ERROR, file_path_name=None):
+    def set_logging(self, log_level: Optional[int] = logging.ERROR, file_path_name: Optional[str] = None) -> None:
         """
         This function allows to change the logging backend, either output or file as backend
         It also allows to set the logging level (whether to display only critical/error/info/debug.
@@ -102,17 +105,17 @@ class SMTP:
 
     def prepare_send(
         self,
-        to=None,
-        subject=None,
-        contents=None,
-        attachments=None,
-        cc=None,
-        bcc=None,
-        headers=None,
-        prettify_html=True,
-        message_id=None,
-        group_messages=True,
-    ):
+        to: Optional[AddressInput] = None,
+        subject: Optional[Union[str, List[str]]] = None,
+        contents: Optional[Any] = None,
+        attachments: Optional[Any] = None,
+        cc: Optional[AddressInput] = None,
+        bcc: Optional[AddressInput] = None,
+        headers: Optional[Dict[str, str]] = None,
+        prettify_html: bool = True,
+        message_id: Optional[str] = None,
+        group_messages: bool = True,
+    ) -> Tuple[List[str], str]:
         addresses = resolve_addresses(self.user, self.useralias, to, cc, bcc)
 
         if self.soft_email_validation:
@@ -140,18 +143,18 @@ class SMTP:
 
     def send(
         self,
-        to=None,
-        subject=None,
-        contents=None,
-        attachments=None,
-        cc=None,
-        bcc=None,
-        preview_only=False,
-        headers=None,
-        prettify_html=True,
-        message_id=None,
-        group_messages=True,
-    ):
+        to: Optional[AddressInput] = None,
+        subject: Optional[Union[str, List[str]]] = None,
+        contents: Optional[Any] = None,
+        attachments: Optional[Any] = None,
+        cc: Optional[AddressInput] = None,
+        bcc: Optional[AddressInput] = None,
+        preview_only: bool = False,
+        headers: Optional[Dict[str, str]] = None,
+        prettify_html: bool = True,
+        message_id: Optional[str] = None,
+        group_messages: bool = True,
+    ) -> Union[Tuple[List[str], str], Dict[str, Any], bool]:
         """ Use this to send an email with gmail"""
         self.login()
         recipients, msg_strings = self.prepare_send(
@@ -171,7 +174,7 @@ class SMTP:
 
         return self._attempt_send(recipients, msg_strings)
 
-    def _attempt_send(self, recipients, msg_strings):
+    def _attempt_send(self, recipients: List[str], msg_strings: str) -> Union[Dict[str, Any], bool]:
         attempts = 0
         while attempts < 3:
             try:
@@ -186,7 +189,7 @@ class SMTP:
         self.unsent.append((recipients, msg_strings))
         return False
 
-    def send_unsent(self):
+    def send_unsent(self) -> None:
         """
         Emails that were not being able to send will be stored in :attr:`self.unsent`.
         Use this function to attempt to send these again
@@ -195,7 +198,7 @@ class SMTP:
             recipients, msg_strings = self.unsent.pop(i)
             self._attempt_send(recipients, msg_strings)
 
-    def close(self):
+    def close(self) -> None:
         """ Close the connection to the SMTP server """
         self.is_closed = True
         try:
@@ -203,25 +206,28 @@ class SMTP:
         except (TypeError, AttributeError, smtplib.SMTPServerDisconnected):
             pass
 
-    def login(self):
+    def login(self) -> None:
         if self.oauth2_file is not None:
-            self._login_oauth2(self.credentials)
+            if isinstance(self.credentials, dict):
+                self._login_oauth2(self.credentials)
+            else:
+                raise TypeError("OAuth2 credentials must be a dictionary")
         else:
             self._login(self.credentials)
 
-    def _login(self, password):
+    def _login(self, password: Any) -> None:
         """
         Login to the SMTP server using password. `login` only needs to be manually run when the
         connection to the SMTP server was closed by the user.
         """
-        self.smtp = self.connection(self.host, self.port, **self.kwargs)
+        self.smtp = self.connection(self.host, self.port, **self.kwargs)  # type: ignore
         self.smtp.set_debuglevel(self.debuglevel)
         if self.starttls:
             self.smtp.ehlo()
             if self.starttls is True:
                 self.smtp.starttls()
             else:
-                self.smtp.starttls(**self.starttls)
+                self.smtp.starttls(**self.starttls)  # type: ignore
             self.smtp.ehlo()
         self.is_closed = False
         if not self.smtp_skip_login:
@@ -230,17 +236,18 @@ class SMTP:
         self.log.info("Connected to SMTP @ %s:%s as %s", self.host, self.port, self.user)
 
     @staticmethod
-    def handle_password(user, password):
+    def handle_password(user: str, password: Optional[str]) -> str:
         return handle_password(user, password)
 
     @staticmethod
-    def get_oauth_string(user, oauth2_info):
+    def get_oauth_string(user: str, oauth2_info: Dict[str, Any]) -> str:
         return get_oauth_string(user, oauth2_info)
 
-    def _login_oauth2(self, oauth2_info):
+    def _login_oauth2(self, oauth2_info: Dict[str, Any]) -> None:
         if "email_address" in oauth2_info:
+            oauth2_info = oauth2_info.copy()
             oauth2_info.pop("email_address")
-        self.smtp = self.connection(self.host, self.port, **self.kwargs)
+        self.smtp = self.connection(self.host, self.port, **self.kwargs)  # type: ignore
         try:
             self.smtp.set_debuglevel(self.debuglevel)
         except AttributeError:
@@ -251,11 +258,11 @@ class SMTP:
             self.smtp.starttls()
         self.smtp.docmd("AUTH", "XOAUTH2 " + auth_string)
 
-    def feedback(self, message="Awesome features! You made my day! How can I contribute?"):
+    def feedback(self, message: str = "Awesome features! You made my day! How can I contribute?") -> None:
         """ Most important function. Please send me feedback :-) """
         self.send("kootenpv@gmail.com", "Yagmail feedback", message)
 
-    def __del__(self):
+    def __del__(self) -> None:
         try:
             if not self.is_closed:
                 self.close()

@@ -38,14 +38,12 @@ def _test_email_with_dkim(include_headers):
 
     to = "b@b.com"
 
-    recipients, msg_bytes = yag.send(
+    recipients, msg_string = yag.send(
         to=to,
         subject="hello from tests",
         contents="important message",
         preview_only=True
     )
-
-    msg_string = msg_bytes.decode("utf8")
 
     assert recipients == [to]
     assert "Subject: hello from tests" in msg_string

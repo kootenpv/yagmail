@@ -1,14 +1,23 @@
 import time
 import random
 import hashlib
-from yagmail.compat import text_type
+from typing import Dict, List, Tuple, Union, Optional, Any
 from yagmail.error import YagAddressError
 from email.utils import formataddr
+from email.message import Message
+
+AddressInput = Union[str, List[str], Tuple[str, ...], Dict[str, str]]
 
 
-def resolve_addresses(user, useralias, to, cc, bcc):
+def resolve_addresses(
+    user: str,
+    useralias: str,
+    to: Optional[AddressInput],
+    cc: Optional[AddressInput],
+    bcc: Optional[AddressInput]
+) -> Dict[str, Any]:
     """ Handle the targets addresses, adding aliases when defined """
-    addresses = {"recipients": []}
+    addresses: Dict[str, Any] = {"recipients": []}
     if to is not None:
         make_addr_alias_target(to, addresses, "To")
     elif cc is not None and bcc is not None:
@@ -22,8 +31,8 @@ def resolve_addresses(user, useralias, to, cc, bcc):
     return addresses
 
 
-def make_addr_alias_user(email_addr):
-    if isinstance(email_addr, text_type):
+def make_addr_alias_user(email_addr: Union[str, Dict[str, str]]) -> Tuple[str, str]:
+    if isinstance(email_addr, str):
         if "@" not in email_addr:
             email_addr += "@gmail.com"
         return (email_addr, email_addr)
@@ -33,12 +42,12 @@ def make_addr_alias_user(email_addr):
     raise YagAddressError
 
 
-def make_addr_alias_target(x, addresses, which):
-    if isinstance(x, text_type):
+def make_addr_alias_target(x: AddressInput, addresses: Dict[str, Any], which: str) -> None:
+    if isinstance(x, str):
         addresses["recipients"].append(x)
         addresses[which] = x
-    elif isinstance(x, list) or isinstance(x, tuple):
-        if not all([isinstance(k, text_type) for k in x]):
+    elif isinstance(x, (list, tuple)):
+        if not all([isinstance(k, str) for k in x]):
             raise YagAddressError
         addresses["recipients"].extend(x)
         addresses[which] = ",".join(x)
@@ -49,7 +58,7 @@ def make_addr_alias_target(x, addresses, which):
         raise YagAddressError
 
 
-def add_subject(msg, subject):
+def add_subject(msg: Message, subject: Optional[Union[str, List[str]]]) -> None:
     if not subject:
         return
     if isinstance(subject, list):
@@ -57,12 +66,12 @@ def add_subject(msg, subject):
     msg["Subject"] = subject
 
 
-def add_recipients_headers(user, useralias, msg, addresses):
+def add_recipients_headers(user: str, useralias: str, msg: Message, addresses: Dict[str, Any]) -> None:
     # Quoting the useralias so it should match display-name from https://tools.ietf.org/html/rfc5322 ,
     # even if it's an email address.
     # msg["From"] = '"{0}" <{1}>'.format(useralias.replace("\\", "\\\\").replace('"', '\\"'), user)
     # formataddr can support From chinese useralias, just like: mail_user = {'notice@test.com': '中文测试'}
-    msg['From'] = formataddr(["{0}".format(useralias.replace("\\", "\\\\").replace('"', '\\"')), user])
+    msg['From'] = formataddr((useralias.replace("\\", "\\\\").replace('"', '\\"'), user))
     if "To" in addresses:
         msg["To"] = addresses["To"]
     else:
@@ -71,10 +80,13 @@ def add_recipients_headers(user, useralias, msg, addresses):
         msg["Cc"] = addresses["Cc"]
 
 
-def add_message_id(msg, message_id=None, group_messages=True):
+def add_message_id(msg: Message, message_id: Optional[str] = None, group_messages: bool = True) -> None:
     if message_id is None:
+        from_val = msg.get("From", "")
+        to_val = msg.get("To", "")
+        subject_val = msg.get("Subject", "None")
         if group_messages:
-            addr = " ".join(sorted([msg["From"], msg["To"]])) + msg.get("Subject", "None")
+            addr = " ".join(sorted([str(from_val), str(to_val)])) + str(subject_val)
         else:
             addr = str(time.time() + random.random())
         message_id = "<" + hashlib.md5(addr.encode()).hexdigest() + "@yagmail>"

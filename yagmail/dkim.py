@@ -1,17 +1,16 @@
 from email.mime.base import MIMEBase
-from typing import NamedTuple
+from typing import NamedTuple, Optional, List
 
 try:
     import dkim
 except ImportError:
-    dkim = None
-    pass
+    dkim = None  # type: ignore
 
 
 class DKIM(NamedTuple):
     domain: bytes
     private_key: bytes
-    include_headers: list
+    include_headers: Optional[List[bytes]]
     selector: bytes
 
 
@@ -23,7 +22,7 @@ def add_dkim_sig_to_message(msg: MIMEBase, dkim_obj: DKIM) -> None:
     # https://github.com/russellballestrini/russell.ballestrini.net/blob/master/content/
     # 2018-06-04-quickstart-to-dkim-sign-email-with-python.rst
     sig = dkim.sign(
-        message=msg.as_bytes(),
+        message=msg.as_string().encode("utf-8"),
         selector=dkim_obj.selector,
         domain=dkim_obj.domain,
         privkey=dkim_obj.private_key,

@@ -13,14 +13,20 @@ yag.log = myOwnLogger
 """
 
 import logging
+from typing import Optional, Union
 
 
-def get_logger(log_level=logging.DEBUG, file_path_name=None):
+def get_logger(
+    log_level: Optional[int] = logging.DEBUG,
+    file_path_name: Optional[str] = None
+) -> logging.Logger:
 
     # create logger
     logger = logging.getLogger(__name__)
 
     logger.setLevel(logging.ERROR)
+
+    ch: Union[logging.FileHandler, logging.StreamHandler, None] = None
 
     # create console handler and set level to debug
     if file_path_name:
@@ -31,17 +37,18 @@ def get_logger(log_level=logging.DEBUG, file_path_name=None):
     else:
         ch = logging.StreamHandler()
 
-    ch.setLevel(log_level)
+    if ch is not None and log_level is not None:
+        ch.setLevel(log_level)
 
-    # create formatter
-    formatter = logging.Formatter(
-        "%(asctime)s [yagmail] [%(levelname)s] : %(message)s", "%Y-%m-%d %H:%M:%S"
-    )
+        # create formatter
+        formatter = logging.Formatter(
+            "%(asctime)s [yagmail] [%(levelname)s] : %(message)s", "%Y-%m-%d %H:%M:%S"
+        )
 
-    # add formatter to ch
-    ch.setFormatter(formatter)
+        # add formatter to ch
+        ch.setFormatter(formatter)
 
-    # add ch to logger
-    logger.handlers = [ch]
+        # add ch to logger
+        logger.handlers = [ch]
 
     return logger
