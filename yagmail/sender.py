@@ -275,4 +275,5 @@ class SMTP:
             pass
 
 
-Connection = SMTP
+Client = SMTP
+Connection = Client

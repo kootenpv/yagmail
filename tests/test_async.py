@@ -2,7 +2,7 @@ import pytest
 import asyncio
 import itertools
 import base64
-from yagmail import AsyncSMTP, AIOSMTP, Connection, AsyncConnection, SMTP
+from yagmail import AsyncSMTP, AIOSMTP, Connection, AsyncConnection, SMTP, Client, AsyncClient
 from yagmail.utils import raw
 
 def get_combinations(yag):
@@ -33,6 +33,8 @@ def test_async_alias():
     assert AIOSMTP is AsyncSMTP
     assert Connection is SMTP
     assert AsyncConnection is AsyncSMTP
+    assert Client is SMTP
+    assert AsyncClient is AsyncSMTP
 
 def test_async_context_manager():
     async def run():
