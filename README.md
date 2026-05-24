@@ -23,7 +23,7 @@ contents = ['This is the body, and here is just text http://somedomain/image.png
 yag.send('to@someone.com', 'subject', contents)
 ```
 
-In 2020, I personally prefer: using an [Application-Specific Password](https://support.google.com/accounts/answer/185833)
+For Gmail, use an [Application-Specific Password](https://support.google.com/accounts/answer/185833) as the password — regular account passwords no longer work over SMTP. If you want revocable, scope-limited credentials, use [OAuth2](#oauth2) instead (note: tokens expire after 7 days unless your Google Cloud project is in "In production" status — see [below](#preventing-oauth-authorization-from-expiring-after-7-days)).
 
 ### Table of Contents
 
@@ -135,6 +135,8 @@ Note that people who obtain the file can send emails, but nothing else. As soon 
 Your Google Cloud Platform project's OAuth consent screen must be in **"In production" publishing status** before authorizing to not have the authorization expire after 7 days. See status at https://console.cloud.google.com/apis/credentials/consent
 
 Your OAuth **client ID must be of type "Desktop"**. Check at https://console.cloud.google.com/apis/credentials
+
+For personal use this is all you need — just hit **"Publish App"** to move the consent screen to production. You'll see an unverified-app warning during the OAuth flow that you can click through; the 7-day expiry no longer applies. Formal Google verification (and the annual CASA security assessment required for the restricted `https://mail.google.com/` scope yagmail uses) is only needed if you want to remove that warning for external users.
 
 ### Magical `contents`
 

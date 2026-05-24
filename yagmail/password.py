@@ -21,7 +21,7 @@ def handle_password(user: str, password: Optional[str]) -> str:  # pragma: no co
         if password is None:
             import getpass
 
-            password = getpass.getpass("Password for <{0}>: ".format(user))
+            password = getpass.getpass(f"Password for <{user}>: ")
             answer = ""
             while answer != "y" and answer != "n":
                 prompt_string = "Save username and password in keyring? [y/n]: "

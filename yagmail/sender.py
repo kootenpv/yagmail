@@ -48,6 +48,11 @@ class Client:
             user = ""
         elif user is None:
             user = find_user_home_path()
+        if user is None:
+            raise ValueError(
+                "No user provided. Pass `user=` to Client(), or create ~/.yagmail "
+                "containing your email address."
+            )
         self.user, self.useralias = make_addr_alias_user(user)
         if soft_email_validation:
             validate_email_with_regex(self.user)

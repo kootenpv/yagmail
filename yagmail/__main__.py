@@ -27,6 +27,9 @@ def main() -> None:
         "-password", "-p", help="Preferable to use keyring rather than password here"
     )
     args = parser.parse_args()
+    if args.to is None:
+        parser.print_help()
+        return
     yag = Client(args.user, args.password)
 
     yag.send(to=args.to, subject=args.subject, contents=args.contents, attachments=args.attachments)

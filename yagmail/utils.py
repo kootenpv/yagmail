@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 
 class raw(str):
@@ -13,6 +14,9 @@ class inline(str):
     pass
 
 
-def find_user_home_path() -> str:
-    with open(os.path.expanduser("~/.yagmail")) as f:
+def find_user_home_path() -> Optional[str]:
+    path = os.path.expanduser("~/.yagmail")
+    if not os.path.isfile(path):
+        return None
+    with open(path) as f:
         return f.read().strip()
