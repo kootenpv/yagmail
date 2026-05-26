@@ -1,6 +1,6 @@
 # ruff: noqa: I001
 __project__ = "yagmail"
-__version__ = "0.15.277"
+__version__ = "0.16.0"
 
 from yagmail.error import YagConnectionClosed, YagAddressError
 from yagmail.password import register
