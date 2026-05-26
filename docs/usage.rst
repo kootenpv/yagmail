@@ -33,34 +33,19 @@ By default, :class:`yagmail.Client` will clean up after itself
 **in CPython**. This is an implementation detail of CPython and as such
 may not work in other implementations such as PyPy (reported in
 `issue #39 <https://github.com/kootenpv/yagmail/issues/39>`_). In those
-cases, you can use :class:`yagmail.Client` with ``with`` instead.
-
-For asynchronous use, you can use the async context manager of :class:`yagmail.AsyncClient`. Below is a complete, copy-pasteable example of sending an email asynchronously:
+cases, you can use :class:`yagmail.Client` with ``with`` instead:
 
 .. code-block:: python
 
-    import asyncio
-    import yagmail
+    with yagmail.Client() as yag:
+        yag.send(contents="Hello!")
 
-    async def main():
-        # Use AsyncClient as an async context manager
-        async with yagmail.AsyncClient('mygmailusername', 'mygmailpassword') as yag:
-            contents = [
-                "This is the body of the async email.",
-                "/local/path/to/song.mp3"
-            ]
-            await yag.send('to@someone.com', 'subject', contents)
-
-    asyncio.run(main())
-
-Alternatively, you can close and re-use the connection with
-:meth:`yagmail.Client.close` and :meth:`yagmail.Client.login` (or
-``aclose()`` and ``login()`` for :class:`yagmail.AsyncClient`).
+Alternatively, you can manually close and re-use the connection with :meth:`yagmail.Client.close` and :meth:`yagmail.Client.login`.
 
 
 Sending E-Mails
 ---------------
-:meth:`yagmail.Client.send` (or :meth:`yagmail.AsyncClient.send`) is a fairly versatile method that allows
+:meth:`yagmail.Client.send` is a fairly versatile method that allows
 you to adjust more or less anything about your Mail.
 First of all, all parameters are optional.
 If you omit the recipient (specified with ``to``), you will send an
@@ -203,16 +188,81 @@ Then, configure and pass a :class:`yagmail.dkim.DKIM` configuration object to yo
     yag.send(to="to@someone.com", subject="DKIM Signed Email", contents="Hi!")
 
 
-Stability & Concurrency
------------------------
+Connection Stability (Auto-reconnect)
+-------------------------------------
+The synchronous ``Client`` features automatic reconnection. If the SMTP server drops the connection (raising ``SMTPServerDisconnected``) during a send operation, ``yagmail`` will automatically catch the exception, log back in, and retry sending the email up to 3 times before raising the error.
 
-Auto-reconnect on Disconnect
+
+Asynchronous Client
+-------------------
+If you are building an asynchronous application (e.g. using ``asyncio``, FastAPI, Sanic, or Tornado), ``yagmail`` provides a native, dependency-free asynchronous client called :class:`yagmail.AsyncClient` (also aliased as ``yagmail.AsyncSMTP`` and ``yagmail.AIOSMTP``).
+
+Starting and Closing Connections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The recommended way to use the asynchronous client is as an asynchronous context manager:
+
+.. code-block:: python
+
+    import asyncio
+    import yagmail
+
+    async def main():
+        async with yagmail.AsyncClient('user@gmail.com', 'app-password') as yag:
+            await yag.send(to='to@someone.com', subject='Async Email', contents='Hello!')
+
+    asyncio.run(main())
+
+Alternatively, you can manually manage the connection using ``login()`` and ``aclose()``:
+
+.. code-block:: python
+
+    async def main():
+        yag = yagmail.AsyncClient('user@gmail.com', 'app-password')
+        await yag.login()
+        await yag.send(to='to@someone.com', subject='Manual Async', contents='Hello!')
+        await yag.aclose()
+
+    asyncio.run(main())
+
+Sending Emails & Attachments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Both the synchronous ``Client`` and asynchronous ``AsyncClient`` feature automatic reconnection. If the SMTP server drops the connection (raising ``SMTPServerDisconnected``) during a send operation, ``yagmail`` will catch the exception, automatically log back in, and retry sending the email up to 3 times before giving up.
+The ``send()`` method on ``AsyncClient`` accepts the same parameters (and performs the same "magical" guessing of content types and attachments) as the synchronous ``Client``, but must be awaited:
 
-Concurrency & Thread-safety
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In asynchronous scripts, you can share a single ``AsyncClient`` instance across concurrent tasks safely. The client implements internal asynchronous locks (``send_lock`` and ``login_lock``) to serialize access to the underlying socket connection, preventing race conditions or interleaved data blocks during simultaneous email transmissions.
+.. code-block:: python
+
+    # Sending to multiple recipients with attachments asynchronously
+    await yag.send(
+        to=['one@gmail.com', 'two@gmail.com'],
+        subject='Async Attachments',
+        contents=['Hello!', '/path/to/local/file.png'],
+        attachments=['/path/to/another/file.pdf']
+    )
+
+DKIM Support in Async
+~~~~~~~~~~~~~~~~~~~~~
+You can pass the same ``DKIM`` configuration object when instantiating ``AsyncClient``:
+
+.. code-block:: python
+
+    from yagmail import AsyncClient
+    from yagmail.dkim import DKIM
+    from pathlib import Path
+
+    private_key = Path("privkey.pem").read_bytes()
+
+    dkim_obj = DKIM(
+        domain=b"example.com",
+        selector=b"selector",
+        private_key=private_key
+    )
+
+    async with AsyncClient(dkim=dkim_obj) as yag:
+        await yag.send(subject="DKIM Signed Async Email", contents="Hi!")
+
+Auto-reconnect & Concurrency Safety
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **Auto-reconnect:** Just like the synchronous client, ``AsyncClient`` automatically handles reconnection. If the connection drops mid-send, it will automatically log back in and retry sending up to 3 times.
+* **Concurrency-safe Locks:** You can share a single ``AsyncClient`` instance across concurrent async tasks safely. The client implements internal asynchronous locks (``send_lock`` and ``login_lock``) to serialize access to the underlying socket connection, preventing race conditions or interleaved data blocks on the shared connection.
 
 
 Using yagmail from the command line
