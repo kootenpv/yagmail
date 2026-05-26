@@ -37,8 +37,15 @@ cases, you can use :class:`yagmail.Client` with ``with`` instead:
 
 .. code-block:: python
 
-    with yagmail.Client() as yag:
-        yag.send(contents="Hello!")
+    with yagmail.Client('mygmailusername', 'mygmailpassword') as yag:
+        yag.send(to='you@gmail.com', contents="Hello!")
+
+Or, using the standard constructor directly without a context manager:
+
+.. code-block:: python
+
+    yag = yagmail.Client('mygmailusername', 'mygmailpassword')
+    yag.send(to="you@gmail.com", contents="Hello!")
 
 Alternatively, you can manually close and re-use the connection with :meth:`yagmail.Client.close` and :meth:`yagmail.Client.login`.
 
