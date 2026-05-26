@@ -1,20 +1,19 @@
 # when there is a bcc a different message has to be sent to the bcc
 # person, to show that they are bcc'ed
 
-import time
 import logging
 import smtplib
-from typing import Optional, Union, List, Dict, Tuple, Any, Literal, Type
+import time
+from typing import Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from yagmail.log import get_logger
-from yagmail.utils import find_user_home_path
-from yagmail.oauth2 import get_oauth2_info, get_oauth_string
-from yagmail.headers import resolve_addresses, AddressInput
-from yagmail.validate import validate_email_with_regex
-from yagmail.password import handle_password
-from yagmail.message import prepare_message
-from yagmail.headers import make_addr_alias_user
 from yagmail.dkim import DKIM
+from yagmail.headers import AddressInput, make_addr_alias_user, resolve_addresses
+from yagmail.log import get_logger
+from yagmail.message import prepare_message
+from yagmail.oauth2 import get_oauth2_info, get_oauth_string
+from yagmail.password import handle_password
+from yagmail.utils import find_user_home_path
+from yagmail.validate import validate_email_with_regex
 
 
 class Client:
@@ -91,7 +90,9 @@ class Client:
             return False if self.ssl else True
         return self.smtp_starttls
 
-    def set_logging(self, log_level: Optional[int] = logging.ERROR, file_path_name: Optional[str] = None) -> None:
+    def set_logging(
+        self, log_level: Optional[int] = logging.ERROR, file_path_name: Optional[str] = None
+    ) -> None:
         """
         This function allows to change the logging backend, either output or file as backend
         It also allows to set the logging level (whether to display only critical/error/info/debug.
@@ -269,7 +270,10 @@ class Client:
             self.smtp.starttls()
         self.smtp.docmd("AUTH", "XOAUTH2 " + auth_string)
 
-    def feedback(self, message: str = "Awesome features! You made my day! How can I contribute?") -> None:
+    def feedback(
+        self,
+        message: str = "Awesome features! You made my day! How can I contribute?",
+    ) -> None:
         """ Most important function. Please send me feedback :-) """
         self.send("kootenpv@gmail.com", "Yagmail feedback", message)
 
