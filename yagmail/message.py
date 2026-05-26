@@ -8,11 +8,11 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
-from typing import Any, Dict, List, Tuple, Union, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from yagmail.dkim import add_dkim_sig_to_message, DKIM
+from yagmail.dkim import DKIM, add_dkim_sig_to_message
 from yagmail.headers import add_message_id, add_recipients_headers, add_subject
-from yagmail.utils import raw, inline
+from yagmail.utils import inline, raw
 
 
 def dt_converter(o: Any) -> Optional[str]:
@@ -58,15 +58,22 @@ def prepare_message(
 
     attachments_list: Optional[List[Any]] = None
     if attachments is not None:
-        attachments_list = list(attachments) if isinstance(attachments, (list, tuple)) else [attachments]
+        attachments_list = (
+            list(attachments) if isinstance(attachments, (list, tuple)) else [attachments]
+        )
 
     # merge contents and attachments for now.
     if attachments_list is not None:
         for a in attachments_list:
             if not isinstance(a, io.IOBase) and not os.path.isfile(a):
-                err_msg = "{a} must be a valid filepath or file handle (instance of io.IOBase). {a} is of type {tp}"
+                err_msg = (
+                    "{a} must be a valid filepath or file handle "
+                    "(instance of io.IOBase). {a} is of type {tp}"
+                )
                 raise TypeError(err_msg.format(a=a, tp=type(a)))
-        contents_list = attachments_list if contents_list is None else contents_list + attachments_list
+        contents_list = (
+            attachments_list if contents_list is None else contents_list + attachments_list
+        )
 
     if contents_list is not None:
         contents_list = [serialize_object(x) for x in contents_list]
@@ -116,10 +123,10 @@ def prepare_message(
                 # TODO: I should probably remove inline now that there is "attachments"
                 # if string is `inline`, inline, else, attach
                 # pylint: disable=unidiomatic-typecheck
-                if type(content_string) == inline:
-                    htmlstr += '<img src="cid:{0}" title="{1}"/>'.format(hashed_ref, alias)
-                    content_object["mime_object"].add_header("Content-ID", "<{0}>".format(hashed_ref))
-                    altstr.append("-- img {0} should be here -- ".format(alias))
+                if type(content_string) is inline:
+                    htmlstr += f'<img src="cid:{hashed_ref}" title="{alias}"/>'
+                    content_object["mime_object"].add_header("Content-ID", f"<{hashed_ref}>")
+                    altstr.append(f"-- img {alias} should be here -- ")
                     # inline images should be in related MIME block
                     msg_related.attach(content_object["mime_object"])
                 else:
@@ -136,13 +143,13 @@ def prepare_message(
                     if not content_object["is_marked_up"]:
                         content_string = content_string.replace("\n", "<br>")
                     try:
-                        htmlstr += "<div>{0}</div>".format(content_string)
+                        htmlstr += f"<div>{content_string}</div>"
                         if prettify_html:
                             import premailer
 
                             htmlstr = premailer.transform(htmlstr)
                     except UnicodeEncodeError:
-                        htmlstr += "<div>{0}</div>".format(content_string)
+                        htmlstr += f"<div>{content_string}</div>"
                     altstr.append(content_string)
 
     msg_related.get_payload()[0] = MIMEText(htmlstr, "html", _charset=encoding)  # type: ignore
@@ -167,7 +174,7 @@ def prepare_contents(
             if isinstance(content, io.IOBase):
                 if not hasattr(content, "name"):
                     # If the IO object has no name attribute, give it one.
-                    setattr(content, "name", "attachment_{}".format(unnamed_attachment_id))
+                    setattr(content, "name", f"attachment_{unnamed_attachment_id}")
 
             content_object = get_mime_object(is_marked_up, content, encoding)
             if content_object["main_type"] == "image":
@@ -190,7 +197,7 @@ def get_mime_object(is_marked_up: bool, content_string: Any, encoding: str) -> D
     except Exception:
         content_name = str(abs(hash(content_string)))
 
-    is_raw = type(content_string) == raw
+    is_raw = type(content_string) is raw
     try:
         is_file = os.path.isfile(content_string)
     except ValueError:
@@ -206,7 +213,8 @@ def get_mime_object(is_marked_up: bool, content_string: Any, encoding: str) -> D
 
     elif isinstance(content_string, io.IOBase):
         content = content_string.read()
-        # no need to except AttributeError, as we set missing name attributes in the `prepare_contents` function
+        # no need to except AttributeError, as we set missing name attributes in the
+        # `prepare_contents` function
         content_name = os.path.basename(getattr(content_string, "name", ""))
         content_object["encoding"] = "base64"
 
@@ -235,7 +243,11 @@ def get_mime_object(is_marked_up: bool, content_string: Any, encoding: str) -> D
             content_object["main_type"] = "application"
             content_object["sub_type"] = "octet-stream"
 
-    mime_object = MIMEBase(content_object["main_type"], content_object["sub_type"], name=(encoding, "", content_name))
+    mime_object = MIMEBase(
+        content_object["main_type"],
+        content_object["sub_type"],
+        name=(encoding, "", content_name),
+    )
     mime_object.set_payload(content)
     if content_object["main_type"] == "application":
         mime_object.add_header("Content-Disposition", "attachment", filename=content_name)

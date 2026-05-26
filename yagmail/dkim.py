@@ -1,5 +1,5 @@
 from email.mime.base import MIMEBase
-from typing import NamedTuple, Optional, List
+from typing import List, NamedTuple, Optional
 
 try:
     import dkim

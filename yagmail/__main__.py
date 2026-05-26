@@ -1,6 +1,6 @@
-from yagmail.sender import Client
 import argparse
-from typing import List, Optional
+
+from yagmail.sender import Client
 
 try:
     import keyring

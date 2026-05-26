@@ -1,3 +1,4 @@
+# ruff: noqa: I001
 __project__ = "yagmail"
 __version__ = "0.15.277"
 

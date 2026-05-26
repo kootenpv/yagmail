@@ -28,7 +28,6 @@ However, this regexp is the best one I've come accross, so props to Syrus Akbary
 
 import re
 
-
 from yagmail.error import YagInvalidEmailAddress
 
 # All we are really doing is comparing the input string to one

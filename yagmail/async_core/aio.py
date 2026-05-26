@@ -1,21 +1,22 @@
-import time
+import asyncio
 import socket
 import ssl
-import asyncio
-from typing import Any, Dict, List, Optional, Tuple, Union, Literal
-import yagmail
-from yagmail.headers import AddressInput
-from yagmail.dkim import DKIM
 from smtplib import (
-    SMTPException,
-    SMTPConnectError,
-    SMTPHeloError,
     SMTPAuthenticationError,
-    SMTPSenderRefused,
-    SMTPRecipientsRefused,
+    SMTPConnectError,
     SMTPDataError,
+    SMTPException,
+    SMTPHeloError,
+    SMTPRecipientsRefused,
+    SMTPSenderRefused,
     SMTPServerDisconnected,
 )
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+
+import yagmail
+from yagmail.dkim import DKIM
+from yagmail.headers import AddressInput
+
 
 async def upgrade_to_tls(
     reader: asyncio.StreamReader,
@@ -112,11 +113,11 @@ class RawAsyncSMTP:
     async def ehlo(self) -> None:
         if self.writer is None:
             raise SMTPServerDisconnected("Not connected")
-        self.writer.write(f"EHLO {self.local_hostname}\r\n".encode("utf-8"))
+        self.writer.write(f"EHLO {self.local_hostname}\r\n".encode())
         await self.writer.drain()
         code, message = await self.read_response()
         if code != 250:
-            self.writer.write(f"HELO {self.local_hostname}\r\n".encode("utf-8"))
+            self.writer.write(f"HELO {self.local_hostname}\r\n".encode())
             await self.writer.drain()
             code, message = await self.read_response()
             if code != 250:
@@ -142,8 +143,8 @@ class RawAsyncSMTP:
             raise SMTPServerDisconnected("Not connected")
         import base64
 
-        auth_plain = base64.b64encode(f"\0{user}\0{password}".encode("utf-8")).decode("utf-8")
-        self.writer.write(f"AUTH PLAIN {auth_plain}\r\n".encode("utf-8"))
+        auth_plain = base64.b64encode(f"\0{user}\0{password}".encode()).decode("utf-8")
+        self.writer.write(f"AUTH PLAIN {auth_plain}\r\n".encode())
         await self.writer.drain()
         code, message = await self.read_response()
 
@@ -157,14 +158,14 @@ class RawAsyncSMTP:
             raise SMTPAuthenticationError(code, message)
 
         user_b64 = base64.b64encode(user.encode("utf-8")).decode("utf-8")
-        self.writer.write(f"{user_b64}\r\n".encode("utf-8"))
+        self.writer.write(f"{user_b64}\r\n".encode())
         await self.writer.drain()
         code, message = await self.read_response()
         if code != 334:
             raise SMTPAuthenticationError(code, message)
 
         pass_b64 = base64.b64encode(password.encode("utf-8")).decode("utf-8")
-        self.writer.write(f"{pass_b64}\r\n".encode("utf-8"))
+        self.writer.write(f"{pass_b64}\r\n".encode())
         await self.writer.drain()
         code, message = await self.read_response()
         if code != 235:
@@ -173,7 +174,7 @@ class RawAsyncSMTP:
     async def login_oauth2(self, user: str, auth_string: str) -> None:
         if self.writer is None:
             raise SMTPServerDisconnected("Not connected")
-        self.writer.write(f"AUTH XOAUTH2 {auth_string}\r\n".encode("utf-8"))
+        self.writer.write(f"AUTH XOAUTH2 {auth_string}\r\n".encode())
         await self.writer.drain()
         code, message = await self.read_response()
         if code != 235:
@@ -191,7 +192,7 @@ class RawAsyncSMTP:
         if isinstance(to_addrs, str):
             to_addrs = [to_addrs]
 
-        self.writer.write(f"MAIL FROM:<{from_addr}>\r\n".encode("utf-8"))
+        self.writer.write(f"MAIL FROM:<{from_addr}>\r\n".encode())
         await self.writer.drain()
         code, message = await self.read_response()
         if code != 250:
@@ -200,7 +201,7 @@ class RawAsyncSMTP:
         errors = {}
         success_count = 0
         for addr in to_addrs:
-            self.writer.write(f"RCPT TO:<{addr}>\r\n".encode("utf-8"))
+            self.writer.write(f"RCPT TO:<{addr}>\r\n".encode())
             await self.writer.drain()
             code, message = await self.read_response()
             if code not in (250, 251):
@@ -329,7 +330,10 @@ class AsyncClient(yagmail.Client):
                     else:
                         raise TypeError("OAuth2 credentials must be a dictionary")
                 else:
-                    password = self.handle_password(self.user, self.credentials if isinstance(self.credentials, str) else None)
+                    password = self.handle_password(
+                        self.user,
+                        self.credentials if isinstance(self.credentials, str) else None,
+                    )
                     await self.smtp.login(self.user, password)
 
             self.is_closed = False
@@ -369,7 +373,9 @@ class AsyncClient(yagmail.Client):
                 await self.login()
             return await self._attempt_send_async(recipients, msg_strings)
 
-    async def _attempt_send_async(self, recipients: List[str], msg_strings: str) -> Union[Dict[str, Any], bool]:
+    async def _attempt_send_async(
+        self, recipients: List[str], msg_strings: str
+    ) -> Union[Dict[str, Any], bool]:
         if self.smtp is None:
             raise SMTPServerDisconnected("Not connected")
         attempts = 0

@@ -1,10 +1,11 @@
-import time
-import random
 import hashlib
-from typing import Dict, List, Tuple, Union, Optional, Any
-from yagmail.error import YagAddressError
-from email.utils import formataddr
+import random
+import time
 from email.message import Message
+from email.utils import formataddr
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from yagmail.error import YagAddressError
 
 AddressInput = Union[str, List[str], Tuple[str, ...], Dict[str, str]]
 
@@ -66,11 +67,14 @@ def add_subject(msg: Message, subject: Optional[Union[str, List[str]]]) -> None:
     msg["Subject"] = subject
 
 
-def add_recipients_headers(user: str, useralias: str, msg: Message, addresses: Dict[str, Any]) -> None:
-    # Quoting the useralias so it should match display-name from https://tools.ietf.org/html/rfc5322 ,
-    # even if it's an email address.
+def add_recipients_headers(
+    user: str, useralias: str, msg: Message, addresses: Dict[str, Any]
+) -> None:
+    # Quoting the useralias so it should match display-name from
+    # https://tools.ietf.org/html/rfc5322 , even if it's an email address.
     # msg["From"] = '"{0}" <{1}>'.format(useralias.replace("\\", "\\\\").replace('"', '\\"'), user)
-    # formataddr can support From chinese useralias, just like: mail_user = {'notice@test.com': '中文测试'}
+    # formataddr can support From chinese useralias, just like:
+    # mail_user = {'notice@test.com': '中文测试'}
     msg['From'] = formataddr((useralias.replace("\\", "\\\\").replace('"', '\\"'), user))
     if "To" in addresses:
         msg["To"] = addresses["To"]
@@ -80,7 +84,9 @@ def add_recipients_headers(user: str, useralias: str, msg: Message, addresses: D
         msg["Cc"] = addresses["Cc"]
 
 
-def add_message_id(msg: Message, message_id: Optional[str] = None, group_messages: bool = True) -> None:
+def add_message_id(
+    msg: Message, message_id: Optional[str] = None, group_messages: bool = True
+) -> None:
     if message_id is None:
         from_val = msg.get("From", "")
         to_val = msg.get("To", "")
