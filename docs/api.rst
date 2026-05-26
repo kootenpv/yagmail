@@ -19,7 +19,7 @@ If no password is given, yagmail will prompt the user for a password and
 then store the result in the keyring.
 
 
-SMTP Clients
+Mail Clients
 ------------
 
 .. autoclass:: yagmail.Client

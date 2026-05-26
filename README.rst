@@ -8,7 +8,7 @@ Sending an Email is as simple:
 .. code-block:: python
 
     import yagmail
-    yag = yagmail.SMTP()
+    yag = yagmail.Client()
     contents = [
         "This is the body, and here is just text http://somedomain/image.png",
         "You can find an audio file attached.", '/local/path/to/song.mp3'
@@ -16,18 +16,18 @@ Sending an Email is as simple:
     yag.send('to@someone.com', 'subject', contents)
 
     # Alternatively, with a simple one-liner:
-    yagmail.SMTP('mygmailusername').send('to@someone.com', 'subject', contents)
+    yagmail.Client('mygmailusername').send('to@someone.com', 'subject', contents)
 
 Note that yagmail will read the password securely from
 your keyring, see the section on
 `Username and Password in the repository's README
 <https://github.com/kootenpv/yagmail#username-and-password>`_
 for further details. If you do not want this, you can
-initialize ``yagmail.SMTP`` like this:
+initialize ``yagmail.Client`` like this:
 
 .. code-block:: python
 
-    yag = yagmail.SMTP('mygmailusername', 'mygmailpassword')
+    yag = yagmail.Client('mygmailusername', 'mygmailpassword')
 
 but honestly, do you want to have your
 password written in your script?

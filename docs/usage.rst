@@ -113,7 +113,7 @@ dictionary mapped in the form ``{address: alias}``, for example:
 
 Magical ``contents``
 --------------------
-The ``contents`` argument of :meth:`yagmail.SMTP.send` will be smartly guessed.
+The ``contents`` argument of :meth:`yagmail.Client.send` will be smartly guessed.
 You can pass it a string with your contents or a list of elements which are either:
 
 - If it is a **dictionary**, then it will be assumed that the key is the content and the value is an alias (currently, this only applies to images). For example:

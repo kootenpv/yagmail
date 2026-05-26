@@ -97,7 +97,7 @@ class Client:
         It also allows to set the logging level (whether to display only critical/error/info/debug.
         for example::
 
-            yag = yagmail.SMTP()
+            yag = yagmail.Client()
             yag.set_logging(yagmail.logging.DEBUG)  # to see everything
 
         and::
@@ -217,6 +217,7 @@ class Client:
             pass
 
     def login(self) -> None:
+        """ Connect and login to the SMTP server. """
         if self.oauth2_file is not None:
             if isinstance(self.credentials, dict):
                 self._login_oauth2(self.credentials)

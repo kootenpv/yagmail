@@ -52,26 +52,26 @@ the following to register your GMail credentials with ``yagmail``:
     yagmail.register('mygmailusername', 'mygmailpassword')
 
 (this is just a wrapper for ``keyring.set_password('yagmail', 'mygmailusername', 'mygmailpassword')``)
-Now, instantiating :class:`yagmail.SMTP` is as easy as doing:
+Now, instantiating :class:`yagmail.Client` is as easy as doing:
 
 .. code-block:: python
 
-    yag = yagmail.SMTP('mygmailusername')
+    yag = yagmail.Client('mygmailusername')
 
 If you want to also omit your username, you can create a ``.yagmail``
 file in your home folder, containing just your username. Then, you can
-instantiate the SMTP client without passing any arguments.
+instantiate the client without passing any arguments.
 
 
 Using OAuth2
 ------------
 Another fairly safe method for authenticating using OAuth2, since
 you can revoke the rights of tokens. In order to use OAuth2, pass
-the location of the credentials file to :class:`yagmail.SMTP`:
+the location of the credentials file to :class:`yagmail.Client`:
 
 .. code-block:: python
 
-    yag = yagmail.SMTP('user@gmail.com', oauth2_file='~/oauth2_creds.json')
+    yag = yagmail.Client('user@gmail.com', oauth2_file='~/oauth2_creds.json')
     yag.send(subject="Great!")
 
 If the file could not be found, then it will prompt for a
