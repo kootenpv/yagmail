@@ -8,23 +8,26 @@ duplicated for completeness.
 
 Start a Connection
 ------------------
-As mentioned in :ref:`configuring_credentials`, there are multiple ways to initialize a connection by instantiating :class:`yagmail.Client`:
+To initialize a connection, you instantiate :class:`yagmail.Client`. The two primary methods are:
 
-1. **With Username and Password / App-Password**:
-   e.g. ``yagmail.Client('mygmailusername', 'mygmailpassword')``
-   This is the most straightforward method. If you do not want to hardcode your password, you can load it from environment variables or prompt for it.
+1. **With App Password**:
+   Pass your username and Google App Password:
 
-2. **With Username and Keyring (Optional)**:
-   If you have registered a keyring entry for ``yagmail`` (e.g. using ``yagmail.register('mygmailusername', 'mygmailpassword')``), you can omit the password and yagmail will securely load it from your OS keyring:
-   ``yagmail.Client('mygmailusername')``
+   .. code-block:: python
 
-3. **With Configuration File (Optional)**:
-   If you have a ``.yagmail`` configuration file containing your GMail username in your home folder, you can instantiate the client without passing any arguments:
-   ``yagmail.Client()``
+       yag = yagmail.Client('mygmailusername', 'myapppassword')
 
-4. **With OAuth2**:
-   This is the safest method of authentication, as you can easily revoke tokens. Pass an ``oauth2_file`` credentials file path:
-   ``yagmail.Client('user@gmail.com', oauth2_file='~/oauth2_creds.json')``
+   .. note::
+      For GMail, you must use an **Application-Specific Password** as the password (your regular Google account password will no longer work over SMTP).
+
+2. **With OAuth2**:
+   Pass your email and the path to an OAuth2 credentials file:
+
+   .. code-block:: python
+
+       yag = yagmail.Client('user@gmail.com', oauth2_file='~/oauth2_creds.json')
+
+For other authentication options (like utilizing the system keyring or configuration files) and detailed setup instructions, refer to :ref:`configuring_credentials`.
 
 
 Closing and reusing the Connection
