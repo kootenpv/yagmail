@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # yagmail documentation build configuration file, created by
 # sphinx-quickstart on Tue Sep 19 19:40:28 2017.
@@ -18,8 +17,10 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('..'))
 
+import yagmail
 
 # -- General configuration ------------------------------------------------
 
@@ -47,11 +48,10 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'yagmail'
-copyright = u'2017, kootenpv'
-author = u'kootenpv'
+project = 'yagmail'
+copyright = '2017, kootenpv'
+author = 'kootenpv'
 
-import yagmail
 # The short X.Y version.
 version = yagmail.__version__
 # The full version, including alpha/beta/rc tags.
@@ -150,8 +150,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'yagmail.tex', u'yagmail Documentation',
-     u'kootenpv', 'manual'),
+    (master_doc, 'yagmail.tex', 'yagmail Documentation',
+     'kootenpv', 'manual'),
 ]
 
 
@@ -160,7 +160,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'yagmail', u'yagmail Documentation',
+    (master_doc, 'yagmail', 'yagmail Documentation',
      [author], 1)
 ]
 
@@ -171,7 +171,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'yagmail', u'yagmail Documentation',
+    (master_doc, 'yagmail', 'yagmail Documentation',
      author, 'yagmail', 'One line description of project.',
      'Miscellaneous'),
 ]

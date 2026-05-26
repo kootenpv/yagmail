@@ -1,9 +1,12 @@
-import pytest
 import asyncio
-import itertools
 import base64
-from yagmail import Client, AsyncClient, SMTP, AsyncSMTP, AIOSMTP
+import itertools
+
+import pytest
+
+from yagmail import AIOSMTP, SMTP, AsyncClient, AsyncSMTP, Client
 from yagmail.utils import raw
+
 
 def get_combinations(yag):
     """ Creates permutations of possible inputs """
@@ -11,13 +14,13 @@ def get_combinations(yag):
         None,
         (yag.user),
         [yag.user, yag.user],
-        {yag.user: '"me" <{}>'.format(yag.user), yag.user + '1': '"me" <{}>'.format(yag.user)},
+        {yag.user: f'"me" <{yag.user}>', yag.user + '1': f'"me" <{yag.user}>'},
     )
     subjects = ('subj', ['subj'], ['subj', 'subj1'])
     contents = (
         None,
         ['body'],
-        ['body', 'body1', '<h2><center>Text</center></h2>', u"<h1>\u2013</h1>"],
+        ['body', 'body1', '<h2><center>Text</center></h2>', "<h1>\u2013</h1>"],
         [raw("body")],
         [{"a": 1}],
     )
@@ -55,12 +58,12 @@ def test_async_combinations():
     async def run():
         yag = AsyncClient(smtp_skip_login=True, soft_email_validation=False)
         combinations = get_combinations(yag)
-        
+
         async def run_comb(c):
             recipients, msg_string = await yag.send(**c)
             assert isinstance(recipients, list) or recipients is None
             assert isinstance(msg_string, str)
-            
+
         await asyncio.gather(*(run_comb(c) for c in combinations))
     asyncio.run(run())
 
@@ -86,13 +89,13 @@ def test_async_send_unsent():
         await yag.login()
         yag.unsent.append((["test@example.com"], "Subject: unsent\n\nunsent content"))
         assert len(yag.unsent) == 1
-        
+
         call_count = 0
         async def mock_sendmail(*args, **kwargs):
             nonlocal call_count
             call_count += 1
             return {}
-            
+
         yag.smtp.sendmail = mock_sendmail  # type: ignore[assignment]
         await yag.send_unsent()
         assert len(yag.unsent) == 0
