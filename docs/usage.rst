@@ -2,40 +2,29 @@ Usage
 =====
 This document aims to show how to use ``yagmail`` in your programs.
 Most of what is shown here is also available to see in the
-`README <https://github.com/Volcyy/yagmail>`_, some content may be
+`README <https://github.com/kootenpv/yagmail>`_, some content may be
 duplicated for completeness.
 
 
 Start a Connection
 ------------------
-As mentioned in :ref:`configuring_credentials`, there
-are multiple ways to initialize a connection by instantiating
-:class:`yagmail.Client` (formerly and still aliased as ``yagmail.SMTP``):
+As mentioned in :ref:`configuring_credentials`, there are multiple ways to initialize a connection by instantiating :class:`yagmail.Client`:
 
-1. **With Username and Password**:
-e.g. ``yagmail.Client('mygmailusername', 'mygmailpassword')``
-This method is not recommended, since you would be storing
-the full credentials to your account in your script in plain text.
-A better alternative is using ``keyring``, as described in the
-following section:
+1. **With Username and Password / App-Password**:
+   e.g. ``yagmail.Client('mygmailusername', 'mygmailpassword')``
+   This is the most straightforward method. If you do not want to hardcode your password, you can load it from environment variables or prompt for it.
 
-2. **With Username and keyring**:
-After registering a ``keyring`` entry for ``yagmail``, you can
-instantiate the client by simply passing your username, e.g.
-``yagmail.Client('mygmailusername')``.
+2. **With Username and Keyring (Optional)**:
+   If you have registered a keyring entry for ``yagmail`` (e.g. using ``yagmail.register('mygmailusername', 'mygmailpassword')``), you can omit the password and yagmail will securely load it from your OS keyring:
+   ``yagmail.Client('mygmailusername')``
 
-3. **With keyring and .yagmail**:
-As explained in the `Setup` documentation, you can also
-omit the username if you have a ``.yagmail`` file in your
-home folder, containing just your GMail username. This way,
-you can initialize :class:`yagmail.Client` without any arguments.
+3. **With Configuration File (Optional)**:
+   If you have a ``.yagmail`` configuration file containing your GMail username in your home folder, you can instantiate the client without passing any arguments:
+   ``yagmail.Client()``
 
 4. **With OAuth2**:
-This is probably the safest method of authentication, as you
-can revoke the rights of tokens. To initialize with OAuth2
-credentials (after obtaining these as shown in `Setup`),
-simply pass an ``oauth2_file`` to :class:`yagmail.Client`,
-for example ``yagmail.Client('user@gmail.com', oauth2_file='~/oauth2_creds.json')``.
+   This is the safest method of authentication, as you can easily revoke tokens. Pass an ``oauth2_file`` credentials file path:
+   ``yagmail.Client('user@gmail.com', oauth2_file='~/oauth2_creds.json')``
 
 
 Closing and reusing the Connection
@@ -46,12 +35,23 @@ may not work in other implementations such as PyPy (reported in
 `issue #39 <https://github.com/kootenpv/yagmail/issues/39>`_). In those
 cases, you can use :class:`yagmail.Client` with ``with`` instead.
 
-For asynchronous use, you should use the async context manager of :class:`yagmail.AsyncClient`:
+For asynchronous use, you can use the async context manager of :class:`yagmail.AsyncClient`. Below is a complete, copy-pasteable example of sending an email asynchronously:
 
 .. code-block:: python
 
-    async with yagmail.AsyncClient() as yag:
-        await yag.send(contents="Hello!")
+    import asyncio
+    import yagmail
+
+    async def main():
+        # Use AsyncClient as an async context manager
+        async with yagmail.AsyncClient('mygmailusername', 'mygmailpassword') as yag:
+            contents = [
+                "This is the body of the async email.",
+                "/local/path/to/song.mp3"
+            ]
+            await yag.send('to@someone.com', 'subject', contents)
+
+    asyncio.run(main())
 
 Alternatively, you can close and re-use the connection with
 :meth:`yagmail.Client.close` and :meth:`yagmail.Client.login` (or
@@ -138,6 +138,81 @@ of :class:`str`.
 
 If you intend to **inline an image instead of attaching it**, you can use
 :class:`yagmail.inline`.
+
+
+Attaching Files
+---------------
+There are multiple ways to attach files using the ``attachments`` parameter (in addition to the magical ``contents`` parameter):
+
+1. **Pass a List of Paths**:
+   You can pass a list of local file paths as a list of strings:
+
+.. code-block:: python
+
+    yag.send(
+        to='to@someone.com',
+        subject='File Attachments',
+        contents='Here are the files you requested.',
+        attachments=['path/to/attachment1.png', 'path/to/attachment2.pdf']
+    )
+
+2. **Pass an IO Stream**:
+   You can pass an instance of :class:`io.IOBase` (such as a file object):
+
+.. code-block:: python
+
+    with open('path/to/attachment.pdf', 'rb') as f:
+        yag.send(
+            to='to@someone.com',
+            subject='File Attachments',
+            contents='Attached is the PDF.',
+            attachments=f
+        )
+
+.. note::
+    When passing an IO stream, ``yagmail`` will look for the ``.name`` attribute to determine the filename and detect the MIME-type. If your IO stream does not have a ``.name`` attribute, it is highly recommended to set it manually (e.g., ``f.name = 'document.pdf'``) to avoid attachments being named generic names like ``attachment1`` without an extension.
+
+
+DKIM Support
+------------
+To send emails signed with a DKIM signature, you will first need to install the package with all optional dkim dependencies:
+
+.. code-block:: bash
+
+    pip install yagmail[dkim]
+
+Then, configure and pass a :class:`yagmail.dkim.DKIM` configuration object to your client instance:
+
+.. code-block:: python
+
+    from yagmail import Client
+    from yagmail.dkim import DKIM
+    from pathlib import Path
+
+    # Load private key bytes
+    private_key = Path("privkey.pem").read_bytes()
+
+    dkim_obj = DKIM(
+        domain=b"example.com",
+        selector=b"selector",
+        private_key=private_key,
+        include_headers=[b"To", b"From", b"Subject"] # Or pass None for defaults
+    )
+
+    yag = Client(dkim=dkim_obj)
+    yag.send(to="to@someone.com", subject="DKIM Signed Email", contents="Hi!")
+
+
+Stability & Concurrency
+-----------------------
+
+Auto-reconnect on Disconnect
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Both the synchronous ``Client`` and asynchronous ``AsyncClient`` feature automatic reconnection. If the SMTP server drops the connection (raising ``SMTPServerDisconnected``) during a send operation, ``yagmail`` will catch the exception, automatically log back in, and retry sending the email up to 3 times before giving up.
+
+Concurrency & Thread-safety
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In asynchronous scripts, you can share a single ``AsyncClient`` instance across concurrent tasks safely. The client implements internal asynchronous locks (``send_lock`` and ``login_lock``) to serialize access to the underlying socket connection, preventing race conditions or interleaved data blocks during simultaneous email transmissions.
 
 
 Using yagmail from the command line

@@ -52,6 +52,10 @@ the following to register your GMail credentials with ``yagmail``:
     yagmail.register('mygmailusername', 'mygmailpassword')
 
 (this is just a wrapper for ``keyring.set_password('yagmail', 'mygmailusername', 'mygmailpassword')``)
+
+.. note::
+    For GMail, you must use an **Application-Specific Password** as the password (your regular Google account password will no longer work over SMTP). 
+
 Now, instantiating :class:`yagmail.Client` is as easy as doing:
 
 .. code-block:: python
@@ -60,14 +64,12 @@ Now, instantiating :class:`yagmail.Client` is as easy as doing:
 
 If you want to also omit your username, you can create a ``.yagmail``
 file in your home folder, containing just your username. Then, you can
-instantiate the client without passing any arguments.
+instantiate the client without passing any arguments. (Note that `~/.yagmail` is completely optional; if it is absent and you do not pass a `user` argument, a `ValueError` will be raised).
 
 
 Using OAuth2
 ------------
-Another fairly safe method for authenticating using OAuth2, since
-you can revoke the rights of tokens. In order to use OAuth2, pass
-the location of the credentials file to :class:`yagmail.Client`:
+Another safe method for authenticating is using OAuth2, which allows you to revoke token permissions easily. To use OAuth2, pass the location of the credentials file to :class:`yagmail.Client`:
 
 .. code-block:: python
 
@@ -81,6 +83,13 @@ upon which the OAauth2 code of ``yagmail`` is heavily based.
 After you have provided these, a link will be shown in the terminal that
 you should follow to obtain a ``google_refresh_token``.
 Paste this again, and you're set up!
+
+.. important::
+    By default, Google OAuth tokens expire after 7 days unless your Google Cloud Platform (GCP) project has a publishing status of **"In production"**. 
+    
+    For personal use:
+    * Go to your Google Cloud Console and set the publishing status to **"In production"** (Publish App). You can click through any unverified-app warnings that appear during authorization.
+    * Ensure your OAuth **Client ID type is set to "Desktop"**.
 
 If somebody obtains the file, they can send E-Mails, but nothing else.
 As soon as you notice, you can simply disable the token.

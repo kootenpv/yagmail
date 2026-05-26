@@ -11,9 +11,9 @@ make it as simple as possible to send emails.
 .. toctree::
    :maxdepth: 2
 
-   api
    setup
    usage
+   api
 
 
 

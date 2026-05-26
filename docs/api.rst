@@ -29,6 +29,12 @@ Mail Clients
    :members:
 
 
+DKIM
+----
+.. autoclass:: yagmail.dkim.DKIM
+   :members:
+
+
 E-Mail Contents
 ---------------
 .. autoclass:: yagmail.raw
