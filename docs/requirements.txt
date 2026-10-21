@@ -1,1 +1,1 @@
-sphinx
+sphinx==9.2.0
